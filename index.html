@@ -13,7 +13,6 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; color: #334155; }
         .canvas-container { touch-action: none; } 
         
-        /* Inputs minimalistas corporativos */
         .input-clean {
             width: 100%;
             background-color: transparent;
@@ -24,10 +23,7 @@
             color: #1e293b;
             transition: border-color 0.2s;
         }
-        .input-clean:focus {
-            outline: none;
-            border-bottom: 2px solid #0071b9; /* Azul Abaco Claro */
-        }
+        .input-clean:focus { outline: none; border-bottom: 2px solid #0071b9; }
         .label-clean {
             display: block;
             font-size: 11px;
@@ -38,7 +34,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Tabla de Daños Corporativa */
         .damage-table-container { border-radius: 6px; overflow: hidden; border: 1px solid #e2e8f0; }
         .damage-table th { background-color: #004481; color: white; padding: 10px; font-size: 12px; font-weight: 600; }
         .damage-table td { padding: 8px; border-bottom: 1px solid #e2e8f0; font-size: 12px; background-color: white; }
@@ -62,27 +57,40 @@
             
             <div class="flex flex-wrap items-center justify-center gap-2">
                 <div id="gpsIndicatorContainer" class="bg-[#003366] text-blue-200 text-xs py-1.5 px-3 rounded flex items-center">
-                    <span id="gpsIndicator" class="w-2 h-2 rounded-full bg-red-500 mr-2"></span> GPS Inactivo
+                    <span id="gpsIndicator" class="w-2 h-2 rounded-full bg-yellow-500 mr-2"></span> GPS Buscando...
                 </div>
-                <button onclick="createNewReport()" class="bg-transparent hover:bg-white/10 text-white text-xs py-1.5 px-3 rounded border border-white/30 transition-colors">Nuevo</button>
-                <button onclick="saveCurrentReport()" class="bg-[#0071b9] hover:bg-[#0055a5] text-white text-xs py-1.5 px-4 rounded transition-colors font-semibold shadow">Guardar</button>
+                <!-- Botón Nuevo -->
+                <button onclick="createNewReport()" class="bg-transparent hover:bg-white/10 text-white text-xs py-1.5 px-3 rounded border border-white/30 transition-colors flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Nuevo
+                </button>
+                <!-- Botón Reportes (Cargar) -->
+                <button onclick="loadReport()" class="bg-transparent hover:bg-white/10 text-white text-xs py-1.5 px-3 rounded border border-white/30 transition-colors flex items-center gap-1" title="Cargar último reporte">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+                    Reportes
+                </button>
+                <!-- Botón Guardar -->
+                <button onclick="saveCurrentReport()" class="bg-[#0071b9] hover:bg-[#0055a5] text-white text-xs py-1.5 px-4 rounded transition-colors font-semibold shadow flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                    Guardar
+                </button>
             </div>
         </div>
         
-        <!-- Barra de Exportación Universal -->
+        <!-- Barra de Exportación -->
         <div class="max-w-4xl mx-auto mt-4 pt-3 border-t border-[#0055a5] flex flex-wrap justify-between items-center gap-3">
             <span class="text-sm font-semibold text-blue-50">Exportar Reporte:</span>
             <div class="flex flex-wrap gap-2">
-                <button onclick="exportToPDF(true)" class="bg-white text-[#004481] hover:bg-gray-100 text-xs py-1.5 px-4 rounded shadow font-semibold flex items-center gap-1">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path></svg>
+                <button onclick="exportToPDF(true)" class="bg-white text-[#004481] hover:bg-gray-100 text-xs py-1.5 px-4 rounded shadow font-semibold flex items-center gap-1 transition-colors">
+                    <svg class="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path></svg>
                     PDF Asegurado
                 </button>
-                <button onclick="exportToPDF(false)" class="bg-[#0071b9] text-white hover:bg-[#0055a5] text-xs py-1.5 px-4 rounded shadow font-semibold flex items-center gap-1">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path></svg>
+                <button onclick="exportToPDF(false)" class="bg-white text-[#004481] hover:bg-gray-100 text-xs py-1.5 px-4 rounded shadow font-semibold flex items-center gap-1 transition-colors">
+                    <svg class="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path></svg>
                     PDF Completo
                 </button>
-                <button onclick="exportToZIP()" class="bg-slate-700 text-white hover:bg-slate-600 text-xs py-1.5 px-4 rounded shadow font-semibold flex items-center gap-1">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V8a2 2 0 00-2-2h-5L9 4H4z" clip-rule="evenodd"></path></svg>
+                <button onclick="exportToZIP()" class="bg-white text-[#004481] hover:bg-gray-100 text-xs py-1.5 px-4 rounded shadow font-semibold flex items-center gap-1 transition-colors">
+                    <svg class="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V8a2 2 0 00-2-2h-5L9 4H4z" clip-rule="evenodd"></path></svg>
                     ZIP Fotos
                 </button>
             </div>
@@ -93,26 +101,26 @@
         
         <!-- SECCIÓN 1: DATOS DE INSPECCIÓN -->
         <div class="bg-white shadow-sm border border-slate-200 p-6 rounded-lg">
-            <h2 class="text-lg font-bold text-[#004481] border-b pb-2 mb-5 border-gray-200">FICHA DE DATOS DE INSPECCIÓN</h2>
+            <h2 class="text-lg font-bold text-[#004481] border-b pb-2 mb-5 border-[#0071b9]">FICHA DE DATOS DE INSPECCIÓN</h2>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4" id="inspectionForm">
-                <div><label class="label-clean">Propietario</label><input type="text" id="propNombre" class="input-clean"></div>
-                <div><label class="label-clean">DNI Propietario</label><input type="number" id="propDNI" class="input-clean"></div>
-                <div><label class="label-clean">Representante</label><input type="text" id="repNombre" class="input-clean"></div>
-                <div><label class="label-clean">DNI Representante</label><input type="number" id="repDNI" class="input-clean"></div>
-                <div class="md:col-span-2"><label class="label-clean">Domicilio</label><input type="text" id="domicilio" class="input-clean"></div>
+                <div><label class="label-clean">Nombre y apellido del propietario</label><input type="text" id="propNombre" class="input-clean"></div>
+                <div><label class="label-clean">Nro. de DNI del propietario</label><input type="number" id="propDNI" class="input-clean"></div>
+                <div><label class="label-clean">Nombre y apellido del representante</label><input type="text" id="repNombre" class="input-clean"></div>
+                <div><label class="label-clean">Nro. de DNI del representante</label><input type="number" id="repDNI" class="input-clean"></div>
+                <div class="md:col-span-2"><label class="label-clean">Dirección</label><input type="text" id="domicilio" class="input-clean"></div>
                 <div><label class="label-clean">Distrito</label><input type="text" id="distrito" class="input-clean"></div>
-                <div><label class="label-clean">Celular</label><input type="tel" id="celular" class="input-clean"></div>
+                <div><label class="label-clean">Nro. celular</label><input type="tel" id="celular" class="input-clean"></div>
                 <div><label class="label-clean">Correo</label><input type="email" id="correo" class="input-clean"></div>
-                <div><label class="label-clean">Fecha Inspección</label><input type="date" id="fechaInsp" class="input-clean"></div>
-                <div><label class="label-clean">Hora Inspección</label><input type="time" id="horaInsp" class="input-clean"></div>
+                <div><label class="label-clean">Fecha de inspección</label><input type="date" id="fechaInsp" class="input-clean"></div>
+                <div><label class="label-clean">hora de inspección</label><input type="time" id="horaInsp" class="input-clean"></div>
                 <div><label class="label-clean">Inspector</label><input type="text" id="inspectorNombre" class="input-clean"></div>
             </div>
         </div>
 
         <!-- SECCIÓN 2: DESCRIPCIONES -->
         <div class="bg-white shadow-sm border border-slate-200 p-6 rounded-lg space-y-5">
-            <h2 class="text-lg font-bold text-[#004481] border-b border-gray-200 pb-2">DETALLES DEL SINIESTRO</h2>
+            <h2 class="text-lg font-bold text-[#004481] border-b border-[#0071b9] pb-2">DETALLES DEL SINIESTRO</h2>
             <div><label class="label-clean">Descripción General del Siniestro</label><textarea id="descSiniestro" rows="2" class="input-clean"></textarea></div>
             <div><label class="label-clean">Descripción del Inmueble</label><textarea id="descInmueble" rows="2" class="input-clean"></textarea></div>
             <div><label class="label-clean">Descripción de Daños</label><textarea id="descDanos" rows="3" class="input-clean"></textarea></div>
@@ -120,7 +128,7 @@
 
         <!-- SECCIÓN 3: TABLA DE DIMENSIONES -->
         <div class="bg-white shadow-sm border border-slate-200 p-6 rounded-lg">
-            <div class="flex justify-between items-center mb-4 border-b border-gray-200 pb-2">
+            <div class="flex justify-between items-center mb-4 border-b border-[#0071b9] pb-2">
                 <h2 class="text-lg font-bold text-[#004481]">DIMENSIONES DE LOS DAÑOS</h2>
                 <button onclick="addDamageRow()" class="text-[#0071b9] hover:text-[#004481] text-sm font-semibold flex items-center gap-1">
                     <span>+</span> Añadir Fila
@@ -153,8 +161,8 @@
                 <div class="border border-slate-300 rounded bg-white relative h-40">
                     <canvas id="canvasFirma" class="absolute inset-0 w-full h-full canvas-container"></canvas>
                     <div class="absolute top-2 right-2 flex gap-1 z-10">
-                        <button onclick="undoCanvas('canvasFirma')" class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs hover:bg-gray-200 shadow-sm border border-gray-200" title="Deshacer trazo">↩</button>
-                        <button onclick="clearCanvas('canvasFirma')" class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs hover:bg-gray-200 shadow-sm border border-gray-200">Borrar Todo</button>
+                        <button onclick="undoCanvas('canvasFirma')" class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs hover:bg-gray-200 shadow-sm border border-gray-200 font-bold" title="Deshacer trazo">↩</button>
+                        <button onclick="clearCanvas('canvasFirma')" class="bg-gray-100 text-red-500 font-semibold px-2 py-1 rounded text-xs hover:bg-gray-200 shadow-sm border border-gray-200">Borrar</button>
                     </div>
                 </div>
             </div>
@@ -163,8 +171,8 @@
                 <div class="border border-slate-300 rounded bg-white relative h-40">
                     <canvas id="canvasDNI" class="absolute inset-0 w-full h-full canvas-container"></canvas>
                     <div class="absolute top-2 right-2 flex gap-1 z-10">
-                        <button onclick="undoCanvas('canvasDNI')" class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs hover:bg-gray-200 shadow-sm border border-gray-200" title="Deshacer trazo">↩</button>
-                        <button onclick="clearCanvas('canvasDNI')" class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs hover:bg-gray-200 shadow-sm border border-gray-200">Borrar Todo</button>
+                        <button onclick="undoCanvas('canvasDNI')" class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs hover:bg-gray-200 shadow-sm border border-gray-200 font-bold" title="Deshacer trazo">↩</button>
+                        <button onclick="clearCanvas('canvasDNI')" class="bg-gray-100 text-red-500 font-semibold px-2 py-1 rounded text-xs hover:bg-gray-200 shadow-sm border border-gray-200">Borrar</button>
                     </div>
                 </div>
             </div>
@@ -172,9 +180,9 @@
 
         <!-- SECCIÓN 5: CROQUIS -->
         <div class="bg-white shadow-sm border border-slate-200 p-6 rounded-lg">
-            <div class="flex justify-between items-center mb-4 border-b border-gray-200 pb-2">
+            <div class="flex justify-between items-center mb-4 border-b border-[#0071b9] pb-2">
                 <h2 class="text-lg font-bold text-[#004481]">HOJAS DE CROQUIS</h2>
-                <button onclick="addCroquisSheet()" class="bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 px-3 py-1.5 text-xs rounded font-semibold transition-colors flex items-center gap-1">
+                <button onclick="addCroquisSheet()" class="bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 px-3 py-1.5 text-xs rounded font-semibold transition-colors flex items-center gap-1 shadow-sm">
                     <span>+</span> Añadir Hoja
                 </button>
             </div>
@@ -185,7 +193,7 @@
 
         <!-- SECCIÓN 6: FOTOS -->
         <div class="bg-white shadow-sm border border-slate-200 p-6 rounded-lg">
-            <h2 class="text-lg font-bold text-[#004481] border-b border-gray-200 pb-2 mb-4">REGISTRO FOTOGRÁFICO</h2>
+            <h2 class="text-lg font-bold text-[#004481] border-b border-[#0071b9] pb-2 mb-4">REGISTRO FOTOGRÁFICO</h2>
             <div class="flex gap-4 mb-6">
                 <label class="flex-1 bg-[#0071b9] hover:bg-[#0055a5] text-white text-center py-2.5 rounded cursor-pointer transition-colors text-sm font-semibold flex items-center justify-center gap-2 shadow-sm">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
@@ -205,37 +213,38 @@
     <!-- MODAL DE PREVISUALIZACIÓN DE FOTOS -->
     <div id="photoPreviewModal" class="hidden fixed inset-0 bg-slate-900/90 z-[110] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="relative w-full max-w-4xl flex flex-col items-center">
-            <button onclick="closePreviewModal()" class="absolute -top-10 right-0 text-white hover:text-gray-300 font-bold text-lg bg-black/50 px-3 py-1 rounded-full flex items-center gap-1 transition-colors">
-                <span>&times;</span> Cerrar
+            <button onclick="closePreviewModal()" class="absolute -top-12 right-0 text-white hover:text-gray-300 font-bold text-lg bg-black/50 px-4 py-1.5 rounded-full flex items-center gap-2 transition-colors border border-white/20">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                Cerrar
             </button>
-            <img id="previewModalImage" src="" class="w-full max-h-[85vh] object-contain rounded shadow-2xl">
+            <img id="previewModalImage" src="" class="w-full max-h-[85vh] object-contain rounded shadow-2xl bg-black">
         </div>
     </div>
 
-    <!-- MODAL UNIVERSAL DE EXPORTACIÓN -->
+    <!-- MODAL UNIVERSAL DE EXPORTACIÓN (Sobrio) -->
     <div id="universalExportModal" class="hidden fixed inset-0 bg-slate-900/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full border-t-4 border-[#0071b9]">
-            <div class="flex items-center justify-center mb-4 text-[#004481]">
+            <div class="flex items-center justify-center mb-4 text-[#0071b9]">
                 <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             </div>
             <h3 class="text-xl font-bold text-center text-[#004481] mb-2" id="modalTitle">¡Archivo Generado!</h3>
-            <p class="text-sm text-center text-gray-600 mb-6 font-medium">¿Qué deseas hacer con el documento?</p>
+            <p class="text-sm text-center text-slate-500 mb-6 font-medium">¿Qué deseas hacer con el documento?</p>
             
             <div class="flex flex-col gap-3">
-                <button onclick="shareModalFile()" class="w-full bg-[#25D366] hover:bg-[#1ebe57] text-white py-3 rounded-lg font-bold transition-colors flex items-center justify-center gap-2 shadow">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-                    Compartir (WhatsApp)
-                </button>
                 <button onclick="saveModalFile()" class="w-full bg-[#004481] hover:bg-[#003366] text-white py-3 rounded-lg font-bold transition-colors flex items-center justify-center gap-2 shadow">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                    Guardar en Equipo
+                    Guardar en el equipo
                 </button>
-                <button onclick="closeModal()" class="w-full text-slate-500 py-2 mt-1 text-sm font-semibold hover:text-slate-800 transition-colors">Cancelar</button>
+                <button onclick="shareModalFile()" class="w-full bg-white border-2 border-[#25D366] text-[#25D366] hover:bg-[#25D366] hover:text-white py-3 rounded-lg font-bold transition-colors flex items-center justify-center gap-2 shadow-sm">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                    Compartir vía App
+                </button>
+                <button onclick="closeModal()" class="w-full text-slate-400 hover:text-slate-700 py-2 mt-1 text-sm font-semibold transition-colors">Cerrar</button>
             </div>
         </div>
     </div>
 
-    <!-- Canvas Oculto -->
+    <!-- Canvas Oculto para Marca de Agua -->
     <canvas id="watermarkCanvas" style="display: none;"></canvas>
 
     <script>
@@ -251,7 +260,7 @@
         // --- 1. GEOLOCALIZACIÓN AUTOMÁTICA ---
         function requestGPS() {
             if ("geolocation" in navigator) {
-                document.getElementById('gpsIndicatorContainer').innerHTML = `<span class="w-2 h-2 rounded-full bg-yellow-500 mr-2"></span> Buscando GPS...`;
+                document.getElementById('gpsIndicatorContainer').innerHTML = `<span class="w-2 h-2 rounded-full bg-yellow-500 mr-2 shadow-[0_0_8px_#eab308]"></span> Buscando GPS...`;
                 navigator.geolocation.watchPosition(
                     (position) => {
                         currentLat = position.coords.latitude;
@@ -275,7 +284,7 @@
             let degrees = Math.floor(d);
             let minutes = Math.floor((d - degrees) * 60);
             let seconds = ((d - degrees - minutes/60) * 3600).toFixed(0);
-            let dir = isLat ? (deg >= 0 ? "N" : "S") : (deg >= 0 ? "E" : "O");
+            let dir = isLat ? (deg >= 0 ? "S" : "N") : (deg >= 0 ? "O" : "E"); // S/N para Lat, O/E para Lon (Perú)
             return `${degrees}°${minutes}'${seconds}" ${dir}`;
         }
 
@@ -309,20 +318,20 @@
                         
                         const fontTitle = Math.floor(canvas.height * 0.025);
                         ctx.font = `bold ${fontTitle}px Arial`;
-                        ctx.fillStyle = '#4ade80'; // Verde brillante
+                        ctx.fillStyle = '#4ade80';
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'middle';
                         ctx.fillText('GEOPHOTO VERIFIED', canvas.width - (topBoxW/2), topBoxH/2);
 
-                        // Banda inferior translúcida con MARGEN INFERIOR
-                        const marginBottom = canvas.height * 0.01; // Margen de 1% (aprox 1mm a escala)
+                        // Banda inferior
+                        const marginBottom = canvas.height * 0.015; // Margen de ~1.5mm
                         const bandHeight = canvas.height * 0.15;
                         const startY = canvas.height - bandHeight - marginBottom;
                         
-                        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)'; // Dark slate translúcido
+                        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
                         ctx.fillRect(0, startY, canvas.width, bandHeight);
                         
-                        // Línea verde superior de la banda inferior
+                        // Línea verde superior de la banda
                         ctx.fillStyle = '#4ade80';
                         ctx.fillRect(0, startY, canvas.width, canvas.height * 0.005);
 
@@ -335,7 +344,7 @@
                         const textY2 = startY + (bandHeight * 0.65);
                         const textY3 = startY + (bandHeight * 0.95);
 
-                        ctx.fillStyle = '#fbbf24'; // Amarillo
+                        ctx.fillStyle = '#fbbf24';
                         ctx.fillText(`FECHA / HORA: ${dateStr} ${timeStr}`, padX, textY1);
                         
                         ctx.fillStyle = 'white';
@@ -374,10 +383,10 @@
                 div.className = "border border-slate-200 rounded p-2 bg-white shadow-sm flex flex-col gap-2 relative";
                 div.innerHTML = `
                     <div class="absolute top-1 right-1 flex gap-1 z-10">
-                        <button onclick="previewPhoto('${p.id}')" class="bg-[#0071b9] text-white rounded w-7 h-7 flex items-center justify-center font-bold shadow hover:bg-[#0055a5]" title="Ver Previsualización">
+                        <button onclick="previewPhoto('${p.id}')" class="bg-[#0071b9] text-white rounded w-8 h-8 flex items-center justify-center font-bold shadow hover:bg-[#0055a5] border border-white" title="Previsualizar">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                         </button>
-                        <button onclick="removePhoto('${p.id}')" class="bg-red-500 text-white rounded w-7 h-7 flex items-center justify-center font-bold text-sm shadow hover:bg-red-600" title="Eliminar Foto">X</button>
+                        <button onclick="removePhoto('${p.id}')" class="bg-red-500 text-white rounded w-8 h-8 flex items-center justify-center font-bold text-sm shadow hover:bg-red-600 border border-white" title="Eliminar Foto">X</button>
                     </div>
                     <img src="${p.image}" class="w-full h-48 object-contain bg-slate-900 rounded" />
                     <textarea placeholder="Descripción / Notas..." class="input-clean text-xs mt-1" rows="2" onchange="updateDesc('${p.id}', this.value)">${p.description}</textarea>
@@ -402,7 +411,7 @@
             document.getElementById('previewModalImage').src = "";
         };
 
-        // --- 3. DIBUJO EN CANVAS (FIRMA, DNI, CROQUIS) ---
+        // --- 3. DIBUJO EN CANVAS (Pointer Events) ---
         function setupCanvasDrawing(canvasId) {
             const canvas = document.getElementById(canvasId);
             if(!canvas) return;
@@ -413,7 +422,7 @@
 
             let isDrawing = false;
             let lastX = 0, lastY = 0;
-            let color = '#004481'; // Azul corporativo por defecto
+            let color = '#004481'; 
             
             if(canvases[canvasId] && canvases[canvasId].color) color = canvases[canvasId].color;
             ctx.strokeStyle = color;
@@ -536,15 +545,24 @@
             div.innerHTML = `
                 <div class="flex flex-wrap justify-between items-center mb-2 gap-2">
                     <input type="text" placeholder="Nivel / Ambiente (Ej: Piso 1)" class="text-sm font-semibold text-[#004481] border-b border-gray-300 outline-none pb-1 w-1/2">
-                    <div class="flex gap-2">
+                    <div class="flex flex-wrap gap-2">
                         <div class="flex gap-1 bg-gray-50 p-1 rounded border shadow-sm">
-                            <button onclick="changeCanvasColor('${id}', '#000000')" class="w-5 h-5 rounded-full bg-black border border-gray-300" title="Negro"></button>
-                            <button onclick="changeCanvasColor('${id}', '#004481')" class="w-5 h-5 rounded-full bg-[#004481] border border-gray-300" title="Azul"></button>
-                            <button onclick="changeCanvasColor('${id}', '#ef4444')" class="w-5 h-5 rounded-full bg-red-500 border border-gray-300" title="Rojo"></button>
+                            <button onclick="changeCanvasColor('${id}', '#000000')" class="w-6 h-6 rounded-full bg-black border border-gray-300" title="Negro"></button>
+                            <button onclick="changeCanvasColor('${id}', '#004481')" class="w-6 h-6 rounded-full bg-[#004481] border border-gray-300" title="Azul"></button>
+                            <button onclick="changeCanvasColor('${id}', '#ef4444')" class="w-6 h-6 rounded-full bg-red-500 border border-gray-300" title="Rojo"></button>
                         </div>
-                        <button onclick="undoCanvas('${id}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs border border-gray-200">Deshacer</button>
-                        <label class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs cursor-pointer border border-gray-200">
-                            Fondo
+                        <button onclick="undoCanvas('${id}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded text-xs border border-gray-200 font-semibold flex items-center gap-1">
+                            ↩ Deshacer
+                        </button>
+                        
+                        <label class="bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 px-2 py-1 rounded text-xs cursor-pointer flex items-center gap-1 font-semibold">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+                            Cámara
+                            <input type="file" accept="image/*" capture="environment" class="hidden" onchange="setCanvasBackground('${id}', this)">
+                        </label>
+                        <label class="bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 px-2 py-1 rounded text-xs cursor-pointer flex items-center gap-1 font-semibold">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            Galería
                             <input type="file" accept="image/*" class="hidden" onchange="setCanvasBackground('${id}', this)">
                         </label>
                     </div>
@@ -605,13 +623,17 @@
             const pageHeight = doc.internal.pageSize.getHeight();
             let yPos = 20;
 
+            // Limpiar nombre para el archivo
+            const ownerName = document.getElementById('propNombre').value.trim().replace(/[^a-zA-Z0-9 ]/g, "") || "Sin_Nombre";
+            const outputFilename = isAsegurado ? `${ownerName}_Acta_Asegurado.pdf` : `${ownerName}_Reporte.pdf`;
+
             const drawHeader = (title = "FICHA DE DATOS DE INSPECCIÓN") => {
                 doc.setFont("helvetica", "bold");
                 doc.setFontSize(16);
                 doc.setTextColor(0, 68, 129); // #004481
                 doc.text(title, 15, 20);
                 
-                // Línea ABACO
+                // Línea ABACO Verde/Azul claro (según preferencia anterior, usando Azul Claro)
                 doc.setDrawColor(0, 113, 185); // #0071b9
                 doc.setLineWidth(1);
                 doc.line(15, 23, 110, 23);
@@ -631,13 +653,13 @@
 
             drawHeader();
             
-            // Ficha de Datos (4 Columnas y líneas separadoras)
+            // Ficha de Datos - Etiquetas exactas y fondo blanco contrastante
             const formValues = [
-                ["Propietario:", document.getElementById('propNombre').value, "DNI Propietario:", document.getElementById('propDNI').value],
-                ["Representante:", document.getElementById('repNombre').value, "DNI Representante:", document.getElementById('repDNI').value],
-                ["Domicilio:", document.getElementById('domicilio').value, "Distrito:", document.getElementById('distrito').value],
-                ["Celular:", document.getElementById('celular').value, "Correo:", document.getElementById('correo').value],
-                ["Fecha Inspección:", document.getElementById('fechaInsp').value, "Hora Inspección:", document.getElementById('horaInsp').value],
+                ["Nombre y apellido del propietario:", document.getElementById('propNombre').value, "Nro. de DNI del propietario:", document.getElementById('propDNI').value],
+                ["Nombre y apellido del representante:", document.getElementById('repNombre').value, "Nro. de DNI del representante:", document.getElementById('repDNI').value],
+                ["Dirección:", document.getElementById('domicilio').value, "Distrito:", document.getElementById('distrito').value],
+                ["Nro. celular:", document.getElementById('celular').value, "Correo:", document.getElementById('correo').value],
+                ["Fecha de inspección:", document.getElementById('fechaInsp').value, "hora de inspección:", document.getElementById('horaInsp').value],
                 ["Inspector:", document.getElementById('inspectorNombre').value, "", ""]
             ];
 
@@ -645,17 +667,23 @@
                 startY: 28,
                 body: formValues,
                 theme: 'plain',
-                styles: { fontSize: 9, cellPadding: 3, lineColor: [220, 220, 220], lineWidth: { bottom: 0.5 }, textColor: [30, 41, 59] },
+                styles: { fontSize: 9, cellPadding: 4, textColor: [30, 41, 59], fillColor: [255, 255, 255] }, // Explicit white background & dark text
                 columnStyles: { 
-                    0: { fontStyle: 'bold', textColor: [100, 116, 139], cellWidth: 40 }, 
-                    2: { fontStyle: 'bold', textColor: [100, 116, 139], cellWidth: 40 } 
+                    0: { fontStyle: 'bold', textColor: [0, 68, 129], cellWidth: 50 }, 
+                    2: { fontStyle: 'bold', textColor: [0, 68, 129], cellWidth: 50 } 
                 },
-                didDrawPage: function (data) { drawHeader(); }
+                didDrawPage: function (data) { drawHeader(); },
+                willDrawCell: function(data) {
+                    // Línea horizontal gris claro para separar datos elegantemente
+                    doc.setDrawColor(226, 232, 240);
+                    doc.setLineWidth(0.2);
+                    doc.line(data.cell.x, data.cell.y + data.cell.height, data.cell.x + data.cell.width, data.cell.y + data.cell.height);
+                }
             });
 
             yPos = doc.lastAutoTable.finalY + 10;
 
-            // Textos Largos (Con margin top crítico para saltos de página)
+            // Textos Largos con paginación
             const textSections = [
                 { title: "Descripción General del Siniestro", text: document.getElementById('descSiniestro').value },
                 { title: "Descripción del Inmueble", text: document.getElementById('descInmueble').value },
@@ -671,7 +699,7 @@
                         body: [[sec.text]],
                         theme: 'plain',
                         headStyles: { fontStyle: 'bold', fontSize: 11, textColor: [0, 68, 129], cellPadding: {top: 5, bottom: 2} },
-                        bodyStyles: { fontSize: 9, textColor: [50, 50, 50], cellPadding: 2 },
+                        bodyStyles: { fontSize: 9, textColor: [30, 41, 59], cellPadding: 2, fillColor: [255, 255, 255] },
                         didDrawPage: function (data) { drawHeader(); }
                     });
                     yPos = doc.lastAutoTable.finalY + 5;
@@ -692,6 +720,7 @@
                     didDrawPage: function (data) { drawHeader(); }
                 });
                 
+                // Tabla con bordes redondeados y colores corporativos
                 doc.autoTable({
                     startY: doc.lastAutoTable.finalY + 2,
                     margin: { top: 35 },
@@ -699,27 +728,27 @@
                     body: dmgData,
                     theme: 'grid',
                     headStyles: { fillColor: [0, 68, 129], textColor: 255, fontSize: 8 },
-                    bodyStyles: { fontSize: 8 },
+                    bodyStyles: { fontSize: 8, fillColor: [255, 255, 255], textColor: [30, 41, 59] },
                     alternateRowStyles: { fillColor: [248, 250, 252] },
                     didDrawPage: function (data) { drawHeader(); }
                 });
                 yPos = doc.lastAutoTable.finalY + 10;
             }
 
-            // Firmas con cuadro delimitador azul
+            // Firmas con cuadro delimitador
             if (yPos > pageHeight - 65) { doc.addPage(); yPos = 35; drawHeader(); }
             
-            doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(0,0,0);
+            doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(0, 68, 129);
             doc.text("Firma (Propietario / Representante):", 15, yPos);
             doc.text("DNI:", 105, yPos);
             
             const firmaCanvas = document.getElementById('canvasFirma');
             const dniCanvas = document.getElementById('canvasDNI');
             
-            // Fondo blanco y borde
+            // Fondo blanco explícito y borde delimitador azul
             doc.setFillColor(255, 255, 255);
-            doc.setDrawColor(0, 68, 129); // Borde azul corporativo
-            doc.setLineWidth(0.5);
+            doc.setDrawColor(0, 68, 129);
+            doc.setLineWidth(0.3);
             doc.rect(15, yPos + 5, 80, 40, 'DF'); 
             doc.rect(105, yPos + 5, 80, 40, 'DF');
             
@@ -730,7 +759,7 @@
             if (isAsegurado) {
                 const totalPages = doc.internal.getNumberOfPages();
                 for (let i = 1; i <= totalPages; i++) { doc.setPage(i); drawFooter(i, totalPages); }
-                showExportModal("pdf", doc.output('blob'), "Acta_Asegurado.pdf");
+                showExportModal("pdf", doc.output('blob'), outputFilename);
                 return;
             }
 
@@ -749,41 +778,54 @@
                 }
             }
 
-            // Registro Fotográfico (6cm alto centrado)
+            // Registro Fotográfico (Fotos de 6cm de altura centradas)
             if (photosData.length > 0) {
                 doc.addPage();
                 drawHeader("REGISTRO FOTOGRÁFICO");
                 yPos = 35;
-                const imgH = 60; // 6 cm exactos
                 const colW = (pageWidth - 30) / 2;
                 let cx = 15;
                 
                 for (let i = 0; i < photosData.length; i++) {
-                    if (yPos + imgH + 20 > pageHeight - 15) {
+                    const p = photosData[i];
+                    
+                    // Extraer dimensiones reales para mantener proporción
+                    const img = new Image();
+                    img.src = p.image;
+                    const imgRatio = img.width / img.height;
+                    
+                    const drawH = 60; // 6 cm fijos de alto
+                    let drawW = drawH * imgRatio;
+                    
+                    // Si el ancho calculado excede la columna, ajustamos (raro en 4:3, pero seguridad)
+                    if(drawW > colW - 4) {
+                        drawW = colW - 4;
+                        // drawH = drawW / imgRatio; // (Comentado para forzar los 6cm de altura estrictos)
+                    }
+
+                    if (yPos + drawH + 20 > pageHeight - 15) {
                         doc.addPage(); drawHeader("REGISTRO FOTOGRÁFICO"); yPos = 35; cx = 15;
                     }
                     
-                    const p = photosData[i];
                     const isRight = i % 2 !== 0;
                     if (isRight) cx = 15 + colW; else cx = 15;
 
-                    // Asumiendo proporción para centrar en la columna
-                    const imgW = 80;
-                    const offsetX = cx + (colW - imgW) / 2;
+                    // Centrar en la columna
+                    const offsetX = cx + (colW - drawW) / 2;
 
-                    doc.addImage(p.image, 'JPEG', offsetX, yPos, imgW, imgH); 
+                    doc.addImage(p.image, 'JPEG', offsetX, yPos, drawW, drawH); 
                     
                     doc.setFontSize(8); doc.setFont("helvetica", "normal"); doc.setTextColor(50, 50, 50);
                     const splitDesc = doc.splitTextToSize(p.description || 'Sin descripción', colW - 10);
-                    doc.text(splitDesc, cx + 5, yPos + imgH + 5);
+                    doc.text(splitDesc, cx + 5, yPos + drawH + 5);
 
-                    if (isRight) yPos += imgH + 25;
+                    if (isRight) yPos += drawH + 25;
                 }
             }
 
             const totalPages = doc.internal.getNumberOfPages();
             for (let i = 1; i <= totalPages; i++) { doc.setPage(i); drawFooter(i, totalPages); }
-            showExportModal("pdf", doc.output('blob'), "Reporte_Completo.pdf");
+            showExportModal("pdf", doc.output('blob'), outputFilename);
         };
 
         // --- 6. EXPORTACIÓN ZIP ---
@@ -791,6 +833,9 @@
             if (photosData.length === 0 && croquisCount === 0) {
                 alert("No hay fotos ni croquis para exportar."); return;
             }
+            const ownerName = document.getElementById('propNombre').value.trim().replace(/[^a-zA-Z0-9 ]/g, "") || "Sin_Nombre";
+            const zipFilename = `Fotos_${ownerName}.zip`;
+
             const zip = new JSZip();
             photosData.forEach((p, i) => {
                 const base64Data = p.image.replace(/^data:image\/(png|jpeg);base64,/, "");
@@ -804,7 +849,7 @@
                 }
             }
             zip.generateAsync({type:"blob"}).then(function(content) {
-                showExportModal("zip", content, "Fotos_Inspeccion.zip");
+                showExportModal("zip", content, zipFilename);
             });
         };
 
@@ -849,10 +894,85 @@
                     console.log('Error o cancelación al compartir:', error);
                 }
             } else {
-                alert("Tu dispositivo o navegador no soporta la función nativa de compartir archivos de este tipo. El archivo se descargará en tu equipo.");
+                alert("Tu dispositivo no soporta la función nativa de compartir archivos pesados. El archivo se descargará directamente en tu equipo para que lo envíes.");
                 saveModalFile();
             }
         }
+        
+        // --- 8. BASE DE DATOS LOCAL (IndexedDB) para Guardar/Cargar ---
+        let db;
+        const request = indexedDB.open("FRMECDB", 1);
+        request.onupgradeneeded = (e) => { db = e.target.result; db.createObjectStore("reports", { keyPath: "id" }); };
+        request.onsuccess = (e) => { db = e.target.result; };
+
+        window.saveCurrentReport = () => {
+            if(!db) { alert("Base de datos no disponible."); return; }
+            const report = {
+                id: "current",
+                timestamp: Date.now(),
+                form: {
+                    propNombre: document.getElementById('propNombre').value,
+                    propDNI: document.getElementById('propDNI').value,
+                    repNombre: document.getElementById('repNombre').value,
+                    repDNI: document.getElementById('repDNI').value,
+                    domicilio: document.getElementById('domicilio').value,
+                    distrito: document.getElementById('distrito').value,
+                    celular: document.getElementById('celular').value,
+                    correo: document.getElementById('correo').value,
+                    fechaInsp: document.getElementById('fechaInsp').value,
+                    horaInsp: document.getElementById('horaInsp').value,
+                    inspectorNombre: document.getElementById('inspectorNombre').value,
+                    descSiniestro: document.getElementById('descSiniestro').value,
+                    descInmueble: document.getElementById('descInmueble').value,
+                    descDanos: document.getElementById('descDanos').value
+                },
+                photos: photosData,
+                firma: document.getElementById('canvasFirma').toDataURL(),
+                dni: document.getElementById('canvasDNI').toDataURL()
+            };
+            const tx = db.transaction("reports", "readwrite");
+            tx.objectStore("reports").put(report);
+            tx.oncomplete = () => alert("Progreso guardado correctamente.");
+        };
+
+        window.loadReport = () => {
+            if(!db) return;
+            const tx = db.transaction("reports", "readonly");
+            const req = tx.objectStore("reports").get("current");
+            req.onsuccess = () => {
+                if(req.result) {
+                    if(!confirm("¿Cargar el último reporte guardado? Los datos actuales no guardados se perderán.")) return;
+                    const r = req.result;
+                    Object.keys(r.form).forEach(k => {
+                        if(document.getElementById(k)) document.getElementById(k).value = r.form[k];
+                    });
+                    photosData = r.photos || [];
+                    renderPhotos();
+                    
+                    if(r.firma) {
+                        const imgF = new Image(); imgF.onload = () => document.getElementById('canvasFirma').getContext('2d').drawImage(imgF,0,0); imgF.src = r.firma;
+                    }
+                    if(r.dni) {
+                        const imgD = new Image(); imgD.onload = () => document.getElementById('canvasDNI').getContext('2d').drawImage(imgD,0,0); imgD.src = r.dni;
+                    }
+                } else {
+                    alert("No se encontró ningún reporte guardado.");
+                }
+            };
+        };
+
+        window.createNewReport = () => {
+            if(confirm("¿Seguro que deseas empezar un nuevo reporte? Se limpiarán todos los campos actuales.")) {
+                document.querySelectorAll('input, textarea').forEach(el => el.value = '');
+                photosData = [];
+                renderPhotos();
+                clearCanvas('canvasFirma'); clearCanvas('canvasDNI');
+                document.getElementById('croquisContainer').innerHTML = '';
+                croquisCount = 0;
+                document.getElementById('damageTableBody').innerHTML = '';
+                addDamageRow(); // Add empty row
+            }
+        };
 
         // --- Inicialización ---
         setupCanvasDrawing('canvasFirma');
