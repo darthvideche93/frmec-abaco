@@ -10,18 +10,18 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; }
-        .canvas-container { touch-action: none; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; color: #334155; }
+        .canvas-container { touch-action: none; } 
         
-        /* Estilos minimalistas para inputs */
+        /* Inputs minimalistas */
         .input-clean {
             width: 100%;
             background-color: transparent;
             border: none;
             border-bottom: 1px solid #cbd5e1;
-            padding: 8px 0;
-            font-size: 14px;
-            color: #334155;
+            padding: 6px 0;
+            font-size: 13px;
+            color: #1e293b;
             transition: border-color 0.2s;
         }
         .input-clean:focus {
@@ -30,7 +30,7 @@
         }
         .label-clean {
             display: block;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             color: #64748b;
             margin-bottom: 2px;
@@ -39,9 +39,9 @@
         }
 
         /* Tabla de Daños Corporativa */
-        .damage-table-container { border-radius: 4px; overflow: hidden; border: 1px solid #e2e8f0; }
-        .damage-table th { background-color: #004481; color: white; padding: 10px; font-size: 13px; font-weight: 500; }
-        .damage-table td { padding: 8px; border-bottom: 1px solid #e2e8f0; font-size: 13px; background-color: white; }
+        .damage-table-container { border-radius: 6px; overflow: hidden; border: 1px solid #e2e8f0; }
+        .damage-table th { background-color: #004481; color: white; padding: 10px; font-size: 12px; font-weight: 600; }
+        .damage-table td { padding: 8px; border-bottom: 1px solid #e2e8f0; font-size: 12px; background-color: white; }
         .damage-table tr:nth-child(even) td { background-color: #f8fafc; }
     </style>
 </head>
@@ -64,31 +64,36 @@
                 <div id="gpsIndicatorContainer" class="bg-[#003366] text-blue-200 text-xs py-1.5 px-3 rounded flex items-center">
                     <span id="gpsIndicator" class="w-2 h-2 rounded-full bg-red-500 mr-2"></span> GPS Inactivo
                 </div>
-                <button onclick="createNewReport()" class="bg-[#0071b9] hover:bg-[#0055a5] text-white text-xs py-1.5 px-3 rounded transition-colors">Nuevo</button>
-                <button onclick="loadReport()" class="bg-[#0071b9] hover:bg-[#0055a5] text-white text-xs py-1.5 px-3 rounded transition-colors">Reportes</button>
-                <button onclick="saveCurrentReport()" class="bg-[#0071b9] hover:bg-[#0055a5] text-white text-xs py-1.5 px-3 rounded transition-colors border border-blue-400">Guardar</button>
+                <button onclick="createNewReport()" class="bg-transparent hover:bg-white/10 text-white text-xs py-1.5 px-3 rounded border border-white/30 transition-colors">Nuevo</button>
+                <button onclick="saveCurrentReport()" class="bg-[#0071b9] hover:bg-[#0055a5] text-white text-xs py-1.5 px-4 rounded transition-colors font-semibold shadow">Guardar</button>
             </div>
         </div>
         
         <!-- Barra de Exportación -->
-        <div class="max-w-4xl mx-auto mt-4 pt-3 border-t border-[#0055a5] flex flex-wrap justify-between items-center gap-2">
-            <span class="text-sm font-light text-blue-100">Exportar Reporte:</span>
-            <div class="flex gap-2">
-                <button onclick="exportToPDF(true)" class="bg-white text-[#004481] hover:bg-gray-100 text-xs py-1.5 px-4 rounded shadow font-semibold">PDF Asegurado</button>
-                <button onclick="exportToPDF(false)" class="bg-[#0071b9] text-white hover:bg-[#0055a5] text-xs py-1.5 px-4 rounded shadow border border-blue-400 font-semibold">PDF Completo</button>
-                <button onclick="exportToZIP()" class="bg-gray-700 text-white hover:bg-gray-600 text-xs py-1.5 px-4 rounded shadow font-semibold">ZIP Fotos</button>
+        <div class="max-w-4xl mx-auto mt-4 pt-3 border-t border-[#0055a5] flex flex-wrap justify-between items-center gap-3">
+            <span class="text-sm font-semibold text-blue-50">Exportar Reporte:</span>
+            <div class="flex flex-wrap gap-2">
+                <button onclick="exportToPDF(true)" class="bg-white text-[#004481] hover:bg-gray-100 text-xs py-1.5 px-4 rounded shadow font-semibold flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path></svg>
+                    PDF Asegurado
+                </button>
+                <button onclick="exportToPDF(false)" class="bg-[#0071b9] text-white hover:bg-[#0055a5] text-xs py-1.5 px-4 rounded shadow font-semibold flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path></svg>
+                    PDF Completo
+                </button>
+                <button onclick="exportToZIP()" class="bg-slate-700 text-white hover:bg-slate-600 text-xs py-1.5 px-4 rounded shadow font-semibold flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V8a2 2 0 00-2-2h-5L9 4H4z" clip-rule="evenodd"></path></svg>
+                    ZIP Fotos
+                </button>
             </div>
         </div>
     </header>
 
     <main class="max-w-4xl mx-auto p-4 space-y-6 mt-4">
         
-        <!-- SECCIÓN 1: DATOS DE INSPECCIÓN (Diseño Minimalista) -->
-        <div class="bg-white shadow-sm border-t-4 border-[#0071b9] p-6 rounded-b-lg">
-            <div class="mb-6 flex items-center gap-2">
-                <div class="w-4 h-4 rounded-full border-2 border-[#0071b9]"></div>
-                <h2 class="text-xl font-normal text-[#004481]">Ficha de Datos de Inspección</h2>
-            </div>
+        <!-- SECCIÓN 1: DATOS DE INSPECCIÓN -->
+        <div class="bg-white shadow-sm border border-slate-200 p-6 rounded-lg">
+            <h2 class="text-lg font-bold text-[#004481] border-b pb-2 mb-5 border-gray-200">FICHA DE DATOS DE INSPECCIÓN</h2>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4" id="inspectionForm">
                 <div><label class="label-clean">Propietario</label><input type="text" id="propNombre" class="input-clean"></div>
@@ -107,7 +112,7 @@
 
         <!-- SECCIÓN 2: DESCRIPCIONES -->
         <div class="bg-white shadow-sm border border-slate-200 p-6 rounded-lg space-y-5">
-            <h2 class="text-lg font-normal text-[#004481] border-b border-gray-200 pb-2">Detalles del Siniestro</h2>
+            <h2 class="text-lg font-bold text-[#004481] border-b border-gray-200 pb-2">DETALLES DEL SINIESTRO</h2>
             <div><label class="label-clean">Descripción General del Siniestro</label><textarea id="descSiniestro" rows="2" class="input-clean"></textarea></div>
             <div><label class="label-clean">Descripción del Inmueble</label><textarea id="descInmueble" rows="2" class="input-clean"></textarea></div>
             <div><label class="label-clean">Descripción de Daños</label><textarea id="descDanos" rows="3" class="input-clean"></textarea></div>
@@ -116,8 +121,10 @@
         <!-- SECCIÓN 3: TABLA DE DIMENSIONES -->
         <div class="bg-white shadow-sm border border-slate-200 p-6 rounded-lg">
             <div class="flex justify-between items-center mb-4 border-b border-gray-200 pb-2">
-                <h2 class="text-lg font-normal text-[#004481]">Dimensiones de los Daños</h2>
-                <button onclick="addDamageRow()" class="text-[#0071b9] hover:text-[#004481] text-sm font-semibold">+ Añadir Fila</button>
+                <h2 class="text-lg font-bold text-[#004481]">DIMENSIONES DE LOS DAÑOS</h2>
+                <button onclick="addDamageRow()" class="text-[#0071b9] hover:text-[#004481] text-sm font-semibold flex items-center gap-1">
+                    <span>+</span> Añadir Fila
+                </button>
             </div>
             <div class="overflow-x-auto damage-table-container">
                 <table class="w-full text-left border-collapse damage-table" id="damageTable">
@@ -137,25 +144,23 @@
                     </tbody>
                 </table>
             </div>
-            <div id="damageSummary" class="mt-4 p-4 bg-[#f8fafc] border border-blue-100 rounded-lg text-sm grid grid-cols-2 md:grid-cols-4 gap-3">
-                <!-- Resumen por agrupaciones -->
-            </div>
+            <!-- Se eliminó el resumen de totales según requerimiento -->
         </div>
 
         <!-- SECCIÓN 4: FIRMAS -->
         <div class="bg-white shadow-sm border border-slate-200 p-6 rounded-lg grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-                <label class="block text-sm font-semibold text-[#004481] mb-2">Firma (Propietario / Representante):</label>
+                <label class="block text-sm font-bold text-[#004481] mb-2">Firma (Propietario / Representante):</label>
                 <div class="border border-slate-300 rounded bg-white relative h-40">
                     <canvas id="canvasFirma" class="absolute inset-0 w-full h-full canvas-container"></canvas>
-                    <button onclick="clearCanvas('canvasFirma')" class="absolute top-2 right-2 bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs hover:bg-gray-200">Borrar</button>
+                    <button onclick="clearCanvas('canvasFirma')" class="absolute top-2 right-2 bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs hover:bg-gray-200 shadow-sm border border-gray-200">Borrar</button>
                 </div>
             </div>
             <div>
-                <label class="block text-sm font-semibold text-[#004481] mb-2">DNI:</label>
+                <label class="block text-sm font-bold text-[#004481] mb-2">DNI:</label>
                 <div class="border border-slate-300 rounded bg-white relative h-40">
                     <canvas id="canvasDNI" class="absolute inset-0 w-full h-full canvas-container"></canvas>
-                    <button onclick="clearCanvas('canvasDNI')" class="absolute top-2 right-2 bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs hover:bg-gray-200">Borrar</button>
+                    <button onclick="clearCanvas('canvasDNI')" class="absolute top-2 right-2 bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs hover:bg-gray-200 shadow-sm border border-gray-200">Borrar</button>
                 </div>
             </div>
         </div>
@@ -163,40 +168,54 @@
         <!-- SECCIÓN 5: CROQUIS -->
         <div class="bg-white shadow-sm border border-slate-200 p-6 rounded-lg">
             <div class="flex justify-between items-center mb-4 border-b border-gray-200 pb-2">
-                <h2 class="text-lg font-normal text-[#004481]">Hojas de Croquis</h2>
-                <button onclick="addCroquisSheet()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 text-sm rounded font-semibold">+ Añadir Hoja</button>
+                <h2 class="text-lg font-bold text-[#004481]">HOJAS DE CROQUIS</h2>
+                <button onclick="addCroquisSheet()" class="bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 px-3 py-1.5 text-xs rounded font-semibold transition-colors flex items-center gap-1">
+                    <span>+</span> Añadir Hoja
+                </button>
             </div>
             <div id="croquisContainer" class="space-y-6">
-                <!-- Hojas de croquis se insertarán aquí -->
+                <!-- Hojas de croquis -->
             </div>
         </div>
 
         <!-- SECCIÓN 6: FOTOS -->
         <div class="bg-white shadow-sm border border-slate-200 p-6 rounded-lg">
-            <h2 class="text-lg font-normal text-[#004481] border-b border-gray-200 pb-2 mb-4">Registro Fotográfico</h2>
+            <h2 class="text-lg font-bold text-[#004481] border-b border-gray-200 pb-2 mb-4">REGISTRO FOTOGRÁFICO</h2>
             <div class="flex gap-4 mb-6">
-                <label class="flex-1 bg-[#0071b9] hover:bg-[#0055a5] text-white text-center py-3 rounded cursor-pointer transition-colors text-sm font-semibold">
+                <label class="flex-1 bg-[#0071b9] hover:bg-[#0055a5] text-white text-center py-2.5 rounded cursor-pointer transition-colors text-sm font-semibold flex items-center justify-center gap-2 shadow-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                     Tomar Foto
                     <input type="file" accept="image/*" capture="environment" id="cameraInput" class="hidden">
                 </label>
-                <label class="flex-1 bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 text-center py-3 rounded cursor-pointer transition-colors text-sm font-semibold">
+                <label class="flex-1 bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 text-center py-2.5 rounded cursor-pointer transition-colors text-sm font-semibold flex items-center justify-center gap-2 shadow-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     Subir de Galería
                     <input type="file" accept="image/*" multiple id="galleryInput" class="hidden">
                 </label>
             </div>
-            <div id="photoList" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+            <div id="photoList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </div>
     </main>
 
-    <!-- MODAL DE EXPORTACIÓN (Para PDF Asegurado) -->
-    <div id="exportModal" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
-        <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full">
-            <h3 class="text-lg font-bold text-[#004481] mb-2">¡Reporte Generado!</h3>
-            <p class="text-sm text-gray-600 mb-6">El PDF Asegurado está listo. ¿Qué deseas hacer con el archivo?</p>
+    <!-- MODAL UNIVERSAL DE EXPORTACIÓN -->
+    <div id="universalExportModal" class="hidden fixed inset-0 bg-slate-900/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full border-t-4 border-[#0071b9]">
+            <div class="flex items-center justify-center mb-4 text-[#004481]">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <h3 class="text-xl font-bold text-center text-[#004481] mb-2" id="modalTitle">¡Archivo Generado!</h3>
+            <p class="text-sm text-center text-gray-600 mb-6 font-medium">¿Qué deseas hacer con el documento?</p>
+            
             <div class="flex flex-col gap-3">
-                <button onclick="saveModalFile()" class="w-full bg-[#0071b9] hover:bg-[#0055a5] text-white py-2.5 rounded font-semibold transition-colors">Guardar en Equipo</button>
-                <button onclick="shareModalFile()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2.5 rounded font-semibold transition-colors">Compartir (WhatsApp / Drive)</button>
-                <button onclick="closeModal()" class="w-full text-gray-500 py-2 mt-2 text-sm hover:text-gray-800">Cancelar</button>
+                <button onclick="shareModalFile()" class="w-full bg-[#25D366] hover:bg-[#1ebe57] text-white py-3 rounded-lg font-bold transition-colors flex items-center justify-center gap-2 shadow">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                    Compartir (WhatsApp)
+                </button>
+                <button onclick="saveModalFile()" class="w-full bg-[#004481] hover:bg-[#003366] text-white py-3 rounded-lg font-bold transition-colors flex items-center justify-center gap-2 shadow">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Guardar en Equipo
+                </button>
+                <button onclick="closeModal()" class="w-full text-slate-500 py-2 mt-1 text-sm font-semibold hover:text-slate-800 transition-colors">Cancelar</button>
             </div>
         </div>
     </div>
@@ -212,13 +231,12 @@
         
         let pendingBlob = null;
         let pendingFileName = "";
+        let pendingFileType = "";
         
         // --- 1. GEOLOCALIZACIÓN AUTOMÁTICA ---
         function requestGPS() {
             if ("geolocation" in navigator) {
-                document.getElementById('gpsIndicator').className = "w-2 h-2 rounded-full bg-yellow-500 mr-2";
                 document.getElementById('gpsIndicatorContainer').innerHTML = `<span class="w-2 h-2 rounded-full bg-yellow-500 mr-2"></span> Buscando GPS...`;
-                
                 navigator.geolocation.watchPosition(
                     (position) => {
                         currentLat = position.coords.latitude;
@@ -234,11 +252,9 @@
                 );
             }
         }
-
-        // Solicitar GPS automáticamente al cargar
         window.onload = requestGPS;
 
-        // --- 2. MARCA DE AGUA EN FOTOS (Diseño Requerido) ---
+        // --- 2. MARCA DE AGUA EN FOTOS ---
         function formatDMS(deg, isLat) {
             let d = Math.abs(deg);
             let degrees = Math.floor(d);
@@ -249,10 +265,7 @@
         }
 
         async function processImageFile(file) {
-            if (!currentLat) {
-                alert("Esperando señal GPS. Asegúrate de haber dado permisos de ubicación.");
-                return;
-            }
+            if (!currentLat) { alert("Esperando señal GPS."); return; }
             return new Promise((resolve) => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -261,13 +274,12 @@
                         const canvas = document.getElementById('watermarkCanvas');
                         const ctx = canvas.getContext('2d');
                         
-                        // Limitar resolución a 1600px
                         let MAX_WIDTH = 1600;
                         let scale = 1;
                         if (img.width > MAX_WIDTH) scale = MAX_WIDTH / img.width;
-                        
                         canvas.width = img.width * scale;
                         canvas.height = img.height * scale;
+                        
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                         
                         const date = new Date();
@@ -287,10 +299,12 @@
                         ctx.textBaseline = 'middle';
                         ctx.fillText('GEOPHOTO VERIFIED', canvas.width - (topBoxW/2), topBoxH/2);
 
-                        // Banda inferior translúcida
+                        // Banda inferior translúcida con MARGEN INFERIOR
+                        const marginBottom = canvas.height * 0.01; // Margen de 1% (aprox 1mm a escala)
                         const bandHeight = canvas.height * 0.15;
-                        const startY = canvas.height - bandHeight;
-                        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)'; // Dark slate
+                        const startY = canvas.height - bandHeight - marginBottom;
+                        
+                        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)'; // Dark slate translúcido
                         ctx.fillRect(0, startY, canvas.width, bandHeight);
                         
                         // Línea verde superior de la banda inferior
@@ -342,11 +356,11 @@
             list.innerHTML = '';
             photosData.forEach((p) => {
                 const div = document.createElement('div');
-                div.className = "border border-gray-200 rounded p-2 bg-white shadow-sm flex flex-col gap-2 relative";
+                div.className = "border border-slate-200 rounded p-2 bg-white shadow-sm flex flex-col gap-2 relative";
                 div.innerHTML = `
-                    <button onclick="removePhoto('${p.id}')" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-sm shadow">X</button>
+                    <button onclick="removePhoto('${p.id}')" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-sm shadow z-10">X</button>
                     <img src="${p.image}" class="w-full h-48 object-contain bg-slate-900 rounded" />
-                    <textarea placeholder="Descripción / Notas..." class="input-clean text-xs" rows="2" onchange="updateDesc('${p.id}', this.value)">${p.description}</textarea>
+                    <textarea placeholder="Descripción / Notas..." class="input-clean text-xs mt-1" rows="2" onchange="updateDesc('${p.id}', this.value)">${p.description}</textarea>
                 `;
                 list.appendChild(div);
             });
@@ -366,7 +380,7 @@
 
             let isDrawing = false;
             let lastX = 0, lastY = 0;
-            let color = '#004481'; // Color por defecto corporativo
+            let color = '#004481'; 
             
             if(canvases[canvasId] && canvases[canvasId].color) color = canvases[canvasId].color;
             ctx.strokeStyle = color;
@@ -419,11 +433,8 @@
             canvas.addEventListener('pointerup', stopDraw);
             canvas.addEventListener('pointerout', stopDraw);
             
-            if(!canvases[canvasId]) {
-                canvases[canvasId] = { ctx: ctx, history: [], color: color };
-            } else {
-                canvases[canvasId].ctx = ctx;
-            }
+            if(!canvases[canvasId]) { canvases[canvasId] = { ctx: ctx, history: [], color: color }; } 
+            else { canvases[canvasId].ctx = ctx; }
         }
 
         window.clearCanvas = (id) => {
@@ -491,14 +502,14 @@
             div.className = "border border-gray-200 rounded p-3 bg-white";
             div.innerHTML = `
                 <div class="flex flex-wrap justify-between items-center mb-2 gap-2">
-                    <input type="text" placeholder="Nivel / Ambiente (Ej: Piso 1)" class="input-clean w-1/2">
+                    <input type="text" placeholder="Nivel / Ambiente (Ej: Piso 1)" class="text-sm font-semibold text-[#004481] border-b border-gray-300 outline-none pb-1 w-1/2">
                     <div class="flex gap-2">
                         <div class="flex gap-1 bg-gray-50 p-1 rounded border">
                             <button onclick="changeCanvasColor('${id}', '#004481')" class="w-5 h-5 rounded-full bg-[#004481] border border-transparent"></button>
                             <button onclick="changeCanvasColor('${id}', '#ef4444')" class="w-5 h-5 rounded-full bg-red-500 border border-transparent"></button>
                         </div>
-                        <button onclick="undoCanvas('${id}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs">Deshacer</button>
-                        <label class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs cursor-pointer">
+                        <button onclick="undoCanvas('${id}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs border border-gray-200">Deshacer</button>
+                        <label class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs cursor-pointer border border-gray-200">
                             Fondo
                             <input type="file" accept="image/*" class="hidden" onchange="setCanvasBackground('${id}', this)">
                         </label>
@@ -523,39 +534,17 @@
                 <td><input type="text" class="w-full bg-transparent outline-none border-b border-dashed border-gray-300 focus:border-[#0071b9] dmg-partida"></td>
                 <td><input type="text" class="w-full bg-transparent outline-none border-b border-dashed border-gray-300 focus:border-[#0071b9] dmg-detalle"></td>
                 <td>
-                    <select class="w-full bg-transparent outline-none border-b border-dashed border-gray-300 dmg-um" onchange="updateTotals()">
+                    <select class="w-full bg-transparent outline-none border-b border-dashed border-gray-300 dmg-um">
                         <option value="m2">m2</option><option value="ml">ml</option>
                         <option value="m3">m3</option><option value="und">und</option>
                         <option value="glb">glb</option><option value="otro">otro</option>
                     </select>
                 </td>
-                <td><input type="number" step="0.01" class="w-full bg-transparent outline-none border-b border-dashed border-gray-300 text-center dmg-sup" onchange="updateTotals()" onkeyup="updateTotals()"></td>
+                <td><input type="number" step="0.01" class="w-full bg-transparent outline-none border-b border-dashed border-gray-300 text-center dmg-sup"></td>
                 <td><input type="text" class="w-full bg-transparent outline-none border-b border-dashed border-gray-300"></td>
-                <td class="text-center"><button onclick="this.parentElement.parentElement.remove(); updateTotals();" class="text-red-500 hover:text-red-700 font-bold text-xs">X</button></td>
+                <td class="text-center"><button onclick="this.parentElement.parentElement.remove();" class="text-red-500 hover:text-red-700 font-bold text-xs">X</button></td>
             `;
             tbody.appendChild(tr);
-        };
-
-        window.updateTotals = () => {
-            const rows = document.querySelectorAll('#damageTableBody tr');
-            const totals = {};
-            rows.forEach(row => {
-                const partida = row.querySelector('.dmg-partida').value.trim().toUpperCase() || 'OTROS';
-                const um = row.querySelector('.dmg-um').value;
-                const sup = parseFloat(row.querySelector('.dmg-sup').value) || 0;
-                
-                const key = `${partida} (${um})`;
-                if(!totals[key]) totals[key] = 0;
-                totals[key] += sup;
-            });
-
-            const summaryDiv = document.getElementById('damageSummary');
-            summaryDiv.innerHTML = '';
-            for (const [key, total] of Object.entries(totals)) {
-                if (total > 0) {
-                    summaryDiv.innerHTML += `<div class="bg-white px-3 py-2 border border-gray-200 rounded shadow-sm"><span class="text-gray-500 text-xs block">${key.split('(')[0]}</span><span class="font-bold text-[#004481]">${total.toFixed(2)} ${key.split('(')[1].replace(')','')}</span></div>`;
-                }
-            }
         };
 
         function getDamageData() {
@@ -588,8 +577,8 @@
                 doc.setTextColor(0, 68, 129); // #004481
                 doc.text(title, 15, 20);
                 
-                // Línea verde corporativa
-                doc.setDrawColor(74, 222, 128); // verde
+                // Línea ABACO
+                doc.setDrawColor(0, 113, 185); // #0071b9
                 doc.setLineWidth(1);
                 doc.line(15, 23, 110, 23);
                 doc.setTextColor(0, 0, 0);
@@ -597,6 +586,7 @@
 
             const drawFooter = (pageNum, totalPages) => {
                 doc.setDrawColor(200, 200, 200);
+                doc.setLineWidth(0.5);
                 doc.line(15, pageHeight - 15, pageWidth - 15, pageHeight - 15);
                 doc.setFontSize(8);
                 doc.setTextColor(100, 100, 100);
@@ -605,60 +595,33 @@
                 doc.text(`Página ${pageNum} de ${totalPages}`, pageWidth - 35, pageHeight - 10);
             };
 
-            // --- Página 1: Datos (Estilo Limpio a 2 Columnas) ---
             drawHeader();
-            yPos = 35;
             
-            const pNombre = document.getElementById('propNombre').value;
-            const pDNI = document.getElementById('propDNI').value;
-            const rNombre = document.getElementById('repNombre').value;
-            const rDNI = document.getElementById('repDNI').value;
-            const dom = document.getElementById('domicilio').value;
-            const dist = document.getElementById('distrito').value;
-            const cel = document.getElementById('celular').value;
-            const corr = document.getElementById('correo').value;
-            const fInsp = document.getElementById('fechaInsp').value;
-            const hInsp = document.getElementById('horaInsp').value;
-            const insp = document.getElementById('inspectorNombre').value;
+            // Ficha de Datos (4 Columnas y líneas separadoras)
+            const formValues = [
+                ["Propietario:", document.getElementById('propNombre').value, "DNI Propietario:", document.getElementById('propDNI').value],
+                ["Representante:", document.getElementById('repNombre').value, "DNI Representante:", document.getElementById('repDNI').value],
+                ["Domicilio:", document.getElementById('domicilio').value, "Distrito:", document.getElementById('distrito').value],
+                ["Celular:", document.getElementById('celular').value, "Correo:", document.getElementById('correo').value],
+                ["Fecha Inspección:", document.getElementById('fechaInsp').value, "Hora Inspección:", document.getElementById('horaInsp').value],
+                ["Inspector:", document.getElementById('inspectorNombre').value, "", ""]
+            ];
 
-            doc.setFontSize(10);
-            const lh = 5; // line height
-            const col1 = 15;
-            const col2 = 110;
+            doc.autoTable({
+                startY: 28,
+                body: formValues,
+                theme: 'plain',
+                styles: { fontSize: 9, cellPadding: 3, lineColor: [220, 220, 220], lineWidth: { bottom: 0.5 }, textColor: [30, 41, 59] },
+                columnStyles: { 
+                    0: { fontStyle: 'bold', textColor: [100, 116, 139], cellWidth: 40 }, 
+                    2: { fontStyle: 'bold', textColor: [100, 116, 139], cellWidth: 40 } 
+                },
+                didDrawPage: function (data) { drawHeader(); }
+            });
 
-            const printLabelVal = (x, y, label, val) => {
-                doc.setFont("helvetica", "bold");
-                doc.setTextColor(100, 116, 139); // Gris azulado
-                doc.text(label, x, y);
-                doc.setFont("helvetica", "normal");
-                doc.setTextColor(15, 23, 42);
-                doc.text(val || "-", x, y + lh);
-            };
+            yPos = doc.lastAutoTable.finalY + 10;
 
-            printLabelVal(col1, yPos, "Propietario:", pNombre);
-            printLabelVal(col2, yPos, "DNI Propietario:", pDNI);
-            yPos += lh * 3;
-            
-            printLabelVal(col1, yPos, "Representante:", rNombre);
-            printLabelVal(col2, yPos, "DNI Representante:", rDNI);
-            yPos += lh * 3;
-
-            printLabelVal(col1, yPos, "Domicilio:", dom);
-            printLabelVal(col2, yPos, "Distrito:", dist);
-            yPos += lh * 3;
-
-            printLabelVal(col1, yPos, "Celular:", cel);
-            printLabelVal(col2, yPos, "Correo:", corr);
-            yPos += lh * 3;
-
-            printLabelVal(col1, yPos, "Fecha Inspección:", fInsp);
-            printLabelVal(col2, yPos, "Hora Inspección:", hInsp);
-            yPos += lh * 3;
-
-            printLabelVal(col1, yPos, "Inspector:", insp);
-            yPos += lh * 4;
-
-            // --- Textos Largos ---
+            // Textos Largos (Con margin top crítico para saltos de página)
             const textSections = [
                 { title: "Descripción General del Siniestro", text: document.getElementById('descSiniestro').value },
                 { title: "Descripción del Inmueble", text: document.getElementById('descInmueble').value },
@@ -669,6 +632,7 @@
                 if (sec.text.trim() !== '') {
                     doc.autoTable({
                         startY: yPos,
+                        margin: { top: 35 }, // Mantiene espacio para el header en nuevas hojas
                         head: [[sec.title]],
                         body: [[sec.text]],
                         theme: 'plain',
@@ -680,20 +644,23 @@
                 }
             });
 
-            // --- Tabla de Dimensiones ---
+            // Tabla de Dimensiones
             const dmgData = getDamageData();
             if(dmgData.length > 0) {
                 yPos += 5;
                 doc.autoTable({
                     startY: yPos,
+                    margin: { top: 35 },
                     head: [["TABLA DE DIMENSIONES DE LOS DAÑOS"]],
                     body: [],
                     theme: 'plain',
-                    headStyles: { fontStyle: 'bold', fontSize: 11, textColor: [0, 68, 129] }
+                    headStyles: { fontStyle: 'bold', fontSize: 11, textColor: [0, 68, 129] },
+                    didDrawPage: function (data) { drawHeader(); }
                 });
                 
                 doc.autoTable({
                     startY: doc.lastAutoTable.finalY + 2,
+                    margin: { top: 35 },
                     head: [["Nro.", "Partida", "Detalle", "U.M.", "Sup.", "Obs."]],
                     body: dmgData,
                     theme: 'grid',
@@ -703,32 +670,10 @@
                     didDrawPage: function (data) { drawHeader(); }
                 });
                 yPos = doc.lastAutoTable.finalY + 10;
-                
-                // Resumen de totales solo en Completo
-                if(!isAsegurado) {
-                    const rows = document.querySelectorAll('#damageTableBody tr');
-                    const totals = {};
-                    rows.forEach(row => {
-                        const partida = row.querySelector('.dmg-partida').value.trim().toUpperCase() || 'OTROS';
-                        const um = row.querySelector('.dmg-um').value;
-                        const sup = parseFloat(row.querySelector('.dmg-sup').value) || 0;
-                        const key = `${partida} (${um})`;
-                        if(!totals[key]) totals[key] = 0;
-                        totals[key] += sup;
-                    });
-                    
-                    let summaryText = "TOTALES: ";
-                    for (const [key, total] of Object.entries(totals)) {
-                        if (total > 0) summaryText += ` | ${key.split('(')[0]}: ${total.toFixed(2)} ${key.split('(')[1].replace(')','')}`;
-                    }
-                    doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(0, 68, 129);
-                    doc.text(summaryText, 15, yPos);
-                    yPos += 10;
-                }
             }
 
-            // --- Firmas ---
-            if (yPos > pageHeight - 60) { doc.addPage(); yPos = 35; drawHeader(); }
+            // Firmas con cuadro delimitador
+            if (yPos > pageHeight - 65) { doc.addPage(); yPos = 35; drawHeader(); }
             
             doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(0,0,0);
             doc.text("Firma (Propietario / Representante):", 15, yPos);
@@ -737,24 +682,25 @@
             const firmaCanvas = document.getElementById('canvasFirma');
             const dniCanvas = document.getElementById('canvasDNI');
             
+            // Fondo blanco y borde
             doc.setFillColor(255, 255, 255);
-            doc.rect(15, yPos + 5, 80, 40, 'F');
-            doc.rect(105, yPos + 5, 80, 40, 'F');
+            doc.setDrawColor(0, 68, 129); // Borde azul corporativo
+            doc.setLineWidth(0.5);
+            doc.rect(15, yPos + 5, 80, 40, 'DF'); // D=Draw, F=Fill
+            doc.rect(105, yPos + 5, 80, 40, 'DF');
             
             doc.addImage(firmaCanvas.toDataURL('image/jpeg', 1.0), 'JPEG', 15, yPos + 5, 80, 40);
             doc.addImage(dniCanvas.toDataURL('image/jpeg', 1.0), 'JPEG', 105, yPos + 5, 80, 40);
 
-            // FINALIZAR Y MOSTRAR MODAL SI ES ASEGURADO
+            // TERMINAR AQUÍ SI ES ASEGURADO
             if (isAsegurado) {
                 const totalPages = doc.internal.getNumberOfPages();
                 for (let i = 1; i <= totalPages; i++) { doc.setPage(i); drawFooter(i, totalPages); }
-                pendingBlob = doc.output('blob');
-                pendingFileName = "Acta_Asegurado.pdf";
-                document.getElementById('exportModal').classList.remove('hidden');
+                showExportModal("pdf", doc.output('blob'), "Acta_Asegurado.pdf");
                 return;
             }
 
-            // --- Hojas de Croquis (4:3) ---
+            // Hojas de Croquis (4:3)
             for (let i = 1; i <= croquisCount; i++) {
                 const cId = 'croquis_' + i;
                 const cCanvas = document.getElementById(cId);
@@ -762,15 +708,14 @@
                     const inputVal = cCanvas.parentElement.parentElement.querySelector('input').value || `Nivel ${i}`;
                     doc.addPage();
                     drawHeader(`HOJA DE CROQUIS: ${inputVal}`);
-                    
                     doc.setFillColor(255, 255, 255);
-                    // Mantiene proporción 4:3. Ancho max 180, Alto 135
-                    doc.rect(15, 35, 180, 135, 'F');
+                    doc.setDrawColor(200, 200, 200);
+                    doc.rect(15, 35, 180, 135, 'DF');
                     doc.addImage(cCanvas.toDataURL('image/jpeg', 1.0), 'JPEG', 15, 35, 180, 135);
                 }
             }
 
-            // --- Registro Fotográfico (Fotos 6cm Alto Centradas) ---
+            // Registro Fotográfico (6cm alto centrado)
             if (photosData.length > 0) {
                 doc.addPage();
                 drawHeader("REGISTRO FOTOGRÁFICO");
@@ -788,10 +733,11 @@
                     const isRight = i % 2 !== 0;
                     if (isRight) cx = 15 + colW; else cx = 15;
 
-                    // Calcular ancho para mantener proporción
-                    // Si es horizontal suele ser 4:3, si es vertical 3:4
-                    let imgW = 80; // Default width guess
-                    doc.addImage(p.image, 'JPEG', cx + (colW - 80)/2, yPos, 80, imgH); 
+                    // Asumiendo proporción 4:3 para el ancho (80mm) para centrar en la columna
+                    const imgW = 80;
+                    const offsetX = cx + (colW - imgW) / 2;
+
+                    doc.addImage(p.image, 'JPEG', offsetX, yPos, imgW, imgH); 
                     
                     doc.setFontSize(8); doc.setFont("helvetica", "normal"); doc.setTextColor(50, 50, 50);
                     const splitDesc = doc.splitTextToSize(p.description || 'Sin descripción', colW - 10);
@@ -801,46 +747,12 @@
                 }
             }
 
-            // FINALIZAR DESCARGA DIRECTA PARA COMPLETO
             const totalPages = doc.internal.getNumberOfPages();
             for (let i = 1; i <= totalPages; i++) { doc.setPage(i); drawFooter(i, totalPages); }
-            doc.save("Reporte_Completo.pdf");
+            showExportModal("pdf", doc.output('blob'), "Reporte_Completo.pdf");
         };
 
-        // --- FUNCIONES DEL MODAL DE EXPORTACIÓN ---
-        function closeModal() {
-            document.getElementById('exportModal').classList.add('hidden');
-            pendingBlob = null;
-        }
-
-        function saveModalFile() {
-            if (pendingBlob) saveAs(pendingBlob, pendingFileName);
-            closeModal();
-        }
-
-        async function shareModalFile() {
-            if (!pendingBlob) return;
-            const file = new File([pendingBlob], pendingFileName, { type: "application/pdf" });
-            
-            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-                try {
-                    await navigator.share({
-                        files: [file],
-                        title: 'Acta de Inspección',
-                        text: 'Adjunto el acta de inspección generada.'
-                    });
-                    closeModal();
-                } catch (error) {
-                    console.log('Error compartiendo:', error);
-                    saveModalFile(); // Fallback si el usuario cancela o falla
-                }
-            } else {
-                alert("La opción de compartir nativa no está soportada en este navegador. Se descargará el archivo.");
-                saveModalFile();
-            }
-        }
-
-        // --- 7. EXPORTACIÓN ZIP ---
+        // --- 6. EXPORTACIÓN ZIP ---
         window.exportToZIP = async () => {
             if (photosData.length === 0 && croquisCount === 0) {
                 alert("No hay fotos ni croquis para exportar."); return;
@@ -858,9 +770,55 @@
                 }
             }
             zip.generateAsync({type:"blob"}).then(function(content) {
-                saveAs(content, "Fotos_Inspeccion.zip");
+                showExportModal("zip", content, "Fotos_Inspeccion.zip");
             });
         };
+
+        // --- 7. MODAL UNIVERSAL DE EXPORTACIÓN ---
+        function showExportModal(type, blob, filename) {
+            pendingBlob = blob;
+            pendingFileName = filename;
+            pendingFileType = type;
+            
+            const title = document.getElementById('modalTitle');
+            if(type === 'pdf') title.innerText = "¡PDF Generado!";
+            else title.innerText = "¡ZIP Generado!";
+            
+            document.getElementById('universalExportModal').classList.remove('hidden');
+        }
+
+        window.closeModal = () => {
+            document.getElementById('universalExportModal').classList.add('hidden');
+            pendingBlob = null;
+        }
+
+        window.saveModalFile = () => {
+            if (pendingBlob) saveAs(pendingBlob, pendingFileName);
+            closeModal();
+        }
+
+        window.shareModalFile = async () => {
+            if (!pendingBlob) return;
+            
+            const fileOptions = { type: pendingFileType === 'pdf' ? "application/pdf" : "application/zip" };
+            const file = new File([pendingBlob], pendingFileName, fileOptions);
+            
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        files: [file],
+                        title: 'Archivo FRMEC',
+                        text: 'Adjunto el archivo generado desde la inspección.'
+                    });
+                    closeModal();
+                } catch (error) {
+                    console.log('Error o cancelación al compartir:', error);
+                }
+            } else {
+                alert("Tu dispositivo o navegador no soporta la función nativa de compartir archivos de este tipo. El archivo se descargará en tu equipo.");
+                saveModalFile();
+            }
+        }
 
         // --- Inicialización ---
         setupCanvasDrawing('canvasFirma');
