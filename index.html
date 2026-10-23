@@ -10,83 +10,114 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9; }
-        .canvas-container { touch-action: none; } /* Previene scroll al dibujar con el dedo/stylus */
-        .damage-table-container { border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; }
-        .damage-table th { background-color: #0f172a; color: white; padding: 10px; font-size: 14px; }
-        .damage-table td { padding: 8px; border-bottom: 1px solid #e2e8f0; font-size: 14px; background-color: white; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; }
+        .canvas-container { touch-action: none; }
+        
+        /* Estilos minimalistas para inputs */
+        .input-clean {
+            width: 100%;
+            background-color: transparent;
+            border: none;
+            border-bottom: 1px solid #cbd5e1;
+            padding: 8px 0;
+            font-size: 14px;
+            color: #334155;
+            transition: border-color 0.2s;
+        }
+        .input-clean:focus {
+            outline: none;
+            border-bottom: 2px solid #0071b9; /* Azul Abaco Claro */
+        }
+        .label-clean {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Tabla de Daños Corporativa */
+        .damage-table-container { border-radius: 4px; overflow: hidden; border: 1px solid #e2e8f0; }
+        .damage-table th { background-color: #004481; color: white; padding: 10px; font-size: 13px; font-weight: 500; }
+        .damage-table td { padding: 8px; border-bottom: 1px solid #e2e8f0; font-size: 13px; background-color: white; }
         .damage-table tr:nth-child(even) td { background-color: #f8fafc; }
-        .summary-row td { background-color: #e0f2fe !important; font-weight: bold; color: #0369a1; }
     </style>
 </head>
 <body class="pb-20">
 
-    <!-- Encabezado Superior -->
-    <header class="bg-slate-900 text-white p-4 shadow-md sticky top-0 z-50">
+    <!-- Encabezado Corporativo -->
+    <header class="bg-[#004481] text-white p-4 shadow-md sticky top-0 z-50">
         <div class="max-w-4xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3 w-full md:w-auto justify-center md:justify-start">
-                <div class="bg-emerald-500 p-2 rounded-lg">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <div class="bg-white/10 p-2 rounded">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold leading-tight">FRMEC - Inspecciones</h1>
-                    <p class="text-xs text-slate-400">Captura, Georreferencia y Reporte</p>
+                    <h1 class="text-xl font-semibold tracking-wide">FRMEC - Inspecciones</h1>
+                    <p class="text-xs text-blue-200 font-light">Captura, Georreferencia y Reporte</p>
                 </div>
             </div>
             
             <div class="flex flex-wrap items-center justify-center gap-2">
-                <button id="btnGPS" onclick="requestGPS()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs py-1.5 px-3 rounded border border-slate-600 flex items-center transition-colors">
+                <div id="gpsIndicatorContainer" class="bg-[#003366] text-blue-200 text-xs py-1.5 px-3 rounded flex items-center">
                     <span id="gpsIndicator" class="w-2 h-2 rounded-full bg-red-500 mr-2"></span> GPS Inactivo
-                </button>
-                <button onclick="createNewReport()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs py-1.5 px-3 rounded flex items-center transition-colors">Nuevo</button>
-                <button onclick="loadReport()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs py-1.5 px-3 rounded flex items-center transition-colors">Reportes</button>
-                <button onclick="saveCurrentReport()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs py-1.5 px-3 rounded flex items-center transition-colors font-semibold">Guardar</button>
+                </div>
+                <button onclick="createNewReport()" class="bg-[#0071b9] hover:bg-[#0055a5] text-white text-xs py-1.5 px-3 rounded transition-colors">Nuevo</button>
+                <button onclick="loadReport()" class="bg-[#0071b9] hover:bg-[#0055a5] text-white text-xs py-1.5 px-3 rounded transition-colors">Reportes</button>
+                <button onclick="saveCurrentReport()" class="bg-[#0071b9] hover:bg-[#0055a5] text-white text-xs py-1.5 px-3 rounded transition-colors border border-blue-400">Guardar</button>
             </div>
         </div>
         
-        <!-- BARRA DE EXPORTACIÓN (Descarga Directa) -->
-        <div class="max-w-4xl mx-auto mt-4 pt-3 border-t border-slate-700 flex flex-wrap justify-between items-center gap-2">
-            <span class="text-sm font-semibold text-slate-300">Exportar Acta:</span>
+        <!-- Barra de Exportación -->
+        <div class="max-w-4xl mx-auto mt-4 pt-3 border-t border-[#0055a5] flex flex-wrap justify-between items-center gap-2">
+            <span class="text-sm font-light text-blue-100">Exportar Reporte:</span>
             <div class="flex gap-2">
-                <button onclick="exportToPDF(true)" class="bg-teal-500 hover:bg-teal-400 text-white text-xs py-1.5 px-3 rounded shadow font-bold">PDF Asegurado</button>
-                <button onclick="exportToPDF(false)" class="bg-rose-500 hover:bg-rose-400 text-white text-xs py-1.5 px-3 rounded shadow font-bold">PDF Completo</button>
-                <button onclick="exportToZIP()" class="bg-sky-500 hover:bg-sky-400 text-white text-xs py-1.5 px-3 rounded shadow font-bold">ZIP Fotos</button>
+                <button onclick="exportToPDF(true)" class="bg-white text-[#004481] hover:bg-gray-100 text-xs py-1.5 px-4 rounded shadow font-semibold">PDF Asegurado</button>
+                <button onclick="exportToPDF(false)" class="bg-[#0071b9] text-white hover:bg-[#0055a5] text-xs py-1.5 px-4 rounded shadow border border-blue-400 font-semibold">PDF Completo</button>
+                <button onclick="exportToZIP()" class="bg-gray-700 text-white hover:bg-gray-600 text-xs py-1.5 px-4 rounded shadow font-semibold">ZIP Fotos</button>
             </div>
         </div>
     </header>
 
     <main class="max-w-4xl mx-auto p-4 space-y-6 mt-4">
-        <!-- SECCIÓN 1: DATOS DE INSPECCIÓN -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-            <h2 class="text-lg font-bold text-slate-800 border-b pb-2 mb-4 border-emerald-500 inline-block">FICHA DE DATOS DE INSPECCIÓN</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="inspectionForm">
-                <div><label class="block text-xs font-semibold text-slate-600 mb-1">Nombres y Apellidos del Propietario</label><input type="text" id="propNombre" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-emerald-200 outline-none"></div>
-                <div><label class="block text-xs font-semibold text-slate-600 mb-1">Nro. de DNI del Propietario</label><input type="number" id="propDNI" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-emerald-200 outline-none"></div>
-                <div><label class="block text-xs font-semibold text-slate-600 mb-1">Nombres y Apellidos del Representante</label><input type="text" id="repNombre" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-emerald-200 outline-none"></div>
-                <div><label class="block text-xs font-semibold text-slate-600 mb-1">Nro. de DNI del Representante</label><input type="number" id="repDNI" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-emerald-200 outline-none"></div>
-                <div class="md:col-span-2"><label class="block text-xs font-semibold text-slate-600 mb-1">Domicilio</label><input type="text" id="domicilio" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-emerald-200 outline-none"></div>
-                <div><label class="block text-xs font-semibold text-slate-600 mb-1">Distrito</label><input type="text" id="distrito" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-emerald-200 outline-none"></div>
-                <div><label class="block text-xs font-semibold text-slate-600 mb-1">Nro. de Celular</label><input type="tel" id="celular" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-emerald-200 outline-none"></div>
-                <div><label class="block text-xs font-semibold text-slate-600 mb-1">Correo</label><input type="email" id="correo" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-emerald-200 outline-none"></div>
-                <div><label class="block text-xs font-semibold text-slate-600 mb-1">Fecha de Inspección</label><input type="date" id="fechaInsp" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-emerald-200 outline-none"></div>
-                <div><label class="block text-xs font-semibold text-slate-600 mb-1">Hora de Inspección</label><input type="time" id="horaInsp" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-emerald-200 outline-none"></div>
-                <div><label class="block text-xs font-semibold text-slate-600 mb-1">Nombre del Inspector</label><input type="text" id="inspectorNombre" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-emerald-200 outline-none"></div>
+        
+        <!-- SECCIÓN 1: DATOS DE INSPECCIÓN (Diseño Minimalista) -->
+        <div class="bg-white shadow-sm border-t-4 border-[#0071b9] p-6 rounded-b-lg">
+            <div class="mb-6 flex items-center gap-2">
+                <div class="w-4 h-4 rounded-full border-2 border-[#0071b9]"></div>
+                <h2 class="text-xl font-normal text-[#004481]">Ficha de Datos de Inspección</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4" id="inspectionForm">
+                <div><label class="label-clean">Propietario</label><input type="text" id="propNombre" class="input-clean"></div>
+                <div><label class="label-clean">DNI Propietario</label><input type="number" id="propDNI" class="input-clean"></div>
+                <div><label class="label-clean">Representante</label><input type="text" id="repNombre" class="input-clean"></div>
+                <div><label class="label-clean">DNI Representante</label><input type="number" id="repDNI" class="input-clean"></div>
+                <div class="md:col-span-2"><label class="label-clean">Domicilio</label><input type="text" id="domicilio" class="input-clean"></div>
+                <div><label class="label-clean">Distrito</label><input type="text" id="distrito" class="input-clean"></div>
+                <div><label class="label-clean">Celular</label><input type="tel" id="celular" class="input-clean"></div>
+                <div><label class="label-clean">Correo</label><input type="email" id="correo" class="input-clean"></div>
+                <div><label class="label-clean">Fecha Inspección</label><input type="date" id="fechaInsp" class="input-clean"></div>
+                <div><label class="label-clean">Hora Inspección</label><input type="time" id="horaInsp" class="input-clean"></div>
+                <div><label class="label-clean">Inspector</label><input type="text" id="inspectorNombre" class="input-clean"></div>
             </div>
         </div>
 
         <!-- SECCIÓN 2: DESCRIPCIONES -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-4">
-            <h2 class="text-lg font-bold text-slate-800 border-b pb-2 mb-4 border-emerald-500 inline-block">DETALLES DEL SINIESTRO</h2>
-            <div><label class="block text-sm font-semibold text-slate-700 mb-1">Descripción General del Siniestro</label><textarea id="descSiniestro" rows="3" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-emerald-200 outline-none"></textarea></div>
-            <div><label class="block text-sm font-semibold text-slate-700 mb-1">Descripción del Inmueble</label><textarea id="descInmueble" rows="3" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-emerald-200 outline-none"></textarea></div>
-            <div><label class="block text-sm font-semibold text-slate-700 mb-1">Descripción de Daños</label><textarea id="descDanos" rows="4" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-emerald-200 outline-none"></textarea></div>
+        <div class="bg-white shadow-sm border border-slate-200 p-6 rounded-lg space-y-5">
+            <h2 class="text-lg font-normal text-[#004481] border-b border-gray-200 pb-2">Detalles del Siniestro</h2>
+            <div><label class="label-clean">Descripción General del Siniestro</label><textarea id="descSiniestro" rows="2" class="input-clean"></textarea></div>
+            <div><label class="label-clean">Descripción del Inmueble</label><textarea id="descInmueble" rows="2" class="input-clean"></textarea></div>
+            <div><label class="label-clean">Descripción de Daños</label><textarea id="descDanos" rows="3" class="input-clean"></textarea></div>
         </div>
 
         <!-- SECCIÓN 3: TABLA DE DIMENSIONES -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-            <div class="flex justify-between items-center mb-4 border-b pb-2 border-emerald-500">
-                <h2 class="text-lg font-bold text-slate-800">DIMENSIONES DE LOS DAÑOS</h2>
-                <button onclick="addDamageRow()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1 text-sm rounded font-semibold">+ Añadir Fila</button>
+        <div class="bg-white shadow-sm border border-slate-200 p-6 rounded-lg">
+            <div class="flex justify-between items-center mb-4 border-b border-gray-200 pb-2">
+                <h2 class="text-lg font-normal text-[#004481]">Dimensiones de los Daños</h2>
+                <button onclick="addDamageRow()" class="text-[#0071b9] hover:text-[#004481] text-sm font-semibold">+ Añadir Fila</button>
             </div>
             <div class="overflow-x-auto damage-table-container">
                 <table class="w-full text-left border-collapse damage-table" id="damageTable">
@@ -106,34 +137,34 @@
                     </tbody>
                 </table>
             </div>
-            <div id="damageSummary" class="mt-4 p-3 bg-slate-50 border rounded-lg text-sm grid grid-cols-2 md:grid-cols-4 gap-2">
+            <div id="damageSummary" class="mt-4 p-4 bg-[#f8fafc] border border-blue-100 rounded-lg text-sm grid grid-cols-2 md:grid-cols-4 gap-3">
                 <!-- Resumen por agrupaciones -->
             </div>
         </div>
 
         <!-- SECCIÓN 4: FIRMAS -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white shadow-sm border border-slate-200 p-6 rounded-lg grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-                <label class="block text-sm font-bold text-slate-800 mb-2">Firma (Propietario / Representante):</label>
-                <div class="border-2 border-dashed border-slate-300 rounded bg-slate-50 relative h-40">
+                <label class="block text-sm font-semibold text-[#004481] mb-2">Firma (Propietario / Representante):</label>
+                <div class="border border-slate-300 rounded bg-white relative h-40">
                     <canvas id="canvasFirma" class="absolute inset-0 w-full h-full canvas-container"></canvas>
-                    <button onclick="clearCanvas('canvasFirma')" class="absolute top-2 right-2 bg-white/80 p-1 rounded shadow text-xs hover:bg-slate-200">Borrar</button>
+                    <button onclick="clearCanvas('canvasFirma')" class="absolute top-2 right-2 bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs hover:bg-gray-200">Borrar</button>
                 </div>
             </div>
             <div>
-                <label class="block text-sm font-bold text-slate-800 mb-2">DNI:</label>
-                <div class="border-2 border-dashed border-slate-300 rounded bg-slate-50 relative h-40">
+                <label class="block text-sm font-semibold text-[#004481] mb-2">DNI:</label>
+                <div class="border border-slate-300 rounded bg-white relative h-40">
                     <canvas id="canvasDNI" class="absolute inset-0 w-full h-full canvas-container"></canvas>
-                    <button onclick="clearCanvas('canvasDNI')" class="absolute top-2 right-2 bg-white/80 p-1 rounded shadow text-xs hover:bg-slate-200">Borrar</button>
+                    <button onclick="clearCanvas('canvasDNI')" class="absolute top-2 right-2 bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs hover:bg-gray-200">Borrar</button>
                 </div>
             </div>
         </div>
 
         <!-- SECCIÓN 5: CROQUIS -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-            <div class="flex justify-between items-center mb-4 border-b pb-2 border-emerald-500">
-                <h2 class="text-lg font-bold text-slate-800">HOJAS DE CROQUIS</h2>
-                <button onclick="addCroquisSheet()" class="bg-slate-800 hover:bg-slate-700 text-white px-3 py-1 text-sm rounded font-semibold shadow">+ Añadir Hoja</button>
+        <div class="bg-white shadow-sm border border-slate-200 p-6 rounded-lg">
+            <div class="flex justify-between items-center mb-4 border-b border-gray-200 pb-2">
+                <h2 class="text-lg font-normal text-[#004481]">Hojas de Croquis</h2>
+                <button onclick="addCroquisSheet()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 text-sm rounded font-semibold">+ Añadir Hoja</button>
             </div>
             <div id="croquisContainer" class="space-y-6">
                 <!-- Hojas de croquis se insertarán aquí -->
@@ -141,23 +172,36 @@
         </div>
 
         <!-- SECCIÓN 6: FOTOS -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-            <h2 class="text-lg font-bold text-slate-800 border-b pb-2 mb-4 border-emerald-500 inline-block">REGISTRO FOTOGRÁFICO</h2>
-            <div class="flex gap-2 mb-4">
-                <label class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-center py-3 rounded cursor-pointer font-bold shadow flex justify-center items-center gap-2">
-                    <span>📷 Tomar Foto</span>
+        <div class="bg-white shadow-sm border border-slate-200 p-6 rounded-lg">
+            <h2 class="text-lg font-normal text-[#004481] border-b border-gray-200 pb-2 mb-4">Registro Fotográfico</h2>
+            <div class="flex gap-4 mb-6">
+                <label class="flex-1 bg-[#0071b9] hover:bg-[#0055a5] text-white text-center py-3 rounded cursor-pointer transition-colors text-sm font-semibold">
+                    Tomar Foto
                     <input type="file" accept="image/*" capture="environment" id="cameraInput" class="hidden">
                 </label>
-                <label class="flex-1 bg-slate-600 hover:bg-slate-500 text-white text-center py-3 rounded cursor-pointer font-bold shadow flex justify-center items-center gap-2">
-                    <span>🖼️ Galería</span>
+                <label class="flex-1 bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 text-center py-3 rounded cursor-pointer transition-colors text-sm font-semibold">
+                    Subir de Galería
                     <input type="file" accept="image/*" multiple id="galleryInput" class="hidden">
                 </label>
             </div>
-            <div id="photoList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            <div id="photoList" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
         </div>
     </main>
 
-    <!-- Canvas Oculto para Marcas de Agua -->
+    <!-- MODAL DE EXPORTACIÓN (Para PDF Asegurado) -->
+    <div id="exportModal" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full">
+            <h3 class="text-lg font-bold text-[#004481] mb-2">¡Reporte Generado!</h3>
+            <p class="text-sm text-gray-600 mb-6">El PDF Asegurado está listo. ¿Qué deseas hacer con el archivo?</p>
+            <div class="flex flex-col gap-3">
+                <button onclick="saveModalFile()" class="w-full bg-[#0071b9] hover:bg-[#0055a5] text-white py-2.5 rounded font-semibold transition-colors">Guardar en Equipo</button>
+                <button onclick="shareModalFile()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2.5 rounded font-semibold transition-colors">Compartir (WhatsApp / Drive)</button>
+                <button onclick="closeModal()" class="w-full text-gray-500 py-2 mt-2 text-sm hover:text-gray-800">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Canvas Oculto -->
     <canvas id="watermarkCanvas" style="display: none;"></canvas>
 
     <script>
@@ -166,42 +210,47 @@
         let croquisCount = 0;
         let canvases = {};
         
-        // --- GEOLOCALIZACIÓN ---
+        let pendingBlob = null;
+        let pendingFileName = "";
+        
+        // --- 1. GEOLOCALIZACIÓN AUTOMÁTICA ---
         function requestGPS() {
             if ("geolocation" in navigator) {
                 document.getElementById('gpsIndicator').className = "w-2 h-2 rounded-full bg-yellow-500 mr-2";
+                document.getElementById('gpsIndicatorContainer').innerHTML = `<span class="w-2 h-2 rounded-full bg-yellow-500 mr-2"></span> Buscando GPS...`;
+                
                 navigator.geolocation.watchPosition(
                     (position) => {
                         currentLat = position.coords.latitude;
                         currentLon = position.coords.longitude;
                         currentAcc = position.coords.accuracy;
-                        document.getElementById('gpsIndicator').className = "w-2 h-2 rounded-full bg-green-500 mr-2 shadow-[0_0_8px_#22c55e]";
-                        document.getElementById('btnGPS').innerHTML = `<span id="gpsIndicator" class="w-2 h-2 rounded-full bg-green-500 mr-2 shadow-[0_0_8px_#22c55e]"></span> GPS Activo`;
+                        document.getElementById('gpsIndicatorContainer').innerHTML = `<span class="w-2 h-2 rounded-full bg-green-400 mr-2 shadow-[0_0_8px_#4ade80]"></span> GPS Activo`;
                     },
                     (error) => {
-                        alert("Error de GPS: " + error.message + ". Asegúrate de activar la Ubicación.");
-                        document.getElementById('gpsIndicator').className = "w-2 h-2 rounded-full bg-red-500 mr-2";
+                        console.warn("GPS Denegado o sin señal.");
+                        document.getElementById('gpsIndicatorContainer').innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500 mr-2"></span> GPS Inactivo`;
                     },
                     { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
                 );
-            } else {
-                alert("Tu navegador no soporta GPS.");
             }
         }
 
-        // --- MARCA DE AGUA EN FOTOS ---
+        // Solicitar GPS automáticamente al cargar
+        window.onload = requestGPS;
+
+        // --- 2. MARCA DE AGUA EN FOTOS (Diseño Requerido) ---
         function formatDMS(deg, isLat) {
             let d = Math.abs(deg);
             let degrees = Math.floor(d);
             let minutes = Math.floor((d - degrees) * 60);
-            let seconds = ((d - degrees - minutes/60) * 3600).toFixed(2);
+            let seconds = ((d - degrees - minutes/60) * 3600).toFixed(0);
             let dir = isLat ? (deg >= 0 ? "N" : "S") : (deg >= 0 ? "E" : "O");
             return `${degrees}°${minutes}'${seconds}" ${dir}`;
         }
 
         async function processImageFile(file) {
             if (!currentLat) {
-                alert("Esperando señal GPS. Por favor activa el GPS primero.");
+                alert("Esperando señal GPS. Asegúrate de haber dado permisos de ubicación.");
                 return;
             }
             return new Promise((resolve) => {
@@ -212,50 +261,59 @@
                         const canvas = document.getElementById('watermarkCanvas');
                         const ctx = canvas.getContext('2d');
                         
-                        // Límite de 1600px para evitar cierres en móviles
+                        // Limitar resolución a 1600px
                         let MAX_WIDTH = 1600;
                         let scale = 1;
                         if (img.width > MAX_WIDTH) scale = MAX_WIDTH / img.width;
                         
                         canvas.width = img.width * scale;
                         canvas.height = img.height * scale;
-                        
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                         
                         const date = new Date();
-                        const dateStr = date.toLocaleDateString('es-PE', {day:'2-digit', month:'short', year:'numeric'});
+                        const dateStr = date.toLocaleDateString('es-PE', {day:'2-digit', month:'2-digit', year:'numeric'}).replace(/\//g, ':');
                         const timeStr = date.toLocaleTimeString('es-PE', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
-                        const latDMS = formatDMS(currentLat, true);
-                        const lonDMS = formatDMS(currentLon, false);
-                        const accStr = `±${Math.round(currentAcc)}m`;
-
-                        const bandHeight = canvas.height * 0.12;
-                        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-                        ctx.fillRect(0, canvas.height - bandHeight, canvas.width, bandHeight);
-
-                        ctx.fillStyle = '#10b981';
-                        ctx.fillRect(canvas.width - (canvas.width * 0.25), canvas.height - bandHeight, canvas.width * 0.25, canvas.height * 0.03);
-                        ctx.fillStyle = '#ffffff';
-                        const fontTitle = Math.floor(canvas.height * 0.02);
+                        
+                        // Etiqueta superior derecha "GEOPHOTO VERIFIED"
+                        const topBoxW = canvas.width * 0.35;
+                        const topBoxH = canvas.height * 0.05;
+                        ctx.fillStyle = 'black';
+                        ctx.fillRect(canvas.width - topBoxW, 0, topBoxW, topBoxH);
+                        
+                        const fontTitle = Math.floor(canvas.height * 0.025);
                         ctx.font = `bold ${fontTitle}px Arial`;
+                        ctx.fillStyle = '#4ade80'; // Verde brillante
                         ctx.textAlign = 'center';
-                        ctx.fillText('GEOPHOTO VERIFIED', canvas.width - (canvas.width * 0.125), canvas.height - bandHeight + (canvas.height * 0.022));
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText('GEOPHOTO VERIFIED', canvas.width - (topBoxW/2), topBoxH/2);
+
+                        // Banda inferior translúcida
+                        const bandHeight = canvas.height * 0.15;
+                        const startY = canvas.height - bandHeight;
+                        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)'; // Dark slate
+                        ctx.fillRect(0, startY, canvas.width, bandHeight);
+                        
+                        // Línea verde superior de la banda inferior
+                        ctx.fillStyle = '#4ade80';
+                        ctx.fillRect(0, startY, canvas.width, canvas.height * 0.005);
 
                         ctx.textAlign = 'left';
-                        const fontText = Math.floor(canvas.height * 0.03);
-                        ctx.font = `${fontText}px Arial`;
-                        ctx.fillStyle = 'white';
+                        const fontText = Math.floor(canvas.height * 0.035);
+                        ctx.font = `bold ${fontText}px Arial`;
                         
                         const padX = canvas.width * 0.02;
-                        const startY = canvas.height - bandHeight + (canvas.height * 0.045);
-                        const lineH = canvas.height * 0.035;
+                        const textY1 = startY + (bandHeight * 0.35);
+                        const textY2 = startY + (bandHeight * 0.65);
+                        const textY3 = startY + (bandHeight * 0.95);
 
-                        ctx.fillText(`Fecha: ${dateStr} ${timeStr}`, padX, startY);
-                        ctx.fillText(`GPS: ${currentLat.toFixed(6)}, ${currentLon.toFixed(6)} [${accStr}]`, padX, startY + lineH);
-                        ctx.fillText(`DMS: Lat: ${latDMS}, Lon: ${lonDMS}`, padX, startY + (lineH * 2));
+                        ctx.fillStyle = '#fbbf24'; // Amarillo
+                        ctx.fillText(`FECHA / HORA: ${dateStr} ${timeStr}`, padX, textY1);
+                        
+                        ctx.fillStyle = 'white';
+                        ctx.fillText(`COORD: ${currentLat.toFixed(6)}°, ${currentLon.toFixed(6)}° (±${Math.round(currentAcc)}m)`, padX, textY2);
+                        ctx.fillText(`DMS: ${formatDMS(currentLat, true)} | ${formatDMS(currentLon, false)}`, padX, textY3);
 
                         const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-                        
                         const photoId = 'photo_' + Date.now() + Math.floor(Math.random() * 1000);
                         photosData.push({ id: photoId, image: dataUrl, description: '' });
                         renderPhotos();
@@ -274,9 +332,7 @@
 
         document.getElementById('galleryInput').addEventListener('change', async (e) => {
             if(e.target.files) {
-                for(let i=0; i<e.target.files.length; i++) {
-                    await processImageFile(e.target.files[i]);
-                }
+                for(let i=0; i<e.target.files.length; i++) await processImageFile(e.target.files[i]);
             }
             e.target.value = '';
         });
@@ -286,11 +342,11 @@
             list.innerHTML = '';
             photosData.forEach((p) => {
                 const div = document.createElement('div');
-                div.className = "border border-slate-200 rounded p-2 bg-slate-50 flex flex-col gap-2 relative";
+                div.className = "border border-gray-200 rounded p-2 bg-white shadow-sm flex flex-col gap-2 relative";
                 div.innerHTML = `
                     <button onclick="removePhoto('${p.id}')" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-sm shadow">X</button>
-                    <img src="${p.image}" class="w-full h-48 object-contain bg-black rounded" />
-                    <textarea placeholder="Descripción / Notas de campo..." class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-emerald-200 outline-none" rows="2" onchange="updateDesc('${p.id}', this.value)">${p.description}</textarea>
+                    <img src="${p.image}" class="w-full h-48 object-contain bg-slate-900 rounded" />
+                    <textarea placeholder="Descripción / Notas..." class="input-clean text-xs" rows="2" onchange="updateDesc('${p.id}', this.value)">${p.description}</textarea>
                 `;
                 list.appendChild(div);
             });
@@ -299,20 +355,19 @@
         window.removePhoto = (id) => { photosData = photosData.filter(p => p.id !== id); renderPhotos(); };
         window.updateDesc = (id, val) => { const p = photosData.find(x => x.id === id); if(p) p.description = val; };
 
-        // --- DIBUJO EN CANVAS (FIRMA, DNI, CROQUIS) ---
+        // --- 3. DIBUJO EN CANVAS (FIRMA, DNI, CROQUIS) ---
         function setupCanvasDrawing(canvasId) {
             const canvas = document.getElementById(canvasId);
             if(!canvas) return;
             const ctx = canvas.getContext('2d');
             
-            // Fondo blanco estricto
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             let isDrawing = false;
-            let lastX = 0; let lastY = 0;
+            let lastX = 0, lastY = 0;
+            let color = '#004481'; // Color por defecto corporativo
             
-            let color = '#000000';
             if(canvases[canvasId] && canvases[canvasId].color) color = canvases[canvasId].color;
             ctx.strokeStyle = color;
             ctx.lineWidth = 2;
@@ -365,7 +420,7 @@
             canvas.addEventListener('pointerout', stopDraw);
             
             if(!canvases[canvasId]) {
-                canvases[canvasId] = { ctx: ctx, history: [], color: '#000000' };
+                canvases[canvasId] = { ctx: ctx, history: [], color: color };
             } else {
                 canvases[canvasId].ctx = ctx;
             }
@@ -413,7 +468,7 @@
                     img.onload = function() {
                         const canvas = document.getElementById(id);
                         const ctx = canvas.getContext('2d');
-                        saveCanvasState(id); 
+                        saveCanvasState(id);
                         ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
                         let scale = Math.min(canvas.width / img.width, canvas.height / img.height);
                         let x = (canvas.width / 2) - (img.width / 2) * scale;
@@ -427,32 +482,29 @@
             inputEl.value = '';
         };
 
-        // --- SISTEMA DE CROQUIS ---
         window.addCroquisSheet = () => {
             croquisCount++;
             const id = 'croquis_' + croquisCount;
             const container = document.getElementById('croquisContainer');
             
             const div = document.createElement('div');
-            div.className = "border border-slate-200 rounded-lg p-3 bg-slate-50";
+            div.className = "border border-gray-200 rounded p-3 bg-white";
             div.innerHTML = `
-                <div class="flex justify-between items-center mb-2">
-                    <input type="text" placeholder="Nivel / Ambiente (Ej: Piso 1)" class="font-bold text-slate-700 bg-transparent border-b border-slate-300 outline-none w-1/2">
+                <div class="flex flex-wrap justify-between items-center mb-2 gap-2">
+                    <input type="text" placeholder="Nivel / Ambiente (Ej: Piso 1)" class="input-clean w-1/2">
                     <div class="flex gap-2">
-                        <div class="flex gap-1 bg-white p-1 rounded shadow-sm border">
-                            <button onclick="changeCanvasColor('${id}', '#000000')" class="w-6 h-6 rounded-full bg-black border-2 border-transparent hover:border-slate-400"></button>
-                            <button onclick="changeCanvasColor('${id}', '#ef4444')" class="w-6 h-6 rounded-full bg-red-500 border-2 border-transparent hover:border-slate-400"></button>
-                            <button onclick="changeCanvasColor('${id}', '#3b82f6')" class="w-6 h-6 rounded-full bg-blue-500 border-2 border-transparent hover:border-slate-400"></button>
+                        <div class="flex gap-1 bg-gray-50 p-1 rounded border">
+                            <button onclick="changeCanvasColor('${id}', '#004481')" class="w-5 h-5 rounded-full bg-[#004481] border border-transparent"></button>
+                            <button onclick="changeCanvasColor('${id}', '#ef4444')" class="w-5 h-5 rounded-full bg-red-500 border border-transparent"></button>
                         </div>
-                        <button onclick="undoCanvas('${id}')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1 rounded text-xs">↩ Deshacer</button>
-                        <button onclick="clearCanvas('${id}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded text-xs">Borrar</button>
-                        <label class="bg-teal-100 hover:bg-teal-200 text-teal-800 px-2 py-1 rounded text-xs cursor-pointer flex items-center">
-                            📸 Fondo
+                        <button onclick="undoCanvas('${id}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs">Deshacer</button>
+                        <label class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs cursor-pointer">
+                            Fondo
                             <input type="file" accept="image/*" class="hidden" onchange="setCanvasBackground('${id}', this)">
                         </label>
                     </div>
                 </div>
-                <div class="border-2 border-slate-300 bg-white relative w-full" style="aspect-ratio: 4/3;">
+                <div class="border border-gray-300 bg-white relative w-full" style="aspect-ratio: 4/3;">
                     <canvas id="${id}" class="absolute inset-0 w-full h-full canvas-container"></canvas>
                 </div>
             `;
@@ -460,26 +512,26 @@
             setTimeout(() => setupCanvasDrawing(id), 50);
         };
 
-        // --- TABLA DE DIMENSIONES DE DAÑOS ---
+        // --- 4. TABLA DE DIMENSIONES ---
         let damageRowCount = 0;
         window.addDamageRow = () => {
             damageRowCount++;
             const tbody = document.getElementById('damageTableBody');
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td class="text-center font-semibold text-slate-500">${damageRowCount}</td>
-                <td><input type="text" class="w-full bg-transparent outline-none border-b border-dashed focus:border-emerald-500 dmg-partida" placeholder="Ej: Paredes"></td>
-                <td><input type="text" class="w-full bg-transparent outline-none border-b border-dashed focus:border-emerald-500 dmg-detalle" placeholder="Descripción..."></td>
+                <td class="text-center text-gray-500">${damageRowCount}</td>
+                <td><input type="text" class="w-full bg-transparent outline-none border-b border-dashed border-gray-300 focus:border-[#0071b9] dmg-partida"></td>
+                <td><input type="text" class="w-full bg-transparent outline-none border-b border-dashed border-gray-300 focus:border-[#0071b9] dmg-detalle"></td>
                 <td>
-                    <select class="w-full bg-transparent outline-none border-b border-dashed dmg-um" onchange="updateTotals()">
+                    <select class="w-full bg-transparent outline-none border-b border-dashed border-gray-300 dmg-um" onchange="updateTotals()">
                         <option value="m2">m2</option><option value="ml">ml</option>
                         <option value="m3">m3</option><option value="und">und</option>
                         <option value="glb">glb</option><option value="otro">otro</option>
                     </select>
                 </td>
-                <td><input type="number" step="0.01" class="w-full bg-transparent outline-none border-b border-dashed text-center dmg-sup" onchange="updateTotals()" onkeyup="updateTotals()"></td>
-                <td><input type="text" class="w-full bg-transparent outline-none border-b border-dashed"></td>
-                <td class="text-center"><button onclick="this.parentElement.parentElement.remove(); updateTotals();" class="text-red-500 hover:text-red-700 font-bold">X</button></td>
+                <td><input type="number" step="0.01" class="w-full bg-transparent outline-none border-b border-dashed border-gray-300 text-center dmg-sup" onchange="updateTotals()" onkeyup="updateTotals()"></td>
+                <td><input type="text" class="w-full bg-transparent outline-none border-b border-dashed border-gray-300"></td>
+                <td class="text-center"><button onclick="this.parentElement.parentElement.remove(); updateTotals();" class="text-red-500 hover:text-red-700 font-bold text-xs">X</button></td>
             `;
             tbody.appendChild(tr);
         };
@@ -501,7 +553,7 @@
             summaryDiv.innerHTML = '';
             for (const [key, total] of Object.entries(totals)) {
                 if (total > 0) {
-                    summaryDiv.innerHTML += `<div class="bg-white px-2 py-1 border rounded shadow-sm"><span class="text-slate-500 text-xs block">${key.split('(')[0]}</span><span class="font-bold text-emerald-600">${total.toFixed(2)} ${key.split('(')[1].replace(')','')}</span></div>`;
+                    summaryDiv.innerHTML += `<div class="bg-white px-3 py-2 border border-gray-200 rounded shadow-sm"><span class="text-gray-500 text-xs block">${key.split('(')[0]}</span><span class="font-bold text-[#004481]">${total.toFixed(2)} ${key.split('(')[1].replace(')','')}</span></div>`;
                 }
             }
         };
@@ -522,7 +574,7 @@
             return data;
         }
 
-        // --- EXPORTACIÓN PDF ---
+        // --- 5. EXPORTACIÓN PDF ---
         window.exportToPDF = async (isAsegurado) => {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ format: 'a4' });
@@ -530,13 +582,16 @@
             const pageHeight = doc.internal.pageSize.getHeight();
             let yPos = 20;
 
-            const drawHeader = (title = "ACTA DE INSPECCIÓN") => {
-                doc.setFillColor(15, 23, 42); // bg-slate-900
-                doc.rect(0, 0, pageWidth, 20, 'F');
-                doc.setTextColor(255, 255, 255);
-                doc.setFontSize(12);
+            const drawHeader = (title = "FICHA DE DATOS DE INSPECCIÓN") => {
                 doc.setFont("helvetica", "bold");
-                doc.text(title, 15, 13);
+                doc.setFontSize(16);
+                doc.setTextColor(0, 68, 129); // #004481
+                doc.text(title, 15, 20);
+                
+                // Línea verde corporativa
+                doc.setDrawColor(74, 222, 128); // verde
+                doc.setLineWidth(1);
+                doc.line(15, 23, 110, 23);
                 doc.setTextColor(0, 0, 0);
             };
 
@@ -550,35 +605,60 @@
                 doc.text(`Página ${pageNum} de ${totalPages}`, pageWidth - 35, pageHeight - 10);
             };
 
-            // Página 1: Datos
+            // --- Página 1: Datos (Estilo Limpio a 2 Columnas) ---
             drawHeader();
+            yPos = 35;
             
-            const formValues = [
-                ["Propietario", document.getElementById('propNombre').value],
-                ["DNI Propietario", document.getElementById('propDNI').value],
-                ["Representante", document.getElementById('repNombre').value],
-                ["DNI Representante", document.getElementById('repDNI').value],
-                ["Domicilio", document.getElementById('domicilio').value],
-                ["Distrito", document.getElementById('distrito').value],
-                ["Celular", document.getElementById('celular').value],
-                ["Correo", document.getElementById('correo').value],
-                ["Fecha", document.getElementById('fechaInsp').value],
-                ["Hora", document.getElementById('horaInsp').value],
-                ["Inspector", document.getElementById('inspectorNombre').value]
-            ];
+            const pNombre = document.getElementById('propNombre').value;
+            const pDNI = document.getElementById('propDNI').value;
+            const rNombre = document.getElementById('repNombre').value;
+            const rDNI = document.getElementById('repDNI').value;
+            const dom = document.getElementById('domicilio').value;
+            const dist = document.getElementById('distrito').value;
+            const cel = document.getElementById('celular').value;
+            const corr = document.getElementById('correo').value;
+            const fInsp = document.getElementById('fechaInsp').value;
+            const hInsp = document.getElementById('horaInsp').value;
+            const insp = document.getElementById('inspectorNombre').value;
 
-            doc.autoTable({
-                startY: 25,
-                body: formValues,
-                theme: 'plain',
-                styles: { fontSize: 9, cellPadding: 2 },
-                columnStyles: { 0: { fontStyle: 'bold', cellWidth: 50 } },
-                didDrawPage: function (data) { drawHeader(); }
-            });
+            doc.setFontSize(10);
+            const lh = 5; // line height
+            const col1 = 15;
+            const col2 = 110;
 
-            yPos = doc.lastAutoTable.finalY + 10;
+            const printLabelVal = (x, y, label, val) => {
+                doc.setFont("helvetica", "bold");
+                doc.setTextColor(100, 116, 139); // Gris azulado
+                doc.text(label, x, y);
+                doc.setFont("helvetica", "normal");
+                doc.setTextColor(15, 23, 42);
+                doc.text(val || "-", x, y + lh);
+            };
 
-            // Textos descriptivos (Paginación Automática)
+            printLabelVal(col1, yPos, "Propietario:", pNombre);
+            printLabelVal(col2, yPos, "DNI Propietario:", pDNI);
+            yPos += lh * 3;
+            
+            printLabelVal(col1, yPos, "Representante:", rNombre);
+            printLabelVal(col2, yPos, "DNI Representante:", rDNI);
+            yPos += lh * 3;
+
+            printLabelVal(col1, yPos, "Domicilio:", dom);
+            printLabelVal(col2, yPos, "Distrito:", dist);
+            yPos += lh * 3;
+
+            printLabelVal(col1, yPos, "Celular:", cel);
+            printLabelVal(col2, yPos, "Correo:", corr);
+            yPos += lh * 3;
+
+            printLabelVal(col1, yPos, "Fecha Inspección:", fInsp);
+            printLabelVal(col2, yPos, "Hora Inspección:", hInsp);
+            yPos += lh * 3;
+
+            printLabelVal(col1, yPos, "Inspector:", insp);
+            yPos += lh * 4;
+
+            // --- Textos Largos ---
             const textSections = [
                 { title: "Descripción General del Siniestro", text: document.getElementById('descSiniestro').value },
                 { title: "Descripción del Inmueble", text: document.getElementById('descInmueble').value },
@@ -592,7 +672,7 @@
                         head: [[sec.title]],
                         body: [[sec.text]],
                         theme: 'plain',
-                        headStyles: { fontStyle: 'bold', fontSize: 10, textColor: [15, 23, 42], cellPadding: {top: 5, bottom: 2} },
+                        headStyles: { fontStyle: 'bold', fontSize: 11, textColor: [0, 68, 129], cellPadding: {top: 5, bottom: 2} },
                         bodyStyles: { fontSize: 9, textColor: [50, 50, 50], cellPadding: 2 },
                         didDrawPage: function (data) { drawHeader(); }
                     });
@@ -600,7 +680,7 @@
                 }
             });
 
-            // Tabla de Dimensiones (Esquinas redondeadas simuladas)
+            // --- Tabla de Dimensiones ---
             const dmgData = getDamageData();
             if(dmgData.length > 0) {
                 yPos += 5;
@@ -609,7 +689,7 @@
                     head: [["TABLA DE DIMENSIONES DE LOS DAÑOS"]],
                     body: [],
                     theme: 'plain',
-                    headStyles: { fontStyle: 'bold', fontSize: 10, textColor: [15, 23, 42] }
+                    headStyles: { fontStyle: 'bold', fontSize: 11, textColor: [0, 68, 129] }
                 });
                 
                 doc.autoTable({
@@ -617,18 +697,40 @@
                     head: [["Nro.", "Partida", "Detalle", "U.M.", "Sup.", "Obs."]],
                     body: dmgData,
                     theme: 'grid',
-                    headStyles: { fillColor: [15, 23, 42], textColor: 255, fontSize: 8 },
+                    headStyles: { fillColor: [0, 68, 129], textColor: 255, fontSize: 8 },
                     bodyStyles: { fontSize: 8 },
                     alternateRowStyles: { fillColor: [248, 250, 252] },
                     didDrawPage: function (data) { drawHeader(); }
                 });
                 yPos = doc.lastAutoTable.finalY + 10;
+                
+                // Resumen de totales solo en Completo
+                if(!isAsegurado) {
+                    const rows = document.querySelectorAll('#damageTableBody tr');
+                    const totals = {};
+                    rows.forEach(row => {
+                        const partida = row.querySelector('.dmg-partida').value.trim().toUpperCase() || 'OTROS';
+                        const um = row.querySelector('.dmg-um').value;
+                        const sup = parseFloat(row.querySelector('.dmg-sup').value) || 0;
+                        const key = `${partida} (${um})`;
+                        if(!totals[key]) totals[key] = 0;
+                        totals[key] += sup;
+                    });
+                    
+                    let summaryText = "TOTALES: ";
+                    for (const [key, total] of Object.entries(totals)) {
+                        if (total > 0) summaryText += ` | ${key.split('(')[0]}: ${total.toFixed(2)} ${key.split('(')[1].replace(')','')}`;
+                    }
+                    doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(0, 68, 129);
+                    doc.text(summaryText, 15, yPos);
+                    yPos += 10;
+                }
             }
 
-            // Firmas y DNI
-            if (yPos > pageHeight - 60) { doc.addPage(); yPos = 25; drawHeader(); }
+            // --- Firmas ---
+            if (yPos > pageHeight - 60) { doc.addPage(); yPos = 35; drawHeader(); }
             
-            doc.setFont("helvetica", "bold"); doc.setFontSize(10);
+            doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(0,0,0);
             doc.text("Firma (Propietario / Representante):", 15, yPos);
             doc.text("DNI:", 105, yPos);
             
@@ -642,92 +744,112 @@
             doc.addImage(firmaCanvas.toDataURL('image/jpeg', 1.0), 'JPEG', 15, yPos + 5, 80, 40);
             doc.addImage(dniCanvas.toDataURL('image/jpeg', 1.0), 'JPEG', 105, yPos + 5, 80, 40);
 
-            // DETENER SI ES PDF ASEGURADO
+            // FINALIZAR Y MOSTRAR MODAL SI ES ASEGURADO
             if (isAsegurado) {
-                finalizePDF(doc, drawFooter);
+                const totalPages = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= totalPages; i++) { doc.setPage(i); drawFooter(i, totalPages); }
+                pendingBlob = doc.output('blob');
+                pendingFileName = "Acta_Asegurado.pdf";
+                document.getElementById('exportModal').classList.remove('hidden');
                 return;
             }
 
-            // Hojas de Croquis
+            // --- Hojas de Croquis (4:3) ---
             for (let i = 1; i <= croquisCount; i++) {
                 const cId = 'croquis_' + i;
                 const cCanvas = document.getElementById(cId);
                 if (cCanvas) {
                     const inputVal = cCanvas.parentElement.parentElement.querySelector('input').value || `Nivel ${i}`;
                     doc.addPage();
-                    drawHeader();
-                    doc.setFontSize(12); doc.setFont("helvetica", "bold"); doc.setTextColor(15, 23, 42);
-                    doc.text(`HOJA DE CROQUIS: ${inputVal}`, 15, 30);
-                    doc.setDrawColor(15, 23, 42); doc.setLineWidth(0.5); doc.line(15, 32, 100, 32);
+                    drawHeader(`HOJA DE CROQUIS: ${inputVal}`);
                     
-                    doc.setFillColor(255, 255, 255); doc.rect(15, 40, 180, 135, 'F');
-                    doc.addImage(cCanvas.toDataURL('image/jpeg', 1.0), 'JPEG', 15, 40, 180, 135);
+                    doc.setFillColor(255, 255, 255);
+                    // Mantiene proporción 4:3. Ancho max 180, Alto 135
+                    doc.rect(15, 35, 180, 135, 'F');
+                    doc.addImage(cCanvas.toDataURL('image/jpeg', 1.0), 'JPEG', 15, 35, 180, 135);
                 }
             }
 
-            // Registro Fotográfico
+            // --- Registro Fotográfico (Fotos 6cm Alto Centradas) ---
             if (photosData.length > 0) {
-                doc.addPage(); drawHeader();
-                
-                doc.autoTable({
-                    startY: 25,
-                    head: [["REGISTRO FOTOGRÁFICO - COLUMNA A", "REGISTRO FOTOGRÁFICO - COLUMNA B"]],
-                    body: [], theme: 'grid',
-                    headStyles: { fillColor: [15, 23, 42], textColor: 255, halign: 'center', fontSize: 10 }
-                });
-
-                let tableY = doc.lastAutoTable.finalY;
+                doc.addPage();
+                drawHeader("REGISTRO FOTOGRÁFICO");
+                yPos = 35;
+                const imgH = 60; // 6 cm exactos
                 const colW = (pageWidth - 30) / 2;
-                const imgH = 60; const pad = 5;
-                let cx = 15, cy = tableY + pad;
+                let cx = 15;
                 
-                photosData.forEach((p, index) => {
-                    if (cy + imgH + 20 > pageHeight - 20) {
-                        doc.addPage(); drawHeader();
-                        doc.autoTable({
-                            startY: 25, head: [["REGISTRO FOTOGRÁFICO - COLUMNA A", "REGISTRO FOTOGRÁFICO - COLUMNA B"]],
-                            body: [], theme: 'grid',
-                            headStyles: { fillColor: [15, 23, 42], textColor: 255, halign: 'center', fontSize: 10 }
-                        });
-                        cy = doc.lastAutoTable.finalY + pad; cx = 15;
+                for (let i = 0; i < photosData.length; i++) {
+                    if (yPos + imgH + 20 > pageHeight - 15) {
+                        doc.addPage(); drawHeader("REGISTRO FOTOGRÁFICO"); yPos = 35; cx = 15;
                     }
-                    const isRight = index % 2 !== 0;
+                    
+                    const p = photosData[i];
+                    const isRight = i % 2 !== 0;
                     if (isRight) cx = 15 + colW; else cx = 15;
 
-                    doc.rect(cx, cy - pad, colW, imgH + 25);
-                    doc.addImage(p.image, 'JPEG', cx + pad, cy, colW - (pad*2), imgH);
+                    // Calcular ancho para mantener proporción
+                    // Si es horizontal suele ser 4:3, si es vertical 3:4
+                    let imgW = 80; // Default width guess
+                    doc.addImage(p.image, 'JPEG', cx + (colW - 80)/2, yPos, 80, imgH); 
+                    
                     doc.setFontSize(8); doc.setFont("helvetica", "normal"); doc.setTextColor(50, 50, 50);
-                    const splitDesc = doc.splitTextToSize(p.description || 'Sin descripción', colW - (pad*2));
-                    doc.text(splitDesc, cx + pad, cy + imgH + 5);
-                    if (isRight) cy += imgH + 25 + pad;
-                });
+                    const splitDesc = doc.splitTextToSize(p.description || 'Sin descripción', colW - 10);
+                    doc.text(splitDesc, cx + 5, yPos + imgH + 5);
+
+                    if (isRight) yPos += imgH + 25;
+                }
             }
 
-            finalizePDF(doc, drawFooter);
+            // FINALIZAR DESCARGA DIRECTA PARA COMPLETO
+            const totalPages = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= totalPages; i++) { doc.setPage(i); drawFooter(i, totalPages); }
+            doc.save("Reporte_Completo.pdf");
         };
 
-        function finalizePDF(doc, drawFooter) {
-            const totalPages = doc.internal.getNumberOfPages();
-            for (let i = 1; i <= totalPages; i++) {
-                doc.setPage(i); drawFooter(i, totalPages);
-            }
-            // Descarga directa estricta (Soluciona bloqueos en móviles)
-            doc.save("Acta_Inspeccion.pdf");
+        // --- FUNCIONES DEL MODAL DE EXPORTACIÓN ---
+        function closeModal() {
+            document.getElementById('exportModal').classList.add('hidden');
+            pendingBlob = null;
         }
 
-        // --- EXPORTACIÓN ZIP ---
+        function saveModalFile() {
+            if (pendingBlob) saveAs(pendingBlob, pendingFileName);
+            closeModal();
+        }
+
+        async function shareModalFile() {
+            if (!pendingBlob) return;
+            const file = new File([pendingBlob], pendingFileName, { type: "application/pdf" });
+            
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        files: [file],
+                        title: 'Acta de Inspección',
+                        text: 'Adjunto el acta de inspección generada.'
+                    });
+                    closeModal();
+                } catch (error) {
+                    console.log('Error compartiendo:', error);
+                    saveModalFile(); // Fallback si el usuario cancela o falla
+                }
+            } else {
+                alert("La opción de compartir nativa no está soportada en este navegador. Se descargará el archivo.");
+                saveModalFile();
+            }
+        }
+
+        // --- 7. EXPORTACIÓN ZIP ---
         window.exportToZIP = async () => {
             if (photosData.length === 0 && croquisCount === 0) {
                 alert("No hay fotos ni croquis para exportar."); return;
             }
-            
             const zip = new JSZip();
-            
             photosData.forEach((p, i) => {
                 const base64Data = p.image.replace(/^data:image\/(png|jpeg);base64,/, "");
                 zip.file(`Foto_${i+1}.jpg`, base64Data, {base64: true});
             });
-
             for (let i = 1; i <= croquisCount; i++) {
                 const cCanvas = document.getElementById('croquis_' + i);
                 if (cCanvas) {
@@ -735,92 +857,15 @@
                     zip.file(`Croquis_${i}.jpg`, base64Data, {base64: true});
                 }
             }
-
             zip.generateAsync({type:"blob"}).then(function(content) {
-                // Descarga directa estricta
                 saveAs(content, "Fotos_Inspeccion.zip");
             });
         };
 
-        // --- BASE DE DATOS LOCAL (IndexedDB) ---
-        let db;
-        const request = indexedDB.open("GeoPhotoDB", 1);
-        request.onupgradeneeded = (e) => { db = e.target.result; db.createObjectStore("reports", { keyPath: "id" }); };
-        request.onsuccess = (e) => { db = e.target.result; };
-
-        window.saveCurrentReport = () => {
-            if(!db) return;
-            const report = {
-                id: "current",
-                timestamp: Date.now(),
-                form: {
-                    propNombre: document.getElementById('propNombre').value,
-                    propDNI: document.getElementById('propDNI').value,
-                    repNombre: document.getElementById('repNombre').value,
-                    repDNI: document.getElementById('repDNI').value,
-                    domicilio: document.getElementById('domicilio').value,
-                    distrito: document.getElementById('distrito').value,
-                    celular: document.getElementById('celular').value,
-                    correo: document.getElementById('correo').value,
-                    fechaInsp: document.getElementById('fechaInsp').value,
-                    horaInsp: document.getElementById('horaInsp').value,
-                    inspectorNombre: document.getElementById('inspectorNombre').value,
-                    descSiniestro: document.getElementById('descSiniestro').value,
-                    descInmueble: document.getElementById('descInmueble').value,
-                    descDanos: document.getElementById('descDanos').value
-                },
-                photos: photosData,
-                firma: document.getElementById('canvasFirma').toDataURL(),
-                dni: document.getElementById('canvasDNI').toDataURL()
-            };
-            const tx = db.transaction("reports", "readwrite");
-            tx.objectStore("reports").put(report);
-            tx.oncomplete = () => alert("Reporte guardado localmente.");
-        };
-
-        window.loadReport = () => {
-            if(!db) return;
-            const tx = db.transaction("reports", "readonly");
-            const req = tx.objectStore("reports").get("current");
-            req.onsuccess = () => {
-                if(req.result) {
-                    const r = req.result;
-                    Object.keys(r.form).forEach(k => {
-                        if(document.getElementById(k)) document.getElementById(k).value = r.form[k];
-                    });
-                    photosData = r.photos || [];
-                    renderPhotos();
-                    
-                    if(r.firma) {
-                        const imgF = new Image(); imgF.onload = () => document.getElementById('canvasFirma').getContext('2d').drawImage(imgF,0,0); imgF.src = r.firma;
-                    }
-                    if(r.dni) {
-                        const imgD = new Image(); imgD.onload = () => document.getElementById('canvasDNI').getContext('2d').drawImage(imgD,0,0); imgD.src = r.dni;
-                    }
-                    alert("Reporte cargado.");
-                } else {
-                    alert("No hay reporte guardado.");
-                }
-            };
-        };
-
-        window.createNewReport = () => {
-            if(confirm("¿Seguro que deseas empezar un nuevo reporte? Se borrarán los datos actuales no guardados.")) {
-                document.querySelectorAll('input, textarea').forEach(el => el.value = '');
-                photosData = [];
-                renderPhotos();
-                clearCanvas('canvasFirma'); clearCanvas('canvasDNI');
-                document.getElementById('croquisContainer').innerHTML = '';
-                croquisCount = 0;
-                document.getElementById('damageTableBody').innerHTML = '';
-                updateTotals();
-            }
-        };
-
-        // Inicialización
+        // --- Inicialización ---
         setupCanvasDrawing('canvasFirma');
         setupCanvasDrawing('canvasDNI');
-        addDamageRow(); 
+        addDamageRow();
     </script>
 </body>
 </html>
