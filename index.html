@@ -13,7 +13,7 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; color: #334155; }
         .canvas-container { touch-action: none; } 
         
-        /* Inputs minimalistas */
+        /* Inputs minimalistas corporativos */
         .input-clean {
             width: 100%;
             background-color: transparent;
@@ -69,7 +69,7 @@
             </div>
         </div>
         
-        <!-- Barra de Exportación -->
+        <!-- Barra de Exportación Universal -->
         <div class="max-w-4xl mx-auto mt-4 pt-3 border-t border-[#0055a5] flex flex-wrap justify-between items-center gap-3">
             <span class="text-sm font-semibold text-blue-50">Exportar Reporte:</span>
             <div class="flex flex-wrap gap-2">
@@ -144,7 +144,6 @@
                     </tbody>
                 </table>
             </div>
-            <!-- Se eliminó el resumen de totales según requerimiento -->
         </div>
 
         <!-- SECCIÓN 4: FIRMAS -->
@@ -153,14 +152,20 @@
                 <label class="block text-sm font-bold text-[#004481] mb-2">Firma (Propietario / Representante):</label>
                 <div class="border border-slate-300 rounded bg-white relative h-40">
                     <canvas id="canvasFirma" class="absolute inset-0 w-full h-full canvas-container"></canvas>
-                    <button onclick="clearCanvas('canvasFirma')" class="absolute top-2 right-2 bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs hover:bg-gray-200 shadow-sm border border-gray-200">Borrar</button>
+                    <div class="absolute top-2 right-2 flex gap-1 z-10">
+                        <button onclick="undoCanvas('canvasFirma')" class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs hover:bg-gray-200 shadow-sm border border-gray-200" title="Deshacer trazo">↩</button>
+                        <button onclick="clearCanvas('canvasFirma')" class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs hover:bg-gray-200 shadow-sm border border-gray-200">Borrar Todo</button>
+                    </div>
                 </div>
             </div>
             <div>
                 <label class="block text-sm font-bold text-[#004481] mb-2">DNI:</label>
                 <div class="border border-slate-300 rounded bg-white relative h-40">
                     <canvas id="canvasDNI" class="absolute inset-0 w-full h-full canvas-container"></canvas>
-                    <button onclick="clearCanvas('canvasDNI')" class="absolute top-2 right-2 bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs hover:bg-gray-200 shadow-sm border border-gray-200">Borrar</button>
+                    <div class="absolute top-2 right-2 flex gap-1 z-10">
+                        <button onclick="undoCanvas('canvasDNI')" class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs hover:bg-gray-200 shadow-sm border border-gray-200" title="Deshacer trazo">↩</button>
+                        <button onclick="clearCanvas('canvasDNI')" class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs hover:bg-gray-200 shadow-sm border border-gray-200">Borrar Todo</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -196,6 +201,16 @@
             <div id="photoList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </div>
     </main>
+
+    <!-- MODAL DE PREVISUALIZACIÓN DE FOTOS -->
+    <div id="photoPreviewModal" class="hidden fixed inset-0 bg-slate-900/90 z-[110] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="relative w-full max-w-4xl flex flex-col items-center">
+            <button onclick="closePreviewModal()" class="absolute -top-10 right-0 text-white hover:text-gray-300 font-bold text-lg bg-black/50 px-3 py-1 rounded-full flex items-center gap-1 transition-colors">
+                <span>&times;</span> Cerrar
+            </button>
+            <img id="previewModalImage" src="" class="w-full max-h-[85vh] object-contain rounded shadow-2xl">
+        </div>
+    </div>
 
     <!-- MODAL UNIVERSAL DE EXPORTACIÓN -->
     <div id="universalExportModal" class="hidden fixed inset-0 bg-slate-900/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
@@ -358,7 +373,12 @@
                 const div = document.createElement('div');
                 div.className = "border border-slate-200 rounded p-2 bg-white shadow-sm flex flex-col gap-2 relative";
                 div.innerHTML = `
-                    <button onclick="removePhoto('${p.id}')" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-sm shadow z-10">X</button>
+                    <div class="absolute top-1 right-1 flex gap-1 z-10">
+                        <button onclick="previewPhoto('${p.id}')" class="bg-[#0071b9] text-white rounded w-7 h-7 flex items-center justify-center font-bold shadow hover:bg-[#0055a5]" title="Ver Previsualización">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                        </button>
+                        <button onclick="removePhoto('${p.id}')" class="bg-red-500 text-white rounded w-7 h-7 flex items-center justify-center font-bold text-sm shadow hover:bg-red-600" title="Eliminar Foto">X</button>
+                    </div>
                     <img src="${p.image}" class="w-full h-48 object-contain bg-slate-900 rounded" />
                     <textarea placeholder="Descripción / Notas..." class="input-clean text-xs mt-1" rows="2" onchange="updateDesc('${p.id}', this.value)">${p.description}</textarea>
                 `;
@@ -368,6 +388,19 @@
 
         window.removePhoto = (id) => { photosData = photosData.filter(p => p.id !== id); renderPhotos(); };
         window.updateDesc = (id, val) => { const p = photosData.find(x => x.id === id); if(p) p.description = val; };
+
+        window.previewPhoto = (id) => {
+            const p = photosData.find(x => x.id === id);
+            if (p) {
+                document.getElementById('previewModalImage').src = p.image;
+                document.getElementById('photoPreviewModal').classList.remove('hidden');
+            }
+        };
+
+        window.closePreviewModal = () => {
+            document.getElementById('photoPreviewModal').classList.add('hidden');
+            document.getElementById('previewModalImage').src = "";
+        };
 
         // --- 3. DIBUJO EN CANVAS (FIRMA, DNI, CROQUIS) ---
         function setupCanvasDrawing(canvasId) {
@@ -380,7 +413,7 @@
 
             let isDrawing = false;
             let lastX = 0, lastY = 0;
-            let color = '#004481'; 
+            let color = '#004481'; // Azul corporativo por defecto
             
             if(canvases[canvasId] && canvases[canvasId].color) color = canvases[canvasId].color;
             ctx.strokeStyle = color;
@@ -504,9 +537,10 @@
                 <div class="flex flex-wrap justify-between items-center mb-2 gap-2">
                     <input type="text" placeholder="Nivel / Ambiente (Ej: Piso 1)" class="text-sm font-semibold text-[#004481] border-b border-gray-300 outline-none pb-1 w-1/2">
                     <div class="flex gap-2">
-                        <div class="flex gap-1 bg-gray-50 p-1 rounded border">
-                            <button onclick="changeCanvasColor('${id}', '#004481')" class="w-5 h-5 rounded-full bg-[#004481] border border-transparent"></button>
-                            <button onclick="changeCanvasColor('${id}', '#ef4444')" class="w-5 h-5 rounded-full bg-red-500 border border-transparent"></button>
+                        <div class="flex gap-1 bg-gray-50 p-1 rounded border shadow-sm">
+                            <button onclick="changeCanvasColor('${id}', '#000000')" class="w-5 h-5 rounded-full bg-black border border-gray-300" title="Negro"></button>
+                            <button onclick="changeCanvasColor('${id}', '#004481')" class="w-5 h-5 rounded-full bg-[#004481] border border-gray-300" title="Azul"></button>
+                            <button onclick="changeCanvasColor('${id}', '#ef4444')" class="w-5 h-5 rounded-full bg-red-500 border border-gray-300" title="Rojo"></button>
                         </div>
                         <button onclick="undoCanvas('${id}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs border border-gray-200">Deshacer</button>
                         <label class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs cursor-pointer border border-gray-200">
@@ -632,7 +666,7 @@
                 if (sec.text.trim() !== '') {
                     doc.autoTable({
                         startY: yPos,
-                        margin: { top: 35 }, // Mantiene espacio para el header en nuevas hojas
+                        margin: { top: 35 }, 
                         head: [[sec.title]],
                         body: [[sec.text]],
                         theme: 'plain',
@@ -672,7 +706,7 @@
                 yPos = doc.lastAutoTable.finalY + 10;
             }
 
-            // Firmas con cuadro delimitador
+            // Firmas con cuadro delimitador azul
             if (yPos > pageHeight - 65) { doc.addPage(); yPos = 35; drawHeader(); }
             
             doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(0,0,0);
@@ -686,7 +720,7 @@
             doc.setFillColor(255, 255, 255);
             doc.setDrawColor(0, 68, 129); // Borde azul corporativo
             doc.setLineWidth(0.5);
-            doc.rect(15, yPos + 5, 80, 40, 'DF'); // D=Draw, F=Fill
+            doc.rect(15, yPos + 5, 80, 40, 'DF'); 
             doc.rect(105, yPos + 5, 80, 40, 'DF');
             
             doc.addImage(firmaCanvas.toDataURL('image/jpeg', 1.0), 'JPEG', 15, yPos + 5, 80, 40);
@@ -733,7 +767,7 @@
                     const isRight = i % 2 !== 0;
                     if (isRight) cx = 15 + colW; else cx = 15;
 
-                    // Asumiendo proporción 4:3 para el ancho (80mm) para centrar en la columna
+                    // Asumiendo proporción para centrar en la columna
                     const imgW = 80;
                     const offsetX = cx + (colW - imgW) / 2;
 
