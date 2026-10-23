@@ -30,7 +30,6 @@
             font-weight: 600;
             color: #64748b;
             margin-bottom: 2px;
-            text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
@@ -64,8 +63,8 @@
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     Nuevo
                 </button>
-                <!-- Botón Reportes (Cargar) -->
-                <button onclick="loadReport()" class="bg-transparent hover:bg-white/10 text-white text-xs py-1.5 px-3 rounded border border-white/30 transition-colors flex items-center gap-1" title="Cargar último reporte">
+                <!-- Botón Reportes (Abre Modal de Lista) -->
+                <button onclick="showReportsList()" class="bg-transparent hover:bg-white/10 text-white text-xs py-1.5 px-3 rounded border border-white/30 transition-colors flex items-center gap-1" title="Ver reportes guardados">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
                     Reportes
                 </button>
@@ -105,12 +104,12 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4" id="inspectionForm">
                 <div><label class="label-clean">Nombre y apellido del propietario</label><input type="text" id="propNombre" class="input-clean"></div>
-                <div><label class="label-clean">Nro. de DNI del propietario</label><input type="number" id="propDNI" class="input-clean"></div>
+                <div><label class="label-clean">Nro. de DNI del propietario</label><input type="tel" inputmode="numeric" id="propDNI" class="input-clean"></div>
                 <div><label class="label-clean">Nombre y apellido del representante</label><input type="text" id="repNombre" class="input-clean"></div>
-                <div><label class="label-clean">Nro. de DNI del representante</label><input type="number" id="repDNI" class="input-clean"></div>
+                <div><label class="label-clean">Nro. de DNI del representante</label><input type="tel" inputmode="numeric" id="repDNI" class="input-clean"></div>
                 <div class="md:col-span-2"><label class="label-clean">Dirección</label><input type="text" id="domicilio" class="input-clean"></div>
                 <div><label class="label-clean">Distrito</label><input type="text" id="distrito" class="input-clean"></div>
-                <div><label class="label-clean">Nro. celular</label><input type="tel" id="celular" class="input-clean"></div>
+                <div><label class="label-clean">Nro. celular</label><input type="tel" inputmode="numeric" id="celular" class="input-clean"></div>
                 <div><label class="label-clean">Correo</label><input type="email" id="correo" class="input-clean"></div>
                 <div><label class="label-clean">Fecha de inspección</label><input type="date" id="fechaInsp" class="input-clean"></div>
                 <div><label class="label-clean">hora de inspección</label><input type="time" id="horaInsp" class="input-clean"></div>
@@ -210,6 +209,20 @@
         </div>
     </main>
 
+    <!-- MODAL DE LISTA DE REPORTES -->
+    <div id="reportsListModal" class="hidden fixed inset-0 bg-slate-900/60 z-[120] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white p-6 rounded-xl shadow-2xl max-w-md w-full border-t-4 border-[#0071b9]">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-[#004481]">Reportes Guardados</h3>
+                <button onclick="closeReportsListModal()" class="text-slate-400 hover:text-slate-700 font-bold">X</button>
+            </div>
+            <div id="reportsListContainer" class="max-h-64 overflow-y-auto space-y-2 mb-4">
+                <!-- Lista de reportes generada dinámicamente -->
+            </div>
+            <button onclick="closeReportsListModal()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded font-semibold transition-colors text-sm">Cerrar</button>
+        </div>
+    </div>
+
     <!-- MODAL DE PREVISUALIZACIÓN DE FOTOS -->
     <div id="photoPreviewModal" class="hidden fixed inset-0 bg-slate-900/90 z-[110] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="relative w-full max-w-4xl flex flex-col items-center">
@@ -221,7 +234,7 @@
         </div>
     </div>
 
-    <!-- MODAL UNIVERSAL DE EXPORTACIÓN (Sobrio) -->
+    <!-- MODAL UNIVERSAL DE EXPORTACIÓN -->
     <div id="universalExportModal" class="hidden fixed inset-0 bg-slate-900/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full border-t-4 border-[#0071b9]">
             <div class="flex items-center justify-center mb-4 text-[#0071b9]">
@@ -256,6 +269,7 @@
         let pendingBlob = null;
         let pendingFileName = "";
         let pendingFileType = "";
+        let currentReportId = Date.now().toString();
         
         // --- 1. GEOLOCALIZACIÓN AUTOMÁTICA ---
         function requestGPS() {
@@ -284,7 +298,7 @@
             let degrees = Math.floor(d);
             let minutes = Math.floor((d - degrees) * 60);
             let seconds = ((d - degrees - minutes/60) * 3600).toFixed(0);
-            let dir = isLat ? (deg >= 0 ? "S" : "N") : (deg >= 0 ? "O" : "E"); // S/N para Lat, O/E para Lon (Perú)
+            let dir = isLat ? (deg >= 0 ? "S" : "N") : (deg >= 0 ? "O" : "E"); // Perú
             return `${degrees}°${minutes}'${seconds}" ${dir}`;
         }
 
@@ -310,7 +324,7 @@
                         const dateStr = date.toLocaleDateString('es-PE', {day:'2-digit', month:'2-digit', year:'numeric'}).replace(/\//g, ':');
                         const timeStr = date.toLocaleTimeString('es-PE', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
                         
-                        // Etiqueta superior derecha "GEOPHOTO VERIFIED"
+                        // Caja superior derecha "GEOPHOTO VERIFIED"
                         const topBoxW = canvas.width * 0.35;
                         const topBoxH = canvas.height * 0.05;
                         ctx.fillStyle = 'black';
@@ -323,8 +337,8 @@
                         ctx.textBaseline = 'middle';
                         ctx.fillText('GEOPHOTO VERIFIED', canvas.width - (topBoxW/2), topBoxH/2);
 
-                        // Banda inferior
-                        const marginBottom = canvas.height * 0.015; // Margen de ~1.5mm
+                        // Banda inferior translúcida con pequeño margen para que no se corte
+                        const marginBottom = canvas.height * 0.005; // Margen minúsculo
                         const bandHeight = canvas.height * 0.15;
                         const startY = canvas.height - bandHeight - marginBottom;
                         
@@ -432,16 +446,29 @@
 
             function resizeCanvas() {
                 const rect = canvas.parentElement.getBoundingClientRect();
+                if (rect.width === 0 || rect.height === 0) return; // Evitar redimensionar a 0
+
+                let hasContent = false;
                 const tempCanvas = document.createElement('canvas');
-                tempCanvas.width = canvas.width; tempCanvas.height = canvas.height;
-                tempCanvas.getContext('2d').drawImage(canvas, 0, 0);
+                
+                // Solo guardar si el canvas original tiene dimensiones válidas
+                if (canvas.width > 0 && canvas.height > 0) {
+                    tempCanvas.width = canvas.width; 
+                    tempCanvas.height = canvas.height;
+                    tempCanvas.getContext('2d').drawImage(canvas, 0, 0);
+                    hasContent = true;
+                }
                 
                 canvas.width = rect.width;
                 canvas.height = rect.height;
                 
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
+                
+                // Solo dibujar el respaldo si existía contenido previo válido
+                if (hasContent) {
+                    ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
+                }
                 ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
             }
             
@@ -567,7 +594,7 @@
                         </label>
                     </div>
                 </div>
-                <div class="border border-gray-300 bg-white relative w-full" style="aspect-ratio: 4/3;">
+                <div class="border border-gray-300 bg-white relative w-full" style="aspect-ratio: 1 / 1.414;">
                     <canvas id="${id}" class="absolute inset-0 w-full h-full canvas-container"></canvas>
                 </div>
             `;
@@ -623,20 +650,16 @@
             const pageHeight = doc.internal.pageSize.getHeight();
             let yPos = 20;
 
-            // Limpiar nombre para el archivo
             const ownerName = document.getElementById('propNombre').value.trim().replace(/[^a-zA-Z0-9 ]/g, "") || "Sin_Nombre";
             const outputFilename = isAsegurado ? `${ownerName}_Acta_Asegurado.pdf` : `${ownerName}_Reporte.pdf`;
 
-            const drawHeader = (title = "FICHA DE DATOS DE INSPECCIÓN") => {
+            const drawHeader = () => {
+                doc.setFillColor(0, 68, 129); // #004481
+                doc.rect(0, 0, pageWidth, 20, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(14);
                 doc.setFont("helvetica", "bold");
-                doc.setFontSize(16);
-                doc.setTextColor(0, 68, 129); // #004481
-                doc.text(title, 15, 20);
-                
-                // Línea ABACO Verde/Azul claro (según preferencia anterior, usando Azul Claro)
-                doc.setDrawColor(0, 113, 185); // #0071b9
-                doc.setLineWidth(1);
-                doc.line(15, 23, 110, 23);
+                doc.text("ACTA DE INSPECCIÓN", 15, 13);
                 doc.setTextColor(0, 0, 0);
             };
 
@@ -653,7 +676,15 @@
 
             drawHeader();
             
-            // Ficha de Datos - Etiquetas exactas y fondo blanco contrastante
+            // Título de Sección "FICHA DE DATOS" solo en la primera página
+            doc.setFontSize(14);
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(0, 68, 129);
+            doc.text("FICHA DE DATOS DE INSPECCIÓN", 15, 30);
+            doc.setDrawColor(0, 113, 185); // Azul Claro
+            doc.setLineWidth(0.8);
+            doc.line(15, 33, 110, 33);
+            
             const formValues = [
                 ["Nombre y apellido del propietario:", document.getElementById('propNombre').value, "Nro. de DNI del propietario:", document.getElementById('propDNI').value],
                 ["Nombre y apellido del representante:", document.getElementById('repNombre').value, "Nro. de DNI del representante:", document.getElementById('repDNI').value],
@@ -664,17 +695,16 @@
             ];
 
             doc.autoTable({
-                startY: 28,
+                startY: 38,
                 body: formValues,
                 theme: 'plain',
-                styles: { fontSize: 9, cellPadding: 4, textColor: [30, 41, 59], fillColor: [255, 255, 255] }, // Explicit white background & dark text
+                styles: { fontSize: 9, cellPadding: 4, textColor: [0, 0, 0], fillColor: [255, 255, 255] }, 
                 columnStyles: { 
                     0: { fontStyle: 'bold', textColor: [0, 68, 129], cellWidth: 50 }, 
                     2: { fontStyle: 'bold', textColor: [0, 68, 129], cellWidth: 50 } 
                 },
                 didDrawPage: function (data) { drawHeader(); },
                 willDrawCell: function(data) {
-                    // Línea horizontal gris claro para separar datos elegantemente
                     doc.setDrawColor(226, 232, 240);
                     doc.setLineWidth(0.2);
                     doc.line(data.cell.x, data.cell.y + data.cell.height, data.cell.x + data.cell.width, data.cell.y + data.cell.height);
@@ -694,7 +724,7 @@
                 if (sec.text.trim() !== '') {
                     doc.autoTable({
                         startY: yPos,
-                        margin: { top: 35 }, 
+                        margin: { top: 30 }, 
                         head: [[sec.title]],
                         body: [[sec.text]],
                         theme: 'plain',
@@ -712,7 +742,7 @@
                 yPos += 5;
                 doc.autoTable({
                     startY: yPos,
-                    margin: { top: 35 },
+                    margin: { top: 30 },
                     head: [["TABLA DE DIMENSIONES DE LOS DAÑOS"]],
                     body: [],
                     theme: 'plain',
@@ -720,10 +750,9 @@
                     didDrawPage: function (data) { drawHeader(); }
                 });
                 
-                // Tabla con bordes redondeados y colores corporativos
                 doc.autoTable({
                     startY: doc.lastAutoTable.finalY + 2,
-                    margin: { top: 35 },
+                    margin: { top: 30 },
                     head: [["Nro.", "Partida", "Detalle", "U.M.", "Sup.", "Obs."]],
                     body: dmgData,
                     theme: 'grid',
@@ -745,7 +774,6 @@
             const firmaCanvas = document.getElementById('canvasFirma');
             const dniCanvas = document.getElementById('canvasDNI');
             
-            // Fondo blanco explícito y borde delimitador azul
             doc.setFillColor(255, 255, 255);
             doc.setDrawColor(0, 68, 129);
             doc.setLineWidth(0.3);
@@ -755,7 +783,6 @@
             doc.addImage(firmaCanvas.toDataURL('image/jpeg', 1.0), 'JPEG', 15, yPos + 5, 80, 40);
             doc.addImage(dniCanvas.toDataURL('image/jpeg', 1.0), 'JPEG', 105, yPos + 5, 80, 40);
 
-            // TERMINAR AQUÍ SI ES ASEGURADO
             if (isAsegurado) {
                 const totalPages = doc.internal.getNumberOfPages();
                 for (let i = 1; i <= totalPages; i++) { doc.setPage(i); drawFooter(i, totalPages); }
@@ -763,63 +790,68 @@
                 return;
             }
 
-            // Hojas de Croquis (4:3)
+            // Hojas de Croquis (Ocupando página completa)
             for (let i = 1; i <= croquisCount; i++) {
                 const cId = 'croquis_' + i;
                 const cCanvas = document.getElementById(cId);
                 if (cCanvas) {
                     const inputVal = cCanvas.parentElement.parentElement.querySelector('input').value || `Nivel ${i}`;
                     doc.addPage();
-                    drawHeader(`HOJA DE CROQUIS: ${inputVal}`);
+                    drawHeader();
+                    doc.setFontSize(12); doc.setFont("helvetica", "bold"); doc.setTextColor(0, 68, 129);
+                    doc.text(`HOJA DE CROQUIS: ${inputVal}`, 15, 28);
+                    doc.setDrawColor(0, 113, 185); doc.setLineWidth(0.5);
+                    doc.line(15, 30, 100, 30);
+                    
                     doc.setFillColor(255, 255, 255);
-                    doc.setDrawColor(200, 200, 200);
-                    doc.rect(15, 35, 180, 135, 'DF');
-                    doc.addImage(cCanvas.toDataURL('image/jpeg', 1.0), 'JPEG', 15, 35, 180, 135);
+                    doc.rect(15, 35, 180, 240, 'F');
+                    doc.addImage(cCanvas.toDataURL('image/jpeg', 1.0), 'JPEG', 15, 35, 180, 240);
                 }
             }
 
-            // Registro Fotográfico (Fotos de 6cm de altura centradas)
+            // Registro Fotográfico (6 fotos por hoja)
             if (photosData.length > 0) {
                 doc.addPage();
-                drawHeader("REGISTRO FOTOGRÁFICO");
-                yPos = 35;
-                const colW = (pageWidth - 30) / 2;
+                drawHeader();
+                
+                doc.setFontSize(14); doc.setFont("helvetica", "bold"); doc.setTextColor(0, 68, 129);
+                doc.text("REGISTRO FOTOGRÁFICO", 15, 30);
+                doc.setDrawColor(0, 113, 185); doc.setLineWidth(0.8);
+                doc.line(15, 33, 110, 33);
+                
+                yPos = 40;
+                const colW = (pageWidth - 35) / 2; // Dos columnas con 5 de padding extra
+                const imgH = 55; // 5.5cm aprox para garantizar 3 filas comodamente
                 let cx = 15;
                 
                 for (let i = 0; i < photosData.length; i++) {
                     const p = photosData[i];
                     
-                    // Extraer dimensiones reales para mantener proporción
                     const img = new Image();
                     img.src = p.image;
                     const imgRatio = img.width / img.height;
+                    let drawW = imgH * imgRatio;
                     
-                    const drawH = 60; // 6 cm fijos de alto
-                    let drawW = drawH * imgRatio;
-                    
-                    // Si el ancho calculado excede la columna, ajustamos (raro en 4:3, pero seguridad)
-                    if(drawW > colW - 4) {
-                        drawW = colW - 4;
-                        // drawH = drawW / imgRatio; // (Comentado para forzar los 6cm de altura estrictos)
-                    }
+                    if(drawW > colW - 4) { drawW = colW - 4; }
 
-                    if (yPos + drawH + 20 > pageHeight - 15) {
-                        doc.addPage(); drawHeader("REGISTRO FOTOGRÁFICO"); yPos = 35; cx = 15;
+                    if (yPos + imgH + 20 > pageHeight - 15) {
+                        doc.addPage(); 
+                        drawHeader(); 
+                        yPos = 35; 
+                        cx = 15;
                     }
                     
                     const isRight = i % 2 !== 0;
-                    if (isRight) cx = 15 + colW; else cx = 15;
+                    if (isRight) cx = 15 + colW + 5; else cx = 15;
 
-                    // Centrar en la columna
                     const offsetX = cx + (colW - drawW) / 2;
-
-                    doc.addImage(p.image, 'JPEG', offsetX, yPos, drawW, drawH); 
+                    doc.addImage(p.image, 'JPEG', offsetX, yPos, drawW, imgH); 
                     
                     doc.setFontSize(8); doc.setFont("helvetica", "normal"); doc.setTextColor(50, 50, 50);
-                    const splitDesc = doc.splitTextToSize(p.description || 'Sin descripción', colW - 10);
-                    doc.text(splitDesc, cx + 5, yPos + drawH + 5);
+                    const splitDesc = doc.splitTextToSize(p.description || 'Sin descripción', colW);
+                    doc.text(splitDesc, cx, yPos + imgH + 5);
 
-                    if (isRight) yPos += drawH + 25;
+                    if (isRight) yPos += imgH + 25;
                 }
             }
 
@@ -899,17 +931,20 @@
             }
         }
         
-        // --- 8. BASE DE DATOS LOCAL (IndexedDB) para Guardar/Cargar ---
+        // --- 8. BASE DE DATOS LOCAL (IndexedDB) Y LISTA ---
         let db;
-        const request = indexedDB.open("FRMECDB", 1);
+        const request = indexedDB.open("FRMECDB_Multi", 1);
         request.onupgradeneeded = (e) => { db = e.target.result; db.createObjectStore("reports", { keyPath: "id" }); };
         request.onsuccess = (e) => { db = e.target.result; };
 
         window.saveCurrentReport = () => {
             if(!db) { alert("Base de datos no disponible."); return; }
+            const propNombre = document.getElementById('propNombre').value || "Sin Nombre";
             const report = {
-                id: "current",
+                id: currentReportId,
                 timestamp: Date.now(),
+                title: propNombre,
+                date: new Date().toLocaleDateString(),
                 form: {
                     propNombre: document.getElementById('propNombre').value,
                     propDNI: document.getElementById('propDNI').value,
@@ -932,16 +967,49 @@
             };
             const tx = db.transaction("reports", "readwrite");
             tx.objectStore("reports").put(report);
-            tx.oncomplete = () => alert("Progreso guardado correctamente.");
+            tx.oncomplete = () => alert("Reporte guardado exitosamente.");
         };
 
-        window.loadReport = () => {
+        window.showReportsList = () => {
             if(!db) return;
             const tx = db.transaction("reports", "readonly");
-            const req = tx.objectStore("reports").get("current");
+            const req = tx.objectStore("reports").getAll();
+            req.onsuccess = () => {
+                const list = req.result.sort((a,b) => b.timestamp - a.timestamp);
+                const container = document.getElementById('reportsListContainer');
+                container.innerHTML = '';
+                if(list.length === 0) {
+                    container.innerHTML = '<p class="text-sm text-gray-500 text-center">No hay reportes guardados.</p>';
+                } else {
+                    list.forEach(r => {
+                        const div = document.createElement('div');
+                        div.className = "flex justify-between items-center bg-gray-50 p-3 rounded border border-gray-200";
+                        div.innerHTML = `
+                            <div>
+                                <p class="text-sm font-bold text-[#004481]">${r.title}</p>
+                                <p class="text-xs text-gray-500">${r.date}</p>
+                            </div>
+                            <button onclick="loadSpecificReport('${r.id}')" class="bg-[#0071b9] text-white text-xs px-3 py-1.5 rounded font-semibold shadow hover:bg-[#0055a5]">Cargar</button>
+                        `;
+                        container.appendChild(div);
+                    });
+                }
+                document.getElementById('reportsListModal').classList.remove('hidden');
+            };
+        };
+
+        window.closeReportsListModal = () => {
+            document.getElementById('reportsListModal').classList.add('hidden');
+        };
+
+        window.loadSpecificReport = (id) => {
+            if(!db) return;
+            const tx = db.transaction("reports", "readonly");
+            const req = tx.objectStore("reports").get(id);
             req.onsuccess = () => {
                 if(req.result) {
-                    if(!confirm("¿Cargar el último reporte guardado? Los datos actuales no guardados se perderán.")) return;
+                    if(!confirm("¿Cargar reporte? Los datos actuales no guardados se perderán.")) return;
+                    currentReportId = id;
                     const r = req.result;
                     Object.keys(r.form).forEach(k => {
                         if(document.getElementById(k)) document.getElementById(k).value = r.form[k];
@@ -955,14 +1023,14 @@
                     if(r.dni) {
                         const imgD = new Image(); imgD.onload = () => document.getElementById('canvasDNI').getContext('2d').drawImage(imgD,0,0); imgD.src = r.dni;
                     }
-                } else {
-                    alert("No se encontró ningún reporte guardado.");
+                    closeReportsListModal();
                 }
             };
         };
 
         window.createNewReport = () => {
-            if(confirm("¿Seguro que deseas empezar un nuevo reporte? Se limpiarán todos los campos actuales.")) {
+            if(confirm("¿Empezar un nuevo reporte en blanco? Perderás los datos actuales no guardados.")) {
+                currentReportId = Date.now().toString();
                 document.querySelectorAll('input, textarea').forEach(el => el.value = '');
                 photosData = [];
                 renderPhotos();
@@ -970,7 +1038,7 @@
                 document.getElementById('croquisContainer').innerHTML = '';
                 croquisCount = 0;
                 document.getElementById('damageTableBody').innerHTML = '';
-                addDamageRow(); // Add empty row
+                addDamageRow(); 
             }
         };
 
