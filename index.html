@@ -455,24 +455,20 @@
             document.getElementById('previewModalImage').src = "";
         };
 
-        // --- 3. DIBUJO EN CANVAS (Pointer Events) ---
+        // --- 3. DIBUJO EN CANVAS (Pointer Events + ALTA RESOLUCIÓN) ---
         function setupCanvasDrawing(canvasId) {
             const canvas = document.getElementById(canvasId);
             if(!canvas) return;
             const ctx = canvas.getContext('2d');
             
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // Factor de alta resolución para que el croquis no pierda calidad en el PDF (Retina HD)
+            const HD_SCALE = 3;
 
             let isDrawing = false;
             let lastX = 0, lastY = 0;
             let color = '#004481'; 
             
             if(canvases[canvasId] && canvases[canvasId].color) color = canvases[canvasId].color;
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 2;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
 
             function resizeCanvas() {
                 const rect = canvas.parentElement.getBoundingClientRect();
@@ -488,8 +484,14 @@
                     hasContent = true;
                 }
                 
-                canvas.width = rect.width;
-                canvas.height = rect.height;
+                const newWidth = rect.width * HD_SCALE;
+                const newHeight = rect.height * HD_SCALE;
+
+                // Evitar resets innecesarios si la pantalla no cambió de tamaño
+                if (canvas.width === newWidth && canvas.height === newHeight) return;
+
+                canvas.width = newWidth;
+                canvas.height = newHeight;
                 
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -497,17 +499,31 @@
                 if (hasContent) {
                     ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
                 }
-                ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+                ctx.strokeStyle = color; 
+                ctx.lineWidth = 2 * HD_SCALE; // Escalar el grosor de línea para alta resolución
+                ctx.lineCap = 'round'; 
+                ctx.lineJoin = 'round';
             }
             
             if(!canvases[canvasId]) {
                 window.addEventListener('resize', resizeCanvas);
                 setTimeout(resizeCanvas, 100);
+            } else {
+                ctx.strokeStyle = color; 
+                ctx.lineWidth = 2 * HD_SCALE; 
+                ctx.lineCap = 'round'; 
+                ctx.lineJoin = 'round';
             }
 
             function getPos(e) {
                 const rect = canvas.getBoundingClientRect();
-                return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+                // Ajustar las coordenadas físicas del mouse/dedo a la alta resolución interna del canvas
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                return { 
+                    x: (e.clientX - rect.left) * scaleX, 
+                    y: (e.clientY - rect.top) * scaleY 
+                };
             }
 
             function startDraw(e) {
@@ -661,7 +677,7 @@
                         </button>
                         
                         <label class="bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 px-2 py-1 rounded text-xs cursor-pointer flex items-center gap-1 font-semibold">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
                             Cámara
                             <input type="file" accept="image/*" capture="environment" class="hidden" onchange="setCanvasBackground('${id}', this)">
                         </label>
@@ -838,9 +854,12 @@
                 body: formValues,
                 theme: 'plain',
                 styles: { fontSize: 9, cellPadding: 4, textColor: [0, 0, 0], fillColor: [255, 255, 255] }, 
+                // Asignación estricta de anchos de columna (45mm cada una para mantener el cuadre perfecto)
                 columnStyles: { 
-                    0: { fontStyle: 'bold', textColor: [0, 68, 129], cellWidth: 50 }, 
-                    2: { fontStyle: 'bold', textColor: [0, 68, 129], cellWidth: 50 } 
+                    0: { fontStyle: 'bold', textColor: [0, 68, 129], cellWidth: 48 }, 
+                    1: { cellWidth: 42 },
+                    2: { fontStyle: 'bold', textColor: [0, 68, 129], cellWidth: 45 },
+                    3: { cellWidth: 45 } 
                 },
                 didDrawPage: function (data) { drawHeader(); },
                 willDrawCell: function(data) {
@@ -852,7 +871,7 @@
 
             yPos = doc.lastAutoTable.finalY + 10;
 
-            // Textos Largos con paginación
+            // Textos Largos con paginación y justificado
             const textSections = [
                 { title: "Descripción General del Siniestro", text: document.getElementById('descSiniestro').value },
                 { title: "Descripción del Inmueble", text: document.getElementById('descInmueble').value },
@@ -868,7 +887,8 @@
                         body: [[sec.text]],
                         theme: 'plain',
                         headStyles: { fontStyle: 'bold', fontSize: 11, textColor: [0, 68, 129], cellPadding: {top: 5, bottom: 2} },
-                        bodyStyles: { fontSize: 9, textColor: [30, 41, 59], cellPadding: 2, fillColor: [255, 255, 255] },
+                        // Alineación 'justify' para que el texto ocupe de extremo a extremo
+                        bodyStyles: { fontSize: 9, textColor: [30, 41, 59], cellPadding: 2, fillColor: [255, 255, 255], halign: 'justify' },
                         didDrawPage: function (data) { drawHeader(); }
                     });
                     yPos = doc.lastAutoTable.finalY + 5;
