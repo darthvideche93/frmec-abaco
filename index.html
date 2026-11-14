@@ -153,10 +153,24 @@
             </div>
         </div>
 
-        <!-- SECCIÓN 4: FIRMAS -->
+        <!-- SECCIÓN 4: FIRMAS Y DNI (CON OPCIÓN DE FOTO / GALERÍA) -->
         <div class="bg-white shadow-sm border border-slate-200 p-6 rounded-lg grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-                <label class="block text-sm font-bold text-[#004481] mb-2">Firma (Propietario / Representante):</label>
+                <div class="flex flex-wrap justify-between items-center mb-2 gap-2">
+                    <label class="block text-sm font-bold text-[#004481]">Firma (Propietario / Rep.):</label>
+                    <div class="flex gap-1">
+                        <label class="bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 px-2 py-1 rounded text-xs cursor-pointer flex items-center gap-1 font-semibold shadow-sm" title="Tomar foto a firma">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+                            Foto
+                            <input type="file" accept="image/*" capture="environment" class="hidden" onchange="setSignatureOrDNIPhoto('canvasFirma', this)">
+                        </label>
+                        <label class="bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 px-2 py-1 rounded text-xs cursor-pointer flex items-center gap-1 font-semibold shadow-sm" title="Subir imagen de firma">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            Subir
+                            <input type="file" accept="image/*" class="hidden" onchange="setSignatureOrDNIPhoto('canvasFirma', this)">
+                        </label>
+                    </div>
+                </div>
                 <div class="border border-slate-300 rounded bg-white relative h-40">
                     <canvas id="canvasFirma" class="absolute inset-0 w-full h-full canvas-container"></canvas>
                     <div class="absolute top-2 right-2 flex gap-1 z-10">
@@ -165,8 +179,23 @@
                     </div>
                 </div>
             </div>
+
             <div>
-                <label class="block text-sm font-bold text-[#004481] mb-2">DNI:</label>
+                <div class="flex flex-wrap justify-between items-center mb-2 gap-2">
+                    <label class="block text-sm font-bold text-[#004481]">DNI:</label>
+                    <div class="flex gap-1">
+                        <label class="bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 px-2 py-1 rounded text-xs cursor-pointer flex items-center gap-1 font-semibold shadow-sm" title="Tomar foto al DNI">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+                            Foto
+                            <input type="file" accept="image/*" capture="environment" class="hidden" onchange="setSignatureOrDNIPhoto('canvasDNI', this)">
+                        </label>
+                        <label class="bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 px-2 py-1 rounded text-xs cursor-pointer flex items-center gap-1 font-semibold shadow-sm" title="Subir imagen de DNI">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            Subir
+                            <input type="file" accept="image/*" class="hidden" onchange="setSignatureOrDNIPhoto('canvasDNI', this)">
+                        </label>
+                    </div>
+                </div>
                 <div class="border border-slate-300 rounded bg-white relative h-40">
                     <canvas id="canvasDNI" class="absolute inset-0 w-full h-full canvas-container"></canvas>
                     <div class="absolute top-2 right-2 flex gap-1 z-10">
@@ -338,7 +367,7 @@
                         ctx.fillText('GEOPHOTO VERIFIED', canvas.width - (topBoxW/2), topBoxH/2);
 
                         // Banda inferior translúcida con pequeño margen para que no se corte
-                        const marginBottom = canvas.height * 0.005; // Margen minúsculo
+                        const marginBottom = canvas.height * 0.005;
                         const bandHeight = canvas.height * 0.15;
                         const startY = canvas.height - bandHeight - marginBottom;
                         
@@ -369,6 +398,7 @@
                         const photoId = 'photo_' + Date.now() + Math.floor(Math.random() * 1000);
                         photosData.push({ id: photoId, image: dataUrl, description: '' });
                         renderPhotos();
+                        triggerAutoSave();
                         resolve();
                     };
                     img.src = e.target.result;
@@ -409,8 +439,8 @@
             });
         }
 
-        window.removePhoto = (id) => { photosData = photosData.filter(p => p.id !== id); renderPhotos(); };
-        window.updateDesc = (id, val) => { const p = photosData.find(x => x.id === id); if(p) p.description = val; };
+        window.removePhoto = (id) => { photosData = photosData.filter(p => p.id !== id); renderPhotos(); triggerAutoSave(); };
+        window.updateDesc = (id, val) => { const p = photosData.find(x => x.id === id); if(p) { p.description = val; triggerAutoSave(); } };
 
         window.previewPhoto = (id) => {
             const p = photosData.find(x => x.id === id);
@@ -446,12 +476,11 @@
 
             function resizeCanvas() {
                 const rect = canvas.parentElement.getBoundingClientRect();
-                if (rect.width === 0 || rect.height === 0) return; // Evitar redimensionar a 0
+                if (rect.width === 0 || rect.height === 0) return;
 
                 let hasContent = false;
                 const tempCanvas = document.createElement('canvas');
                 
-                // Solo guardar si el canvas original tiene dimensiones válidas
                 if (canvas.width > 0 && canvas.height > 0) {
                     tempCanvas.width = canvas.width; 
                     tempCanvas.height = canvas.height;
@@ -465,7 +494,6 @@
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
-                // Solo dibujar el respaldo si existía contenido previo válido
                 if (hasContent) {
                     ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
                 }
@@ -495,7 +523,12 @@
                 lastX = pos.x; lastY = pos.y;
                 e.preventDefault();
             }
-            function stopDraw(e) { isDrawing = false; }
+            function stopDraw(e) { 
+                if(isDrawing) {
+                    isDrawing = false; 
+                    triggerAutoSave();
+                }
+            }
 
             canvas.addEventListener('pointerdown', startDraw);
             canvas.addEventListener('pointermove', draw);
@@ -512,6 +545,7 @@
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             if(canvases[id]) saveCanvasState(id);
+            triggerAutoSave();
         };
 
         function saveCanvasState(id) {
@@ -528,6 +562,7 @@
                 img.onload = () => {
                     ctx.clearRect(0,0, canvas.width, canvas.height);
                     ctx.drawImage(img, 0, 0);
+                    triggerAutoSave();
                 };
                 img.src = canvases[id].history.pop();
             } else {
@@ -540,6 +575,38 @@
             canvases[id].ctx.strokeStyle = color;
         };
 
+        // Función para cargar foto en Firma o DNI manteniendo la proporción sin distorsión
+        window.setSignatureOrDNIPhoto = (canvasId, inputEl) => {
+            if(inputEl.files && inputEl.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.getElementById(canvasId);
+                        const ctx = canvas.getContext('2d');
+                        saveCanvasState(canvasId);
+                        
+                        ctx.fillStyle = '#ffffff'; 
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        
+                        // Escalar imagen para que encaje perfectamente (contain) sin deformarse
+                        let scale = Math.min(canvas.width / img.width, canvas.height / img.height);
+                        let drawW = img.width * scale;
+                        let drawH = img.height * scale;
+                        let x = (canvas.width - drawW) / 2;
+                        let y = (canvas.height - drawH) / 2;
+                        
+                        ctx.drawImage(img, x, y, drawW, drawH);
+                        triggerAutoSave();
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(inputEl.files[0]);
+            }
+            inputEl.value = '';
+        };
+
+        // Función para cargar fondo en Croquis forzando recorte o encaje 3:4 (4:3 vertical) sin distorsión
         window.setCanvasBackground = (id, inputEl) => {
             if(inputEl.files && inputEl.files[0]) {
                 const reader = new FileReader();
@@ -549,11 +616,19 @@
                         const canvas = document.getElementById(id);
                         const ctx = canvas.getContext('2d');
                         saveCanvasState(id);
-                        ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        
+                        ctx.fillStyle = '#ffffff'; 
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        
+                        // Usar Math.min para asegurar que fotos 16:9 u otras entren completas y centradas sin estirarse ni deformarse
                         let scale = Math.min(canvas.width / img.width, canvas.height / img.height);
-                        let x = (canvas.width / 2) - (img.width / 2) * scale;
-                        let y = (canvas.height / 2) - (img.height / 2) * scale;
-                        ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+                        let drawW = img.width * scale;
+                        let drawH = img.height * scale;
+                        let x = (canvas.width - drawW) / 2;
+                        let y = (canvas.height - drawH) / 2;
+                        
+                        ctx.drawImage(img, x, y, drawW, drawH);
+                        triggerAutoSave();
                     };
                     img.src = e.target.result;
                 };
@@ -562,16 +637,16 @@
             inputEl.value = '';
         };
 
-        window.addCroquisSheet = () => {
+        window.addCroquisSheet = (savedTitle = '', savedDataUrl = null) => {
             croquisCount++;
             const id = 'croquis_' + croquisCount;
             const container = document.getElementById('croquisContainer');
             
             const div = document.createElement('div');
-            div.className = "border border-gray-200 rounded p-3 bg-white";
+            div.className = "border border-gray-200 rounded p-3 bg-white croquis-item";
             div.innerHTML = `
                 <div class="flex flex-wrap justify-between items-center mb-2 gap-2">
-                    <input type="text" placeholder="Nivel / Ambiente (Ej: Piso 1)" class="text-sm font-semibold text-[#004481] border-b border-gray-300 outline-none pb-1 w-1/2">
+                    <input type="text" placeholder="Nivel / Ambiente (Ej: Piso 1)" value="${savedTitle}" oninput="triggerAutoSave()" class="croquis-title text-sm font-semibold text-[#004481] border-b border-gray-300 outline-none pb-1 w-1/2">
                     <div class="flex flex-wrap gap-2">
                         <div class="flex gap-1 bg-gray-50 p-1 rounded border shadow-sm">
                             <button onclick="changeCanvasColor('${id}', '#000000')" class="w-6 h-6 rounded-full bg-black border border-gray-300" title="Negro"></button>
@@ -580,6 +655,9 @@
                         </div>
                         <button onclick="undoCanvas('${id}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded text-xs border border-gray-200 font-semibold flex items-center gap-1">
                             ↩ Deshacer
+                        </button>
+                        <button onclick="clearCanvas('${id}')" class="bg-gray-100 hover:bg-red-50 text-red-500 px-2 py-1 rounded text-xs border border-gray-200 font-semibold">
+                            Borrar
                         </button>
                         
                         <label class="bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 px-2 py-1 rounded text-xs cursor-pointer flex items-center gap-1 font-semibold">
@@ -594,50 +672,111 @@
                         </label>
                     </div>
                 </div>
-                <div class="border border-gray-300 bg-white relative w-full" style="aspect-ratio: 1 / 1.414;">
+                <!-- Proporción 3:4 exacta (4:3 vertical) -->
+                <div class="border border-gray-300 bg-white relative w-full" style="aspect-ratio: 3 / 4;">
                     <canvas id="${id}" class="absolute inset-0 w-full h-full canvas-container"></canvas>
                 </div>
             `;
             container.appendChild(div);
-            setTimeout(() => setupCanvasDrawing(id), 50);
+            setTimeout(() => {
+                setupCanvasDrawing(id);
+                if (savedDataUrl) {
+                    const canvas = document.getElementById(id);
+                    const ctx = canvas.getContext('2d');
+                    const img = new Image();
+                    img.onload = () => {
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    };
+                    img.src = savedDataUrl;
+                }
+            }, 60);
         };
 
         // --- 4. TABLA DE DIMENSIONES ---
         let damageRowCount = 0;
-        window.addDamageRow = () => {
+        window.addDamageRow = (rowData = null) => {
             damageRowCount++;
             const tbody = document.getElementById('damageTableBody');
             const tr = document.createElement('tr');
+            
+            const partidaVal = rowData ? (rowData.partida || '') : '';
+            const detalleVal = rowData ? (rowData.detalle || '') : '';
+            const umVal = rowData ? (rowData.um || 'm2') : 'm2';
+            const supVal = rowData ? (rowData.sup || '') : '';
+            const obsVal = rowData ? (rowData.obs || '') : '';
+
             tr.innerHTML = `
-                <td class="text-center text-gray-500">${damageRowCount}</td>
-                <td><input type="text" class="w-full bg-transparent outline-none border-b border-dashed border-gray-300 focus:border-[#0071b9] dmg-partida"></td>
-                <td><input type="text" class="w-full bg-transparent outline-none border-b border-dashed border-gray-300 focus:border-[#0071b9] dmg-detalle"></td>
+                <td class="text-center text-gray-500 row-index">${damageRowCount}</td>
+                <td><input type="text" value="${partidaVal}" oninput="triggerAutoSave()" class="w-full bg-transparent outline-none border-b border-dashed border-gray-300 focus:border-[#0071b9] dmg-partida"></td>
+                <td><input type="text" value="${detalleVal}" oninput="triggerAutoSave()" class="w-full bg-transparent outline-none border-b border-dashed border-gray-300 focus:border-[#0071b9] dmg-detalle"></td>
                 <td>
-                    <select class="w-full bg-transparent outline-none border-b border-dashed border-gray-300 dmg-um">
-                        <option value="m2">m2</option><option value="ml">ml</option>
-                        <option value="m3">m3</option><option value="und">und</option>
-                        <option value="glb">glb</option><option value="otro">otro</option>
+                    <select onchange="triggerAutoSave()" class="w-full bg-transparent outline-none border-b border-dashed border-gray-300 dmg-um">
+                        <option value="m2" ${umVal === 'm2' ? 'selected' : ''}>m2</option>
+                        <option value="ml" ${umVal === 'ml' ? 'selected' : ''}>ml</option>
+                        <option value="m3" ${umVal === 'm3' ? 'selected' : ''}>m3</option>
+                        <option value="und" ${umVal === 'und' ? 'selected' : ''}>und</option>
+                        <option value="glb" ${umVal === 'glb' ? 'selected' : ''}>glb</option>
+                        <option value="otro" ${umVal === 'otro' ? 'selected' : ''}>otro</option>
                     </select>
                 </td>
-                <td><input type="number" step="0.01" class="w-full bg-transparent outline-none border-b border-dashed border-gray-300 text-center dmg-sup"></td>
-                <td><input type="text" class="w-full bg-transparent outline-none border-b border-dashed border-gray-300"></td>
-                <td class="text-center"><button onclick="this.parentElement.parentElement.remove();" class="text-red-500 hover:text-red-700 font-bold text-xs">X</button></td>
+                <td><input type="number" step="0.01" value="${supVal}" oninput="triggerAutoSave()" class="w-full bg-transparent outline-none border-b border-dashed border-gray-300 text-center dmg-sup"></td>
+                <td><input type="text" value="${obsVal}" oninput="triggerAutoSave()" class="w-full bg-transparent outline-none border-b border-dashed border-gray-300 dmg-obs"></td>
+                <td class="text-center"><button onclick="removeDamageRow(this)" class="text-red-500 hover:text-red-700 font-bold text-xs">X</button></td>
             `;
             tbody.appendChild(tr);
+            renumberDamageRows();
         };
+
+        window.removeDamageRow = (btn) => {
+            btn.parentElement.parentElement.remove();
+            renumberDamageRows();
+            triggerAutoSave();
+        };
+
+        function renumberDamageRows() {
+            const rows = document.querySelectorAll('#damageTableBody tr');
+            damageRowCount = rows.length;
+            rows.forEach((row, idx) => {
+                const idxCell = row.querySelector('.row-index');
+                if (idxCell) idxCell.innerText = idx + 1;
+            });
+        }
+
+        function getDamageDataForSave() {
+            const rows = document.querySelectorAll('#damageTableBody tr');
+            const data = [];
+            rows.forEach((row) => {
+                data.push({
+                    partida: row.querySelector('.dmg-partida').value,
+                    detalle: row.querySelector('.dmg-detalle').value,
+                    um: row.querySelector('.dmg-um').value,
+                    sup: row.querySelector('.dmg-sup').value,
+                    obs: row.querySelector('.dmg-obs').value
+                });
+            });
+            return data;
+        }
 
         function getDamageData() {
             const rows = document.querySelectorAll('#damageTableBody tr');
             const data = [];
             rows.forEach((row, index) => {
-                data.push([
-                    (index + 1).toString(),
-                    row.querySelector('.dmg-partida').value,
-                    row.querySelector('.dmg-detalle').value,
-                    row.querySelector('.dmg-um').value,
-                    row.querySelector('.dmg-sup').value,
-                    row.cells[5].querySelector('input').value
-                ]);
+                const partida = row.querySelector('.dmg-partida').value.trim();
+                const detalle = row.querySelector('.dmg-detalle').value.trim();
+                const sup = row.querySelector('.dmg-sup').value.trim();
+                const obs = row.querySelector('.dmg-obs').value.trim();
+                if (partida || detalle || sup || obs) {
+                    data.push([
+                        (index + 1).toString(),
+                        partida,
+                        detalle,
+                        row.querySelector('.dmg-um').value,
+                        sup,
+                        obs
+                    ]);
+                }
             });
             return data;
         }
@@ -681,7 +820,7 @@
             doc.setFont("helvetica", "bold");
             doc.setTextColor(0, 68, 129);
             doc.text("FICHA DE DATOS DE INSPECCIÓN", 15, 30);
-            doc.setDrawColor(0, 113, 185); // Azul Claro
+            doc.setDrawColor(0, 113, 185);
             doc.setLineWidth(0.8);
             doc.line(15, 33, 110, 33);
             
@@ -790,12 +929,12 @@
                 return;
             }
 
-            // Hojas de Croquis (Ocupando página completa)
-            for (let i = 1; i <= croquisCount; i++) {
-                const cId = 'croquis_' + i;
-                const cCanvas = document.getElementById(cId);
+            // Hojas de Croquis (Proporción 3:4 exacta de 180mm x 240mm ocupando toda la hoja)
+            const croquisItems = document.querySelectorAll('.croquis-item');
+            croquisItems.forEach((item, idx) => {
+                const cCanvas = item.querySelector('canvas');
+                const inputVal = item.querySelector('.croquis-title').value || `Nivel ${idx + 1}`;
                 if (cCanvas) {
-                    const inputVal = cCanvas.parentElement.parentElement.querySelector('input').value || `Nivel ${i}`;
                     doc.addPage();
                     drawHeader();
                     doc.setFontSize(12); doc.setFont("helvetica", "bold"); doc.setTextColor(0, 68, 129);
@@ -804,10 +943,13 @@
                     doc.line(15, 30, 100, 30);
                     
                     doc.setFillColor(255, 255, 255);
-                    doc.rect(15, 35, 180, 240, 'F');
+                    doc.setDrawColor(203, 213, 225);
+                    doc.setLineWidth(0.3);
+                    // 180mm ancho x 240mm alto = proporción exacta 3:4 (4:3 vertical)
+                    doc.rect(15, 35, 180, 240, 'DF');
                     doc.addImage(cCanvas.toDataURL('image/jpeg', 1.0), 'JPEG', 15, 35, 180, 240);
                 }
-            }
+            });
 
             // Registro Fotográfico (6 fotos por hoja)
             if (photosData.length > 0) {
@@ -820,8 +962,8 @@
                 doc.line(15, 33, 110, 33);
                 
                 yPos = 40;
-                const colW = (pageWidth - 35) / 2; // Dos columnas con 5 de padding extra
-                const imgH = 55; // 5.5cm aprox para garantizar 3 filas comodamente
+                const colW = (pageWidth - 35) / 2;
+                const imgH = 55;
                 let cx = 15;
                 
                 for (let i = 0; i < photosData.length; i++) {
@@ -862,7 +1004,8 @@
 
         // --- 6. EXPORTACIÓN ZIP ---
         window.exportToZIP = async () => {
-            if (photosData.length === 0 && croquisCount === 0) {
+            const croquisItems = document.querySelectorAll('.croquis-item');
+            if (photosData.length === 0 && croquisItems.length === 0) {
                 alert("No hay fotos ni croquis para exportar."); return;
             }
             const ownerName = document.getElementById('propNombre').value.trim().replace(/[^a-zA-Z0-9 ]/g, "") || "Sin_Nombre";
@@ -873,13 +1016,13 @@
                 const base64Data = p.image.replace(/^data:image\/(png|jpeg);base64,/, "");
                 zip.file(`Foto_${i+1}.jpg`, base64Data, {base64: true});
             });
-            for (let i = 1; i <= croquisCount; i++) {
-                const cCanvas = document.getElementById('croquis_' + i);
+            croquisItems.forEach((item, idx) => {
+                const cCanvas = item.querySelector('canvas');
                 if (cCanvas) {
                     const base64Data = cCanvas.toDataURL('image/jpeg', 1.0).replace(/^data:image\/(png|jpeg);base64,/, "");
-                    zip.file(`Croquis_${i}.jpg`, base64Data, {base64: true});
+                    zip.file(`Croquis_${idx+1}.jpg`, base64Data, {base64: true});
                 }
-            }
+            });
             zip.generateAsync({type:"blob"}).then(function(content) {
                 showExportModal("zip", content, zipFilename);
             });
@@ -931,16 +1074,42 @@
             }
         }
         
-        // --- 8. BASE DE DATOS LOCAL (IndexedDB) Y LISTA ---
+        // --- 8. BASE DE DATOS LOCAL (IndexedDB), AUTOGUARDADO Y LISTA ---
         let db;
-        const request = indexedDB.open("FRMECDB_Multi", 1);
-        request.onupgradeneeded = (e) => { db = e.target.result; db.createObjectStore("reports", { keyPath: "id" }); };
-        request.onsuccess = (e) => { db = e.target.result; };
+        let autoSaveTimer = null;
+        const request = indexedDB.open("FRMECDB_Multi", 2);
+        
+        request.onupgradeneeded = (e) => { 
+            db = e.target.result; 
+            if (!db.objectStoreNames.contains("reports")) {
+                db.createObjectStore("reports", { keyPath: "id" }); 
+            }
+        };
+        
+        request.onsuccess = (e) => { 
+            db = e.target.result; 
+            // Restaurar sesión activa automáticamente al refrescar la página
+            const lastSessionId = localStorage.getItem('frmec_active_report_id');
+            if (lastSessionId) {
+                loadSpecificReport(lastSessionId, true);
+            }
+        };
 
-        window.saveCurrentReport = () => {
-            if(!db) { alert("Base de datos no disponible."); return; }
+        function collectReportObject() {
             const propNombre = document.getElementById('propNombre').value || "Sin Nombre";
-            const report = {
+            const croquisList = [];
+            document.querySelectorAll('.croquis-item').forEach((item) => {
+                const cCanvas = item.querySelector('canvas');
+                const cTitle = item.querySelector('.croquis-title').value;
+                if (cCanvas) {
+                    croquisList.push({
+                        title: cTitle,
+                        dataUrl: cCanvas.toDataURL('image/jpeg', 0.9)
+                    });
+                }
+            });
+
+            return {
                 id: currentReportId,
                 timestamp: Date.now(),
                 title: propNombre,
@@ -961,13 +1130,32 @@
                     descInmueble: document.getElementById('descInmueble').value,
                     descDanos: document.getElementById('descDanos').value
                 },
+                damages: getDamageDataForSave(),
+                croquis: croquisList,
                 photos: photosData,
                 firma: document.getElementById('canvasFirma').toDataURL(),
                 dni: document.getElementById('canvasDNI').toDataURL()
             };
+        }
+
+        function triggerAutoSave() {
+            if (!db) return;
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(() => {
+                const report = collectReportObject();
+                const tx = db.transaction("reports", "readwrite");
+                tx.objectStore("reports").put(report);
+                localStorage.setItem('frmec_active_report_id', currentReportId);
+            }, 600);
+        }
+
+        window.saveCurrentReport = () => {
+            if(!db) { alert("Base de datos no disponible."); return; }
+            const report = collectReportObject();
             const tx = db.transaction("reports", "readwrite");
             tx.objectStore("reports").put(report);
-            tx.oncomplete = () => alert("Reporte guardado exitosamente.");
+            localStorage.setItem('frmec_active_report_id', currentReportId);
+            tx.oncomplete = () => alert("Reporte guardado exitosamente (incluyendo tabla de daños y croquis).");
         };
 
         window.showReportsList = () => {
@@ -989,7 +1177,7 @@
                                 <p class="text-sm font-bold text-[#004481]">${r.title}</p>
                                 <p class="text-xs text-gray-500">${r.date}</p>
                             </div>
-                            <button onclick="loadSpecificReport('${r.id}')" class="bg-[#0071b9] text-white text-xs px-3 py-1.5 rounded font-semibold shadow hover:bg-[#0055a5]">Cargar</button>
+                            <button onclick="loadSpecificReport('${r.id}', false)" class="bg-[#0071b9] text-white text-xs px-3 py-1.5 rounded font-semibold shadow hover:bg-[#0055a5]">Cargar</button>
                         `;
                         container.appendChild(div);
                     });
@@ -1002,26 +1190,67 @@
             document.getElementById('reportsListModal').classList.add('hidden');
         };
 
-        window.loadSpecificReport = (id) => {
+        window.loadSpecificReport = (id, isSilentRestore = false) => {
             if(!db) return;
             const tx = db.transaction("reports", "readonly");
             const req = tx.objectStore("reports").get(id);
             req.onsuccess = () => {
                 if(req.result) {
-                    if(!confirm("¿Cargar reporte? Los datos actuales no guardados se perderán.")) return;
+                    if(!isSilentRestore && !confirm("¿Cargar este reporte? Se reemplazará la vista actual.")) return;
                     currentReportId = id;
+                    localStorage.setItem('frmec_active_report_id', currentReportId);
                     const r = req.result;
-                    Object.keys(r.form).forEach(k => {
-                        if(document.getElementById(k)) document.getElementById(k).value = r.form[k];
-                    });
+                    
+                    // 1. Restaurar campos de formulario
+                    if (r.form) {
+                        Object.keys(r.form).forEach(k => {
+                            if(document.getElementById(k)) document.getElementById(k).value = r.form[k];
+                        });
+                    }
+                    
+                    // 2. Restaurar Tabla de Dimensiones de Daños
+                    const tbody = document.getElementById('damageTableBody');
+                    tbody.innerHTML = '';
+                    damageRowCount = 0;
+                    if (r.damages && Array.isArray(r.damages) && r.damages.length > 0) {
+                        r.damages.forEach(rowData => addDamageRow(rowData));
+                    } else {
+                        addDamageRow();
+                    }
+
+                    // 3. Restaurar Hojas de Croquis
+                    document.getElementById('croquisContainer').innerHTML = '';
+                    croquisCount = 0;
+                    if (r.croquis && Array.isArray(r.croquis) && r.croquis.length > 0) {
+                        r.croquis.forEach(c => addCroquisSheet(c.title, c.dataUrl));
+                    }
+
+                    // 4. Restaurar Fotos
                     photosData = r.photos || [];
                     renderPhotos();
                     
+                    // 5. Restaurar Firma y DNI
                     if(r.firma) {
-                        const imgF = new Image(); imgF.onload = () => document.getElementById('canvasFirma').getContext('2d').drawImage(imgF,0,0); imgF.src = r.firma;
+                        const cF = document.getElementById('canvasFirma');
+                        const ctxF = cF.getContext('2d');
+                        const imgF = new Image(); 
+                        imgF.onload = () => {
+                            ctxF.fillStyle = '#ffffff';
+                            ctxF.fillRect(0, 0, cF.width, cF.height);
+                            ctxF.drawImage(imgF, 0, 0, cF.width, cF.height);
+                        }; 
+                        imgF.src = r.firma;
                     }
                     if(r.dni) {
-                        const imgD = new Image(); imgD.onload = () => document.getElementById('canvasDNI').getContext('2d').drawImage(imgD,0,0); imgD.src = r.dni;
+                        const cD = document.getElementById('canvasDNI');
+                        const ctxD = cD.getContext('2d');
+                        const imgD = new Image(); 
+                        imgD.onload = () => {
+                            ctxD.fillStyle = '#ffffff';
+                            ctxD.fillRect(0, 0, cD.width, cD.height);
+                            ctxD.drawImage(imgD, 0, 0, cD.width, cD.height);
+                        }; 
+                        imgD.src = r.dni;
                     }
                     closeReportsListModal();
                 }
@@ -1029,8 +1258,9 @@
         };
 
         window.createNewReport = () => {
-            if(confirm("¿Empezar un nuevo reporte en blanco? Perderás los datos actuales no guardados.")) {
+            if(confirm("¿Empezar un nuevo reporte en blanco? Se guardará el anterior en tu lista de Reportes.")) {
                 currentReportId = Date.now().toString();
+                localStorage.setItem('frmec_active_report_id', currentReportId);
                 document.querySelectorAll('input, textarea').forEach(el => el.value = '');
                 photosData = [];
                 renderPhotos();
@@ -1038,9 +1268,15 @@
                 document.getElementById('croquisContainer').innerHTML = '';
                 croquisCount = 0;
                 document.getElementById('damageTableBody').innerHTML = '';
+                damageRowCount = 0;
                 addDamageRow(); 
             }
         };
+
+        // Escuchar cambios en todos los inputs principales para autoguardar
+        document.querySelectorAll('#inspectionForm input, textarea').forEach(el => {
+            el.addEventListener('input', triggerAutoSave);
+        });
 
         // --- Inicialización ---
         setupCanvasDrawing('canvasFirma');
