@@ -24,14 +24,7 @@
             transition: border-color 0.2s;
         }
         .input-clean:focus { outline: none; border-bottom: 2px solid #0071b9; }
-        .label-clean {
-            display: block;
-            font-size: 11px;
-            font-weight: 600;
-            color: #64748b;
-            margin-bottom: 2px;
-            letter-spacing: 0.5px;
-        }
+        .label-clean { display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 2px; letter-spacing: 0.5px; }
 
         .damage-table-container { border-radius: 6px; overflow: hidden; border: 1px solid #e2e8f0; }
         .damage-table th { background-color: #004481; color: white; padding: 10px; font-size: 11px; font-weight: 600; text-align: center; }
@@ -43,16 +36,50 @@
 </head>
 <body class="pb-20">
 
+    <!-- MODAL DE LOGIN (Firebase Auth) -->
+    <div id="loginModal" class="fixed inset-0 bg-slate-900 z-[300] flex flex-col items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-xl shadow-2xl max-w-sm w-full border-t-4 border-[#004481]">
+            <div class="flex justify-center mb-4">
+                <div class="bg-[#004481] p-3 rounded-full text-white">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.071 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"></path></svg>
+                </div>
+            </div>
+            <h2 class="text-2xl font-bold text-center text-[#004481] mb-6">Acceso a FRMEC</h2>
+            <form id="loginForm" onsubmit="event.preventDefault(); window.loginUser();">
+                <div class="mb-4">
+                    <label class="label-clean">Correo Electrónico</label>
+                    <input type="email" id="loginEmail" class="input-clean" required>
+                </div>
+                <div class="mb-6">
+                    <label class="label-clean">Contraseña</label>
+                    <input type="password" id="loginPassword" class="input-clean" required>
+                </div>
+                <button type="submit" class="w-full bg-[#0071b9] hover:bg-[#0055a5] text-white py-3 rounded font-bold shadow-md transition-colors">
+                    Iniciar Sesión
+                </button>
+            </form>
+            <p id="loginError" class="text-red-500 text-xs text-center mt-3 hidden"></p>
+        </div>
+    </div>
+
+    <!-- OVERLAY DE CARGA (Para procesos en la nube) -->
+    <div id="loadingOverlay" class="hidden fixed inset-0 bg-slate-900/80 z-[200] flex flex-col items-center justify-center p-4 backdrop-blur-sm">
+        <svg class="animate-spin h-12 w-12 text-[#0071b9] mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+        <p id="loadingText" class="text-white font-bold text-lg">Sincronizando con la nube...</p>
+    </div>
+
     <!-- Encabezado Corporativo -->
     <header class="bg-[#004481] text-white p-4 shadow-md sticky top-0 z-50">
         <div class="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3 w-full md:w-auto justify-center md:justify-start">
-                <div class="bg-white/10 p-2 rounded">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                </div>
-                <div>
-                    <h1 class="text-xl font-semibold tracking-wide">FRMEC - Inspecciones</h1>
-                    <p class="text-xs text-blue-200 font-light">Captura, Georreferencia y Reporte</p>
+            <div class="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto justify-center md:justify-start">
+                <div class="flex items-center gap-2">
+                    <div class="bg-white/10 p-2 rounded">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-semibold tracking-wide leading-tight">FRMEC - Inspecciones</h1>
+                        <p class="text-[10px] text-blue-200 font-light" id="currentUserDisplay">Conectando...</p>
+                    </div>
                 </div>
             </div>
             
@@ -60,20 +87,17 @@
                 <div id="gpsIndicatorContainer" class="bg-[#003366] text-blue-200 text-xs py-1.5 px-3 rounded flex items-center">
                     <span id="gpsIndicator" class="w-2 h-2 rounded-full bg-yellow-500 mr-2"></span> GPS Buscando...
                 </div>
-                <!-- Botón Nuevo -->
                 <button onclick="createNewReport()" class="bg-transparent hover:bg-white/10 text-white text-xs py-1.5 px-3 rounded border border-white/30 transition-colors flex items-center gap-1">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     Nuevo
                 </button>
-                <!-- Botón Reportes -->
-                <button onclick="showReportsList()" class="bg-transparent hover:bg-white/10 text-white text-xs py-1.5 px-3 rounded border border-white/30 transition-colors flex items-center gap-1" title="Ver reportes guardados">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+                <button onclick="showReportsList()" class="bg-transparent hover:bg-white/10 text-white text-xs py-1.5 px-3 rounded border border-white/30 transition-colors flex items-center gap-1" title="Nube">
                     Reportes
                 </button>
-                <!-- Botón Guardar -->
-                <button onclick="saveCurrentReport()" class="bg-[#0071b9] hover:bg-[#0055a5] text-white text-xs py-1.5 px-4 rounded transition-colors font-semibold shadow flex items-center gap-1">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                <button onclick="saveCurrentReportToCloud()" class="bg-[#0071b9] hover:bg-[#0055a5] text-white text-xs py-1.5 px-4 rounded transition-colors font-semibold shadow flex items-center gap-1">
                     Guardar
+                </button>
+                <button onclick="logoutUser()" class="bg-red-500 hover:bg-red-600 text-white text-xs py-1.5 px-3 rounded font-bold shadow transition-colors ml-2">
+                    Salir
                 </button>
             </div>
         </div>
@@ -82,28 +106,17 @@
         <div class="max-w-5xl mx-auto mt-4 pt-3 border-t border-[#0055a5] flex flex-wrap justify-between items-center gap-3">
             <span class="text-sm font-semibold text-blue-50">Exportar Reporte:</span>
             <div class="flex flex-wrap gap-2">
-                <button onclick="exportToPDF(true)" class="bg-white text-[#004481] hover:bg-gray-100 text-xs py-1.5 px-4 rounded shadow font-semibold flex items-center gap-1 transition-colors">
-                    <svg class="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path></svg>
-                    PDF Asegurado
-                </button>
-                <button onclick="exportToPDF(false)" class="bg-white text-[#004481] hover:bg-gray-100 text-xs py-1.5 px-4 rounded shadow font-semibold flex items-center gap-1 transition-colors">
-                    <svg class="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path></svg>
-                    PDF Completo
-                </button>
-                <button onclick="exportToZIP()" class="bg-white text-[#004481] hover:bg-gray-100 text-xs py-1.5 px-4 rounded shadow font-semibold flex items-center gap-1 transition-colors">
-                    <svg class="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V8a2 2 0 00-2-2h-5L9 4H4z" clip-rule="evenodd"></path></svg>
-                    ZIP Fotos
-                </button>
+                <button onclick="exportToPDF(true)" class="bg-white text-[#004481] hover:bg-gray-100 text-xs py-1.5 px-4 rounded shadow font-semibold flex items-center gap-1 transition-colors">PDF Asegurado</button>
+                <button onclick="exportToPDF(false)" class="bg-white text-[#004481] hover:bg-gray-100 text-xs py-1.5 px-4 rounded shadow font-semibold flex items-center gap-1 transition-colors">PDF Completo</button>
+                <button onclick="exportToZIP()" class="bg-white text-[#004481] hover:bg-gray-100 text-xs py-1.5 px-4 rounded shadow font-semibold flex items-center gap-1 transition-colors">ZIP Fotos</button>
             </div>
         </div>
     </header>
 
     <main class="max-w-5xl mx-auto p-4 space-y-6 mt-4">
-        
         <!-- SECCIÓN 1: DATOS DE INSPECCIÓN -->
         <div class="bg-white shadow-sm border border-slate-200 p-6 rounded-lg">
             <h2 class="text-lg font-bold text-[#004481] border-b pb-2 mb-5 border-[#0071b9]">FICHA DE DATOS DE INSPECCIÓN</h2>
-            
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4" id="inspectionForm">
                 <div><label class="label-clean">Nombre y apellido del propietario</label><input type="text" id="propNombre" class="input-clean"></div>
                 <div><label class="label-clean">Nro. de DNI del propietario</label><input type="tel" inputmode="numeric" id="propDNI" class="input-clean"></div>
@@ -127,13 +140,11 @@
             <div><label class="label-clean">Descripción de Daños</label><textarea id="descDanos" rows="4" class="input-clean"></textarea></div>
         </div>
 
-        <!-- SECCIÓN 3: TABLA DE DIMENSIONES (ACTUALIZADA) -->
+        <!-- SECCIÓN 3: TABLA DE DIMENSIONES -->
         <div class="bg-white shadow-sm border border-slate-200 p-6 rounded-lg">
             <div class="flex justify-between items-center mb-4 border-b border-[#0071b9] pb-2">
                 <h2 class="text-lg font-bold text-[#004481]">DIMENSIONES DE LOS DAÑOS</h2>
-                <button onclick="addDamageRow()" class="text-[#0071b9] hover:text-[#004481] text-sm font-semibold flex items-center gap-1">
-                    <span>+</span> Añadir Fila
-                </button>
+                <button onclick="addDamageRow()" class="text-[#0071b9] hover:text-[#004481] text-sm font-semibold flex items-center gap-1">+ Añadir Fila</button>
             </div>
             <div class="overflow-x-auto damage-table-container">
                 <table class="w-full text-left border-collapse damage-table" id="damageTable">
@@ -150,34 +161,22 @@
                             <th class="w-8"></th>
                         </tr>
                     </thead>
-                    <tbody id="damageTableBody">
-                        <!-- Filas dinámicas -->
-                    </tbody>
+                    <tbody id="damageTableBody"></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- SECCIÓN 4: DISCLAIMERS LEGALES Y FIRMAS -->
+        <!-- SECCIÓN 4: FIRMAS Y LEGAL -->
         <div class="bg-white shadow-sm border border-slate-200 p-6 rounded-lg space-y-6">
-            
-            <!-- Disclaimer 1 -->
             <div class="border border-blue-200 rounded-lg overflow-hidden">
-                <div class="bg-[#0071b9] text-white font-bold py-2 px-3 flex items-center gap-2 text-sm">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    IMPORTANTE (LECTURA OBLIGATORIA)
-                </div>
+                <div class="bg-[#0071b9] text-white font-bold py-2 px-3 text-sm">IMPORTANTE (LECTURA OBLIGATORIA)</div>
                 <div class="p-3 text-xs text-justify text-slate-700 bg-blue-50/50 leading-relaxed">
                     Le informamos que luego del presente levantamiento de información, se procederá con el análisis del siniestro por parte del Ajustador de Seguros seleccionado por usted, de conformidad a lo establecido en la Póliza de Seguros contratada y con la presentación de la documentación que sea requerida de acuerdo a la normativa de seguros vigente.<br><br>
                     El asegurado no podrá hacer abandono parcial o total de los bienes afectados sin la autorización expresa de la Compañía de Seguros o del Ajustador de Seguros, debiendo darse el debido cuidado para evitar el agravamiento de los daños. Estos bienes podrán ser retirados previa comunicación de la Compañía de Seguros o de la empresa autorizada por esta.
                 </div>
             </div>
-
-            <!-- Disclaimer 2 -->
             <div class="border border-blue-200 rounded-lg overflow-hidden">
-                <div class="bg-[#0071b9] text-white font-bold py-2 px-3 flex items-center gap-2 text-sm">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                    DECLARACIÓN DEL ASEGURADO
-                </div>
+                <div class="bg-[#0071b9] text-white font-bold py-2 px-3 text-sm">DECLARACIÓN DEL ASEGURADO</div>
                 <div class="p-3 text-xs text-justify text-slate-700 bg-blue-50/50 leading-relaxed">
                     He leído y estoy de acuerdo con los aspectos importantes mencionados en el párrafo anterior.<br>
                     Por la presente, acepto el detalle de las partidas afectadas de Edificio o Contenido, registrados en la presente inspección y anexos, no teniendo ninguna objeción a la inspección realizada.<br>
@@ -185,21 +184,16 @@
                 </div>
             </div>
 
-            <!-- Recuadros de Firma -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-2">
                 <div>
                     <div class="flex flex-wrap justify-between items-center mb-2 gap-2">
                         <label class="block text-sm font-bold text-[#004481]">Firma (Propietario / Rep.):</label>
                         <div class="flex gap-1">
                             <label class="bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 px-2 py-1 rounded text-xs cursor-pointer flex items-center gap-1 font-semibold shadow-sm">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
-                                Foto
-                                <input type="file" accept="image/*" capture="environment" class="hidden" onchange="setSignatureOrDNIPhoto('canvasFirma', this)">
+                                Foto <input type="file" accept="image/*" capture="environment" class="hidden" onchange="setSignatureOrDNIPhoto('canvasFirma', this)">
                             </label>
                             <label class="bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 px-2 py-1 rounded text-xs cursor-pointer flex items-center gap-1 font-semibold shadow-sm">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                Subir
-                                <input type="file" accept="image/*" class="hidden" onchange="setSignatureOrDNIPhoto('canvasFirma', this)">
+                                Subir <input type="file" accept="image/*" class="hidden" onchange="setSignatureOrDNIPhoto('canvasFirma', this)">
                             </label>
                         </div>
                     </div>
@@ -217,14 +211,10 @@
                         <label class="block text-sm font-bold text-[#004481]">DNI:</label>
                         <div class="flex gap-1">
                             <label class="bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 px-2 py-1 rounded text-xs cursor-pointer flex items-center gap-1 font-semibold shadow-sm">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
-                                Foto
-                                <input type="file" accept="image/*" capture="environment" class="hidden" onchange="setSignatureOrDNIPhoto('canvasDNI', this)">
+                                Foto <input type="file" accept="image/*" capture="environment" class="hidden" onchange="setSignatureOrDNIPhoto('canvasDNI', this)">
                             </label>
                             <label class="bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 px-2 py-1 rounded text-xs cursor-pointer flex items-center gap-1 font-semibold shadow-sm">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                Subir
-                                <input type="file" accept="image/*" class="hidden" onchange="setSignatureOrDNIPhoto('canvasDNI', this)">
+                                Subir <input type="file" accept="image/*" class="hidden" onchange="setSignatureOrDNIPhoto('canvasDNI', this)">
                             </label>
                         </div>
                     </div>
@@ -243,13 +233,9 @@
         <div class="bg-white shadow-sm border border-slate-200 p-6 rounded-lg">
             <div class="flex justify-between items-center mb-4 border-b border-[#0071b9] pb-2">
                 <h2 class="text-lg font-bold text-[#004481]">HOJAS DE CROQUIS</h2>
-                <button onclick="addCroquisSheet()" class="bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 px-3 py-1.5 text-xs rounded font-semibold transition-colors flex items-center gap-1 shadow-sm">
-                    <span>+</span> Añadir Hoja
-                </button>
+                <button onclick="addCroquisSheet()" class="bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 px-3 py-1.5 text-xs rounded font-semibold transition-colors flex items-center gap-1 shadow-sm">+ Añadir Hoja</button>
             </div>
-            <div id="croquisContainer" class="space-y-6">
-                <!-- Hojas de croquis -->
-            </div>
+            <div id="croquisContainer" class="space-y-6"></div>
         </div>
 
         <!-- SECCIÓN 6: FOTOS -->
@@ -257,30 +243,24 @@
             <h2 class="text-lg font-bold text-[#004481] border-b border-[#0071b9] pb-2 mb-4">REGISTRO FOTOGRÁFICO</h2>
             <div class="flex gap-4 mb-6">
                 <label class="flex-1 bg-[#0071b9] hover:bg-[#0055a5] text-white text-center py-2.5 rounded cursor-pointer transition-colors text-sm font-semibold flex items-center justify-center gap-2 shadow-sm">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    Tomar Foto
-                    <input type="file" accept="image/*" capture="environment" id="cameraInput" class="hidden">
+                    Tomar Foto <input type="file" accept="image/*" capture="environment" id="cameraInput" class="hidden">
                 </label>
                 <label class="flex-1 bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 text-center py-2.5 rounded cursor-pointer transition-colors text-sm font-semibold flex items-center justify-center gap-2 shadow-sm">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    Subir de Galería
-                    <input type="file" accept="image/*" multiple id="galleryInput" class="hidden">
+                    Subir de Galería <input type="file" accept="image/*" multiple id="galleryInput" class="hidden">
                 </label>
             </div>
             <div id="photoList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </div>
     </main>
 
-    <!-- MODAL DE LISTA DE REPORTES -->
+    <!-- MODAL DE LISTA DE REPORTES (AHORA DESDE FIREBASE) -->
     <div id="reportsListModal" class="hidden fixed inset-0 bg-slate-900/60 z-[120] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white p-6 rounded-xl shadow-2xl max-w-md w-full border-t-4 border-[#0071b9]">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold text-[#004481]">Reportes Guardados</h3>
+                <h3 class="text-lg font-bold text-[#004481]">Reportes en la Nube</h3>
                 <button onclick="closeReportsListModal()" class="text-slate-400 hover:text-slate-700 font-bold">X</button>
             </div>
-            <div id="reportsListContainer" class="max-h-64 overflow-y-auto space-y-2 mb-4">
-                <!-- Lista de reportes generada dinámicamente -->
-            </div>
+            <div id="reportsListContainer" class="max-h-64 overflow-y-auto space-y-2 mb-4"></div>
             <button onclick="closeReportsListModal()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded font-semibold transition-colors text-sm">Cerrar</button>
         </div>
     </div>
@@ -288,10 +268,7 @@
     <!-- MODAL DE PREVISUALIZACIÓN DE FOTOS -->
     <div id="photoPreviewModal" class="hidden fixed inset-0 bg-slate-900/90 z-[110] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="relative w-full max-w-4xl flex flex-col items-center">
-            <button onclick="closePreviewModal()" class="absolute -top-12 right-0 text-white hover:text-gray-300 font-bold text-lg bg-black/50 px-4 py-1.5 rounded-full flex items-center gap-2 transition-colors border border-white/20">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                Cerrar
-            </button>
+            <button onclick="closePreviewModal()" class="absolute -top-12 right-0 text-white hover:text-gray-300 font-bold text-lg bg-black/50 px-4 py-1.5 rounded-full border border-white/20">Cerrar</button>
             <img id="previewModalImage" src="" class="w-full max-h-[85vh] object-contain rounded shadow-2xl bg-black">
         </div>
     </div>
@@ -299,66 +276,273 @@
     <!-- MODAL UNIVERSAL DE EXPORTACIÓN -->
     <div id="universalExportModal" class="hidden fixed inset-0 bg-slate-900/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full border-t-4 border-[#0071b9]">
-            <div class="flex items-center justify-center mb-4 text-[#0071b9]">
-                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            </div>
             <h3 class="text-xl font-bold text-center text-[#004481] mb-2" id="modalTitle">¡Archivo Generado!</h3>
             <p class="text-sm text-center text-slate-500 mb-6 font-medium">¿Qué deseas hacer con el documento?</p>
-            
             <div class="flex flex-col gap-3">
-                <button onclick="saveModalFile()" class="w-full bg-[#004481] hover:bg-[#003366] text-white py-3 rounded-lg font-bold transition-colors flex items-center justify-center gap-2 shadow">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                    Guardar en el equipo
-                </button>
-                <button onclick="shareModalFile()" class="w-full bg-white border-2 border-[#25D366] text-[#25D366] hover:bg-[#25D366] hover:text-white py-3 rounded-lg font-bold transition-colors flex items-center justify-center gap-2 shadow-sm">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-                    Compartir vía App
-                </button>
+                <button onclick="saveModalFile()" class="w-full bg-[#004481] hover:bg-[#003366] text-white py-3 rounded-lg font-bold transition-colors shadow">Guardar en el equipo</button>
+                <button onclick="shareModalFile()" class="w-full bg-white border-2 border-[#25D366] text-[#25D366] hover:bg-[#25D366] hover:text-white py-3 rounded-lg font-bold transition-colors shadow-sm">Compartir vía App</button>
                 <button onclick="closeModal()" class="w-full text-slate-400 hover:text-slate-700 py-2 mt-1 text-sm font-semibold transition-colors">Cerrar</button>
             </div>
         </div>
     </div>
 
-    <!-- Canvas Oculto para Marca de Agua -->
     <canvas id="watermarkCanvas" style="display: none;"></canvas>
 
+    <!-- FIREBASE E INTEGRACIÓN BACKEND (MODULE) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+        // CREDENCIALES FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyBJnn6jcjQq4Ar8QtO6Z8BtZB4TZVBimRQ",
+            authDomain: "frmec-siniestros.firebaseapp.com",
+            projectId: "frmec-siniestros",
+            storageBucket: "frmec-siniestros.firebasestorage.app",
+            messagingSenderId: "185395261286",
+            appId: "1:185395261286:web:8f9515b2bb0e840084e2a7",
+            measurementId: "G-G3WCECFV3P"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // CREDENCIALES CLOUDINARY
+        const CLOUD_NAME = "ovmfxdmm";
+        const UPLOAD_PRESET = "frmec_fotos";
+        const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
+
+        // MANEJO DE SESIÓN (LOGIN)
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('loginModal').classList.add('hidden');
+                document.getElementById('currentUserDisplay').innerText = `Usuario: ${user.email}`;
+            } else {
+                document.getElementById('loginModal').classList.remove('hidden');
+            }
+        });
+
+        window.loginUser = async () => {
+            const email = document.getElementById('loginEmail').value;
+            const pass = document.getElementById('loginPassword').value;
+            const err = document.getElementById('loginError');
+            try {
+                err.classList.add('hidden');
+                document.getElementById('loadingOverlay').classList.remove('hidden');
+                document.getElementById('loadingText').innerText = "Verificando...";
+                await signInWithEmailAndPassword(auth, email, pass);
+            } catch (error) {
+                err.innerText = "Credenciales incorrectas o usuario no existe.";
+                err.classList.remove('hidden');
+            } finally {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            }
+        };
+
+        window.logoutUser = () => { signOut(auth); };
+
+        // HELPER PARA SUBIR A CLOUDINARY
+        async function uploadImageToCloudinary(base64Data) {
+            if (!base64Data || !base64Data.startsWith('data:image')) return base64Data; // Ya es URL o está vacío
+            const formData = new FormData();
+            formData.append('file', base64Data);
+            formData.append('upload_preset', UPLOAD_PRESET);
+            const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+            const data = await res.json();
+            return data.secure_url;
+        }
+
+        // HELPER PARA DESCARGAR URL A BASE64 (Necesario para jsPDF y ZIP)
+        async function getBase64FromUrl(url) {
+            if (!url || url.startsWith('data:')) return url;
+            try {
+                const res = await fetch(url);
+                const blob = await res.blob();
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.readAsDataURL(blob);
+                });
+            } catch (e) {
+                console.error("Error convirtiendo URL a Base64", e);
+                return null;
+            }
+        }
+
+        // EXPOSICIÓN A WINDOW PARA MANTENER LA APP FUNCIONANDO
+        window.saveCurrentReportToCloud = async () => {
+            if (!auth.currentUser) { alert("Debes iniciar sesión"); return; }
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            document.getElementById('loadingText').innerText = "Subiendo imágenes y guardando en la Nube...";
+            
+            try {
+                const report = window.collectReportObject();
+                
+                // 1. Subir Firmas
+                report.firma = await uploadImageToCloudinary(report.firma);
+                report.dni = await uploadImageToCloudinary(report.dni);
+                
+                // 2. Subir Fotos
+                for (let i = 0; i < report.photos.length; i++) {
+                    report.photos[i].image = await uploadImageToCloudinary(report.photos[i].image);
+                }
+                
+                // 3. Subir Croquis
+                for (let i = 0; i < report.croquis.length; i++) {
+                    report.croquis[i].dataUrl = await uploadImageToCloudinary(report.croquis[i].dataUrl);
+                }
+                
+                // 4. Guardar documento JSON en Firestore (Firebase)
+                await setDoc(doc(db, "reports", report.id), report);
+                
+                // Mantener el backup local por si acaso
+                window.saveToLocalDB(report);
+                
+                alert("¡Reporte guardado exitosamente en la Nube!");
+            } catch (error) {
+                console.error(error);
+                alert("Error al guardar en la nube: " + error.message);
+            } finally {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            }
+        };
+
+        window.showReportsList = async () => {
+            if (!auth.currentUser) return;
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            document.getElementById('loadingText').innerText = "Obteniendo reportes...";
+            
+            try {
+                const querySnapshot = await getDocs(collection(db, "reports"));
+                const list = [];
+                querySnapshot.forEach((docSnap) => { list.push(docSnap.data()); });
+                list.sort((a,b) => b.timestamp - a.timestamp);
+                
+                const container = document.getElementById('reportsListContainer');
+                container.innerHTML = '';
+                if(list.length === 0) {
+                    container.innerHTML = '<p class="text-sm text-gray-500 text-center">No hay reportes en la nube.</p>';
+                } else {
+                    list.forEach(r => {
+                        const div = document.createElement('div');
+                        div.className = "flex justify-between items-center bg-gray-50 p-3 rounded border border-gray-200";
+                        div.innerHTML = `
+                            <div>
+                                <p class="text-sm font-bold text-[#004481]">${r.title}</p>
+                                <p class="text-xs text-gray-500">${r.date}</p>
+                            </div>
+                            <button onclick="loadCloudReport('${r.id}')" class="bg-[#0071b9] text-white text-xs px-3 py-1.5 rounded font-semibold shadow hover:bg-[#0055a5]">Cargar</button>
+                        `;
+                        container.appendChild(div);
+                    });
+                }
+                document.getElementById('reportsListModal').classList.remove('hidden');
+            } catch (e) {
+                alert("Error al cargar la lista: " + e.message);
+            } finally {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            }
+        };
+
+        window.loadCloudReport = async (id) => {
+            if(!confirm("¿Cargar este reporte de la nube? Se reemplazará la vista actual.")) return;
+            
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            document.getElementById('loadingText').innerText = "Descargando datos...";
+            
+            try {
+                const docRef = doc(db, "reports", id);
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    window.renderLoadedReport(docSnap.data());
+                    window.closeReportsListModal();
+                } else {
+                    alert("El reporte no existe en la nube.");
+                }
+            } catch (e) {
+                alert("Error al cargar el reporte: " + e.message);
+            } finally {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            }
+        };
+
+        // Envolver exportToPDF y exportToZIP para asegurar conversión de URL a Base64
+        const originalExportPDF = window.exportToPDF;
+        window.exportToPDF = async (isAsegurado) => {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            document.getElementById('loadingText').innerText = "Procesando imágenes para el PDF...";
+            try {
+                await window.convertAllCloudImagesToBase64();
+                await originalExportPDF(isAsegurado);
+            } finally {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            }
+        };
+
+        const originalExportZIP = window.exportToZIP;
+        window.exportToZIP = async () => {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            document.getElementById('loadingText').innerText = "Descargando fotos para el ZIP...";
+            try {
+                await window.convertAllCloudImagesToBase64();
+                await originalExportZIP();
+            } finally {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            }
+        };
+
+        window.convertAllCloudImagesToBase64 = async () => {
+            for(let i=0; i<photosData.length; i++) {
+                photosData[i].image = await getBase64FromUrl(photosData[i].image);
+            }
+            // Los canvas se extraen usando .toDataURL() que ya es base64, 
+            // siempre que se hayan pintado con crossOrigin="Anonymous"
+        };
+    </script>
+
+    <!-- LOGICA FRONTEND RESTANTE (Mantenida fuera del module para acceso fácil) -->
     <script>
         let currentLat = null, currentLon = null, currentAcc = null;
         let photosData = [];
         let croquisCount = 0;
         let canvases = {};
-        
         let pendingBlob = null;
         let pendingFileName = "";
         let pendingFileType = "";
         let currentReportId = Date.now().toString();
-        
-        // --- 1. GEOLOCALIZACIÓN AUTOMÁTICA ---
+        let localDB;
+        let autoSaveTimer = null;
+
+        // INICIALIZACIÓN BASE DATOS LOCAL (Solo para backup offline automático)
+        const request = indexedDB.open("FRMECDB_Multi", 3);
+        request.onupgradeneeded = (e) => { 
+            localDB = e.target.result; 
+            if (!localDB.objectStoreNames.contains("reports")) localDB.createObjectStore("reports", { keyPath: "id" }); 
+        };
+        request.onsuccess = (e) => { 
+            localDB = e.target.result; 
+            const lastId = localStorage.getItem('frmec_active_report_id');
+            if (lastId) loadLocalReportOffline(lastId);
+        };
+
         function requestGPS() {
             if ("geolocation" in navigator) {
-                document.getElementById('gpsIndicatorContainer').innerHTML = `<span class="w-2 h-2 rounded-full bg-yellow-500 mr-2 shadow-[0_0_8px_#eab308]"></span> Buscando GPS...`;
                 navigator.geolocation.watchPosition(
                     (position) => {
-                        currentLat = position.coords.latitude;
-                        currentLon = position.coords.longitude;
-                        currentAcc = position.coords.accuracy;
-                        document.getElementById('gpsIndicatorContainer').innerHTML = `<span class="w-2 h-2 rounded-full bg-green-400 mr-2 shadow-[0_0_8px_#4ade80]"></span> GPS Activo`;
+                        currentLat = position.coords.latitude; currentLon = position.coords.longitude; currentAcc = position.coords.accuracy;
+                        document.getElementById('gpsIndicatorContainer').innerHTML = `<span class="w-2 h-2 rounded-full bg-green-400 mr-2"></span> GPS Activo`;
                     },
-                    (error) => {
-                        console.warn("GPS Denegado o sin señal.");
-                        document.getElementById('gpsIndicatorContainer').innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500 mr-2"></span> GPS Inactivo`;
-                    },
+                    (e) => { document.getElementById('gpsIndicatorContainer').innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500 mr-2"></span> GPS Inactivo`; },
                     { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
                 );
             }
         }
         window.onload = requestGPS;
 
-        // --- 2. MARCA DE AGUA EN FOTOS ---
         function formatDMS(deg, isLat) {
-            let d = Math.abs(deg);
-            let degrees = Math.floor(d);
-            let minutes = Math.floor((d - degrees) * 60);
+            let d = Math.abs(deg); let degrees = Math.floor(d); let minutes = Math.floor((d - degrees) * 60);
             let seconds = ((d - degrees - minutes/60) * 3600).toFixed(0);
             let dir = isLat ? (deg >= 0 ? "S" : "N") : (deg >= 0 ? "O" : "E"); 
             return `${degrees}°${minutes}'${seconds}" ${dir}`;
@@ -371,65 +555,32 @@
                 reader.onload = function(e) {
                     const img = new Image();
                     img.onload = function() {
-                        const canvas = document.getElementById('watermarkCanvas');
-                        const ctx = canvas.getContext('2d');
-                        
-                        let MAX_WIDTH = 1600;
-                        let scale = 1;
-                        if (img.width > MAX_WIDTH) scale = MAX_WIDTH / img.width;
-                        canvas.width = img.width * scale;
-                        canvas.height = img.height * scale;
-                        
+                        const canvas = document.getElementById('watermarkCanvas'); const ctx = canvas.getContext('2d');
+                        let scale = img.width > 1600 ? 1600 / img.width : 1;
+                        canvas.width = img.width * scale; canvas.height = img.height * scale;
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                         
                         const date = new Date();
                         const dateStr = date.toLocaleDateString('es-PE', {day:'2-digit', month:'2-digit', year:'numeric'}).replace(/\//g, ':');
-                        const timeStr = date.toLocaleTimeString('es-PE', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+                        const timeStr = date.toLocaleTimeString('es-PE');
                         
-                        const topBoxW = canvas.width * 0.35;
-                        const topBoxH = canvas.height * 0.05;
-                        ctx.fillStyle = 'black';
-                        ctx.fillRect(canvas.width - topBoxW, 0, topBoxW, topBoxH);
-                        
-                        const fontTitle = Math.floor(canvas.height * 0.025);
-                        ctx.font = `bold ${fontTitle}px Arial`;
-                        ctx.fillStyle = '#4ade80';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillText('GEOPHOTO VERIFIED', canvas.width - (topBoxW/2), topBoxH/2);
+                        const topBoxW = canvas.width * 0.35, topBoxH = canvas.height * 0.05;
+                        ctx.fillStyle = 'black'; ctx.fillRect(canvas.width - topBoxW, 0, topBoxW, topBoxH);
+                        ctx.font = `bold ${Math.floor(canvas.height * 0.025)}px Arial`; ctx.fillStyle = '#4ade80';
+                        ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('GEOPHOTO VERIFIED', canvas.width - (topBoxW/2), topBoxH/2);
 
-                        const marginBottom = canvas.height * 0.005;
-                        const bandHeight = canvas.height * 0.15;
-                        const startY = canvas.height - bandHeight - marginBottom;
-                        
-                        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
-                        ctx.fillRect(0, startY, canvas.width, bandHeight);
-                        
-                        ctx.fillStyle = '#4ade80';
-                        ctx.fillRect(0, startY, canvas.width, canvas.height * 0.005);
+                        const bandHeight = canvas.height * 0.15, startY = canvas.height - bandHeight - (canvas.height * 0.005);
+                        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)'; ctx.fillRect(0, startY, canvas.width, bandHeight);
+                        ctx.fillStyle = '#4ade80'; ctx.fillRect(0, startY, canvas.width, canvas.height * 0.005);
 
-                        ctx.textAlign = 'left';
-                        const fontText = Math.floor(canvas.height * 0.035);
-                        ctx.font = `bold ${fontText}px Arial`;
-                        
+                        ctx.textAlign = 'left'; ctx.font = `bold ${Math.floor(canvas.height * 0.035)}px Arial`;
                         const padX = canvas.width * 0.02;
-                        const textY1 = startY + (bandHeight * 0.35);
-                        const textY2 = startY + (bandHeight * 0.65);
-                        const textY3 = startY + (bandHeight * 0.95);
+                        ctx.fillStyle = '#fbbf24'; ctx.fillText(`FECHA / HORA: ${dateStr} ${timeStr}`, padX, startY + (bandHeight * 0.35));
+                        ctx.fillStyle = 'white'; ctx.fillText(`COORD: ${currentLat.toFixed(6)}°, ${currentLon.toFixed(6)}° (±${Math.round(currentAcc)}m)`, padX, startY + (bandHeight * 0.65));
+                        ctx.fillText(`DMS: ${formatDMS(currentLat, true)} | ${formatDMS(currentLon, false)}`, padX, startY + (bandHeight * 0.95));
 
-                        ctx.fillStyle = '#fbbf24';
-                        ctx.fillText(`FECHA / HORA: ${dateStr} ${timeStr}`, padX, textY1);
-                        
-                        ctx.fillStyle = 'white';
-                        ctx.fillText(`COORD: ${currentLat.toFixed(6)}°, ${currentLon.toFixed(6)}° (±${Math.round(currentAcc)}m)`, padX, textY2);
-                        ctx.fillText(`DMS: ${formatDMS(currentLat, true)} | ${formatDMS(currentLon, false)}`, padX, textY3);
-
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-                        const photoId = 'photo_' + Date.now() + Math.floor(Math.random() * 1000);
-                        photosData.push({ id: photoId, image: dataUrl, description: '' });
-                        renderPhotos();
-                        triggerAutoSave();
-                        resolve();
+                        photosData.push({ id: 'photo_' + Date.now(), image: canvas.toDataURL('image/jpeg', 0.85), description: '' });
+                        renderPhotos(); triggerAutoSave(); resolve();
                     };
                     img.src = e.target.result;
                 };
@@ -437,33 +588,21 @@
             });
         }
 
-        document.getElementById('cameraInput').addEventListener('change', async (e) => {
-            if(e.target.files && e.target.files[0]) await processImageFile(e.target.files[0]);
-            e.target.value = '';
-        });
-
-        document.getElementById('galleryInput').addEventListener('change', async (e) => {
-            if(e.target.files) {
-                for(let i=0; i<e.target.files.length; i++) await processImageFile(e.target.files[i]);
-            }
-            e.target.value = '';
-        });
+        document.getElementById('cameraInput').addEventListener('change', async (e) => { if(e.target.files[0]) await processImageFile(e.target.files[0]); e.target.value = ''; });
+        document.getElementById('galleryInput').addEventListener('change', async (e) => { if(e.target.files) for(let i=0; i<e.target.files.length; i++) await processImageFile(e.target.files[i]); e.target.value = ''; });
 
         function renderPhotos() {
-            const list = document.getElementById('photoList');
-            list.innerHTML = '';
+            const list = document.getElementById('photoList'); list.innerHTML = '';
             photosData.forEach((p) => {
                 const div = document.createElement('div');
                 div.className = "border border-slate-200 rounded p-2 bg-white shadow-sm flex flex-col gap-2 relative";
                 div.innerHTML = `
                     <div class="absolute top-1 right-1 flex gap-1 z-10">
-                        <button onclick="previewPhoto('${p.id}')" class="bg-[#0071b9] text-white rounded w-8 h-8 flex items-center justify-center font-bold shadow hover:bg-[#0055a5] border border-white" title="Previsualizar">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                        </button>
-                        <button onclick="removePhoto('${p.id}')" class="bg-red-500 text-white rounded w-8 h-8 flex items-center justify-center font-bold text-sm shadow hover:bg-red-600 border border-white" title="Eliminar Foto">X</button>
+                        <button onclick="previewPhoto('${p.id}')" class="bg-[#0071b9] text-white rounded w-8 h-8 flex items-center justify-center font-bold">O</button>
+                        <button onclick="removePhoto('${p.id}')" class="bg-red-500 text-white rounded w-8 h-8 flex items-center justify-center font-bold">X</button>
                     </div>
-                    <img src="${p.image}" class="w-full h-48 object-contain bg-slate-900 rounded" />
-                    <textarea placeholder="Descripción / Notas..." class="input-clean text-xs mt-1" rows="2" onchange="updateDesc('${p.id}', this.value)">${p.description}</textarea>
+                    <img src="${p.image}" class="w-full h-48 object-contain bg-slate-900 rounded" crossorigin="Anonymous" />
+                    <textarea placeholder="Descripción..." class="input-clean text-xs mt-1" rows="2" onchange="updateDesc('${p.id}', this.value)">${p.description}</textarea>
                 `;
                 list.appendChild(div);
             });
@@ -471,907 +610,191 @@
 
         window.removePhoto = (id) => { photosData = photosData.filter(p => p.id !== id); renderPhotos(); triggerAutoSave(); };
         window.updateDesc = (id, val) => { const p = photosData.find(x => x.id === id); if(p) { p.description = val; triggerAutoSave(); } };
+        window.previewPhoto = (id) => { const p = photosData.find(x => x.id === id); if(p) { document.getElementById('previewModalImage').src = p.image; document.getElementById('photoPreviewModal').classList.remove('hidden'); } };
+        window.closePreviewModal = () => { document.getElementById('photoPreviewModal').classList.add('hidden'); document.getElementById('previewModalImage').src = ""; };
 
-        window.previewPhoto = (id) => {
-            const p = photosData.find(x => x.id === id);
-            if (p) {
-                document.getElementById('previewModalImage').src = p.image;
-                document.getElementById('photoPreviewModal').classList.remove('hidden');
-            }
-        };
-
-        window.closePreviewModal = () => {
-            document.getElementById('photoPreviewModal').classList.add('hidden');
-            document.getElementById('previewModalImage').src = "";
-        };
-
-        // --- 3. DIBUJO EN CANVAS ---
         function setupCanvasDrawing(canvasId) {
-            const canvas = document.getElementById(canvasId);
-            if(!canvas) return;
-            const ctx = canvas.getContext('2d');
-            const HD_SCALE = 3;
-
-            let isDrawing = false;
-            let lastX = 0, lastY = 0;
-            let color = '#004481'; 
-            
-            if(canvases[canvasId] && canvases[canvasId].color) color = canvases[canvasId].color;
+            const canvas = document.getElementById(canvasId); if(!canvas) return;
+            const ctx = canvas.getContext('2d'); const HD_SCALE = 3;
+            let isDrawing = false; let lastX = 0, lastY = 0;
+            let color = canvases[canvasId] ? canvases[canvasId].color : '#004481';
 
             function resizeCanvas() {
-                const rect = canvas.parentElement.getBoundingClientRect();
-                if (rect.width === 0 || rect.height === 0) return;
-
-                const newWidth = rect.width * HD_SCALE;
-                const newHeight = rect.height * HD_SCALE;
-
-                if (canvas.width === newWidth && canvas.height === newHeight) return;
-
-                let hasContent = false;
-                const tempCanvas = document.createElement('canvas');
-                
-                if (canvas.width > 0 && canvas.height > 0) {
-                    tempCanvas.width = canvas.width; 
-                    tempCanvas.height = canvas.height;
-                    tempCanvas.getContext('2d').drawImage(canvas, 0, 0);
-                    hasContent = true;
-                }
-
-                canvas.width = newWidth;
-                canvas.height = newHeight;
-                
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                if (hasContent) { ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height); }
-                ctx.strokeStyle = color; 
-                ctx.lineWidth = 2 * HD_SCALE; 
-                ctx.lineCap = 'round'; 
-                ctx.lineJoin = 'round';
+                const rect = canvas.parentElement.getBoundingClientRect(); if (rect.width === 0) return;
+                const newW = rect.width * HD_SCALE, newH = rect.height * HD_SCALE;
+                if (canvas.width === newW && canvas.height === newH) return;
+                const tempCanvas = document.createElement('canvas'); let hasContent = false;
+                if (canvas.width > 0) { tempCanvas.width = canvas.width; tempCanvas.height = canvas.height; tempCanvas.getContext('2d').drawImage(canvas, 0, 0); hasContent = true; }
+                canvas.width = newW; canvas.height = newH;
+                ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                if (hasContent) ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
+                ctx.strokeStyle = color; ctx.lineWidth = 2 * HD_SCALE; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
             }
+            if(!canvases[canvasId]) { window.addEventListener('resize', resizeCanvas); setTimeout(resizeCanvas, 100); } 
+            else { ctx.strokeStyle = color; ctx.lineWidth = 2 * HD_SCALE; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; }
+
+            function getPos(e) { const rect = canvas.getBoundingClientRect(); return { x: (e.clientX - rect.left) * (canvas.width / rect.width), y: (e.clientY - rect.top) * (canvas.height / rect.height) }; }
+            canvas.addEventListener('pointerdown', (e) => { isDrawing = true; const pos = getPos(e); lastX = pos.x; lastY = pos.y; if(canvases[canvasId]) saveCanvasState(canvasId); e.preventDefault(); });
+            canvas.addEventListener('pointermove', (e) => { if(!isDrawing) return; const pos = getPos(e); ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(pos.x, pos.y); ctx.stroke(); lastX = pos.x; lastY = pos.y; e.preventDefault(); });
+            canvas.addEventListener('pointerup', (e) => { if(isDrawing) { isDrawing = false; triggerAutoSave(); } });
+            canvas.addEventListener('pointerout', (e) => { if(isDrawing) { isDrawing = false; triggerAutoSave(); } });
             
-            if(!canvases[canvasId]) {
-                window.addEventListener('resize', resizeCanvas);
-                setTimeout(resizeCanvas, 100);
-            } else {
-                ctx.strokeStyle = color; 
-                ctx.lineWidth = 2 * HD_SCALE; 
-                ctx.lineCap = 'round'; 
-                ctx.lineJoin = 'round';
-            }
-
-            function getPos(e) {
-                const rect = canvas.getBoundingClientRect();
-                const scaleX = canvas.width / rect.width;
-                const scaleY = canvas.height / rect.height;
-                return { 
-                    x: (e.clientX - rect.left) * scaleX, 
-                    y: (e.clientY - rect.top) * scaleY 
-                };
-            }
-
-            function startDraw(e) {
-                isDrawing = true;
-                const pos = getPos(e); lastX = pos.x; lastY = pos.y;
-                if(canvases[canvasId]) saveCanvasState(canvasId);
-                e.preventDefault();
-            }
-            function draw(e) {
-                if (!isDrawing) return;
-                const pos = getPos(e);
-                ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(pos.x, pos.y); ctx.stroke();
-                lastX = pos.x; lastY = pos.y;
-                e.preventDefault();
-            }
-            function stopDraw(e) { 
-                if(isDrawing) { isDrawing = false; triggerAutoSave(); }
-            }
-
-            canvas.addEventListener('pointerdown', startDraw);
-            canvas.addEventListener('pointermove', draw);
-            canvas.addEventListener('pointerup', stopDraw);
-            canvas.addEventListener('pointerout', stopDraw);
-            
-            if(!canvases[canvasId]) { canvases[canvasId] = { ctx: ctx, history: [], color: color }; } 
-            else { canvases[canvasId].ctx = ctx; }
+            if(!canvases[canvasId]) canvases[canvasId] = { ctx: ctx, history: [], color: color }; else canvases[canvasId].ctx = ctx;
         }
 
-        window.clearCanvas = (id) => {
-            const canvas = document.getElementById(id);
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            if(canvases[id]) saveCanvasState(id);
-            triggerAutoSave();
-        };
-
-        function saveCanvasState(id) {
-            const canvas = document.getElementById(id);
-            canvases[id].history.push(canvas.toDataURL());
-            if(canvases[id].history.length > 10) canvases[id].history.shift();
-        }
+        window.clearCanvas = (id) => { const canvas = document.getElementById(id); canvas.getContext('2d').fillRect(0, 0, canvas.width, canvas.height); if(canvases[id]) saveCanvasState(id); triggerAutoSave(); };
+        function saveCanvasState(id) { canvases[id].history.push(document.getElementById(id).toDataURL()); if(canvases[id].history.length > 10) canvases[id].history.shift(); }
+        window.undoCanvas = (id) => { if(canvases[id] && canvases[id].history.length > 0) { const canvas = document.getElementById(id); const img = new Image(); img.onload = () => { canvas.getContext('2d').clearRect(0,0, canvas.width, canvas.height); canvas.getContext('2d').drawImage(img, 0, 0); triggerAutoSave(); }; img.src = canvases[id].history.pop(); } else clearCanvas(id); };
+        window.changeCanvasColor = (id, color) => { canvases[id].color = color; canvases[id].ctx.strokeStyle = color; };
         
-        window.undoCanvas = (id) => {
-            if(canvases[id] && canvases[id].history.length > 0) {
-                const canvas = document.getElementById(id);
-                const ctx = canvas.getContext('2d');
-                const img = new Image();
-                img.onload = () => {
-                    ctx.clearRect(0,0, canvas.width, canvas.height);
-                    ctx.drawImage(img, 0, 0);
-                    triggerAutoSave();
-                };
-                img.src = canvases[id].history.pop();
-            } else {
-                clearCanvas(id);
-            }
-        };
-
-        window.changeCanvasColor = (id, color) => {
-            canvases[id].color = color;
-            canvases[id].ctx.strokeStyle = color;
-        };
-
         window.setSignatureOrDNIPhoto = (canvasId, inputEl) => {
-            if(inputEl.files && inputEl.files[0]) {
+            if(inputEl.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = new Image();
-                    img.onload = function() {
-                        const canvas = document.getElementById(canvasId);
-                        const ctx = canvas.getContext('2d');
-                        saveCanvasState(canvasId);
-                        
-                        ctx.fillStyle = '#ffffff'; 
-                        ctx.fillRect(0, 0, canvas.width, canvas.height);
-                        
+                reader.onload = (e) => {
+                    const img = new Image(); img.crossOrigin = "Anonymous";
+                    img.onload = () => {
+                        const canvas = document.getElementById(canvasId); saveCanvasState(canvasId);
+                        const ctx = canvas.getContext('2d'); ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
                         let scale = Math.min(canvas.width / img.width, canvas.height / img.height);
-                        let drawW = img.width * scale;
-                        let drawH = img.height * scale;
-                        let x = (canvas.width - drawW) / 2;
-                        let y = (canvas.height - drawH) / 2;
-                        
-                        ctx.drawImage(img, x, y, drawW, drawH);
+                        ctx.drawImage(img, (canvas.width - img.width * scale)/2, (canvas.height - img.height * scale)/2, img.width * scale, img.height * scale);
                         triggerAutoSave();
-                    };
-                    img.src = e.target.result;
-                };
-                reader.readAsDataURL(inputEl.files[0]);
-            }
-            inputEl.value = '';
+                    }; img.src = e.target.result;
+                }; reader.readAsDataURL(inputEl.files[0]);
+            } inputEl.value = '';
         };
 
-        // ACTUALIZADO: Adapta el canvas a la proporción original de la imagen
         window.setCanvasBackground = (id, inputEl) => {
-            if(inputEl.files && inputEl.files[0]) {
+            if(inputEl.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = new Image();
-                    img.onload = function() {
-                        const canvas = document.getElementById(id);
-                        const wrapper = canvas.parentElement;
-                        const ctx = canvas.getContext('2d');
-                        
-                        // Modificar el aspecto del contenedor para igualar a la imagen
-                        wrapper.style.aspectRatio = `${img.width} / ${img.height}`;
-                        wrapper.style.minHeight = 'auto'; // Limpiar la altura predeterminada
-                        
-                        // Dar tiempo al DOM para ajustar el tamaño antes de dibujar
-                        setTimeout(() => {
-                            ctx.fillStyle = '#ffffff'; 
-                            ctx.fillRect(0, 0, canvas.width, canvas.height);
-                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                            saveCanvasState(id);
-                            triggerAutoSave();
-                        }, 100);
-                    };
-                    img.src = e.target.result;
-                };
-                reader.readAsDataURL(inputEl.files[0]);
-            }
-            inputEl.value = '';
+                reader.onload = (e) => {
+                    const img = new Image(); img.crossOrigin = "Anonymous";
+                    img.onload = () => {
+                        const canvas = document.getElementById(id); canvas.parentElement.style.aspectRatio = `${img.width} / ${img.height}`; canvas.parentElement.style.minHeight = 'auto';
+                        setTimeout(() => { canvas.getContext('2d').fillRect(0, 0, canvas.width, canvas.height); canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height); saveCanvasState(id); triggerAutoSave(); }, 100);
+                    }; img.src = e.target.result;
+                }; reader.readAsDataURL(inputEl.files[0]);
+            } inputEl.value = '';
         };
 
         window.addCroquisSheet = (savedTitle = '', savedDataUrl = null) => {
-            croquisCount++;
-            const id = 'croquis_' + croquisCount;
-            const container = document.getElementById('croquisContainer');
-            
-            const div = document.createElement('div');
-            div.className = "border border-gray-200 rounded p-3 bg-white croquis-item";
+            croquisCount++; const id = 'croquis_' + croquisCount; const div = document.createElement('div'); div.className = "border border-gray-200 rounded p-3 bg-white croquis-item";
             div.innerHTML = `
-                <div class="flex flex-wrap justify-between items-center mb-2 gap-2">
-                    <input type="text" placeholder="Nivel / Ambiente (Ej: Piso 1)" value="${savedTitle}" oninput="triggerAutoSave()" class="croquis-title text-sm font-semibold text-[#004481] border-b border-gray-300 outline-none pb-1 w-1/2">
+                <div class="flex flex-wrap justify-between items-center mb-2 gap-2"><input type="text" placeholder="Nivel (Ej: Piso 1)" value="${savedTitle}" oninput="triggerAutoSave()" class="croquis-title text-sm font-semibold text-[#004481] border-b border-gray-300 outline-none pb-1 w-1/2">
                     <div class="flex flex-wrap gap-2">
-                        <div class="flex gap-1 bg-gray-50 p-1 rounded border shadow-sm">
-                            <button onclick="changeCanvasColor('${id}', '#000000')" class="w-6 h-6 rounded-full bg-black border border-gray-300" title="Negro"></button>
-                            <button onclick="changeCanvasColor('${id}', '#004481')" class="w-6 h-6 rounded-full bg-[#004481] border border-gray-300" title="Azul"></button>
-                            <button onclick="changeCanvasColor('${id}', '#ef4444')" class="w-6 h-6 rounded-full bg-red-500 border border-gray-300" title="Rojo"></button>
-                        </div>
-                        <button onclick="undoCanvas('${id}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded text-xs border border-gray-200 font-semibold flex items-center gap-1">
-                            ↩ Deshacer
-                        </button>
-                        <button onclick="clearCanvas('${id}')" class="bg-gray-100 hover:bg-red-50 text-red-50 px-2 py-1 rounded text-xs border border-gray-200 font-semibold text-red-500">
-                            Borrar
-                        </button>
-                        <label class="bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 px-2 py-1 rounded text-xs cursor-pointer flex items-center gap-1 font-semibold">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
-                            Cámara
-                            <input type="file" accept="image/*" capture="environment" class="hidden" onchange="setCanvasBackground('${id}', this)">
-                        </label>
-                        <label class="bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 px-2 py-1 rounded text-xs cursor-pointer flex items-center gap-1 font-semibold">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            Galería
-                            <input type="file" accept="image/*" class="hidden" onchange="setCanvasBackground('${id}', this)">
-                        </label>
+                        <div class="flex gap-1 bg-gray-50 p-1 rounded border shadow-sm"><button onclick="changeCanvasColor('${id}', '#000')" class="w-6 h-6 rounded-full bg-black"></button><button onclick="changeCanvasColor('${id}', '#004481')" class="w-6 h-6 rounded-full bg-[#004481]"></button><button onclick="changeCanvasColor('${id}', '#ef4444')" class="w-6 h-6 rounded-full bg-red-500"></button></div>
+                        <button onclick="undoCanvas('${id}')" class="bg-gray-100 px-3 py-1 rounded text-xs border font-semibold">Deshacer</button><button onclick="clearCanvas('${id}')" class="bg-gray-100 text-red-500 px-2 py-1 rounded text-xs border font-semibold">Borrar</button>
+                        <label class="bg-white border border-[#0071b9] text-[#0071b9] px-2 py-1 rounded text-xs cursor-pointer">Cámara<input type="file" accept="image/*" capture="environment" class="hidden" onchange="setCanvasBackground('${id}', this)"></label>
+                        <label class="bg-white border border-[#0071b9] text-[#0071b9] px-2 py-1 rounded text-xs cursor-pointer">Galería<input type="file" accept="image/*" class="hidden" onchange="setCanvasBackground('${id}', this)"></label>
                     </div>
                 </div>
-                <!-- Proporción por defecto (4:3) que se adapta si se sube una imagen -->
-                <div class="border border-gray-300 bg-white relative w-full croquis-wrapper" style="aspect-ratio: 3 / 4;">
-                    <canvas id="${id}" class="absolute inset-0 w-full h-full canvas-container"></canvas>
-                </div>
-            `;
-            container.appendChild(div);
+                <div class="border border-gray-300 bg-white relative w-full croquis-wrapper" style="aspect-ratio: 3 / 4;"><canvas id="${id}" class="absolute inset-0 w-full h-full canvas-container"></canvas></div>`;
+            document.getElementById('croquisContainer').appendChild(div);
             setTimeout(() => {
                 setupCanvasDrawing(id);
                 if (savedDataUrl) {
-                    const canvas = document.getElementById(id);
-                    const ctx = canvas.getContext('2d');
-                    const img = new Image();
-                    img.onload = () => {
-                        const wrapper = canvas.parentElement;
-                        wrapper.style.aspectRatio = `${img.width} / ${img.height}`;
-                        setTimeout(() => {
-                            ctx.fillStyle = '#ffffff';
-                            ctx.fillRect(0, 0, canvas.width, canvas.height);
-                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        }, 50);
-                    };
-                    img.src = savedDataUrl;
+                    const img = new Image(); img.crossOrigin = "Anonymous"; img.onload = () => {
+                        const canvas = document.getElementById(id); canvas.parentElement.style.aspectRatio = `${img.width} / ${img.height}`;
+                        setTimeout(() => { canvas.getContext('2d').fillRect(0, 0, canvas.width, canvas.height); canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height); }, 50);
+                    }; img.src = savedDataUrl;
                 }
             }, 60);
         };
 
-        // --- 4. NUEVA TABLA DE DIMENSIONES (7 COLUMNAS) ---
         let damageRowCount = 0;
         window.addDamageRow = (rowData = null) => {
-            damageRowCount++;
-            const tbody = document.getElementById('damageTableBody');
-            const tr = document.createElement('tr');
-            
-            const rubroVal = rowData ? (rowData.rubro || '') : '';
-            const descVal = rowData ? (rowData.desc || '') : '';
-            const ubiVal = rowData ? (rowData.ubi || '') : '';
-            const umVal = rowData ? (rowData.um || 'm2') : 'm2';
-            const supTotalVal = rowData ? (rowData.supTotal || '') : '';
-            const supAfecVal = rowData ? (rowData.supAfec || '') : '';
-            const obsVal = rowData ? (rowData.obs || '') : '';
-
-            tr.innerHTML = `
-                <td class="text-center text-gray-500 row-index">${damageRowCount}</td>
-                <td><input type="text" value="${rubroVal}" oninput="triggerAutoSave()" class="dmg-input dmg-rubro"></td>
-                <td><input type="text" value="${descVal}" oninput="triggerAutoSave()" class="dmg-input dmg-desc"></td>
-                <td><input type="text" value="${ubiVal}" oninput="triggerAutoSave()" class="dmg-input dmg-ubi"></td>
-                <td>
-                    <select onchange="triggerAutoSave()" class="dmg-input dmg-um border-none text-center">
-                        <option value="m2" ${umVal === 'm2' ? 'selected' : ''}>m2</option>
-                        <option value="ml" ${umVal === 'ml' ? 'selected' : ''}>ml</option>
-                        <option value="m3" ${umVal === 'm3' ? 'selected' : ''}>m3</option>
-                        <option value="und" ${umVal === 'und' ? 'selected' : ''}>und</option>
-                        <option value="glb" ${umVal === 'glb' ? 'selected' : ''}>glb</option>
-                        <option value="otro" ${umVal === 'otro' ? 'selected' : ''}>otro</option>
-                    </select>
-                </td>
-                <td><input type="number" step="0.01" value="${supTotalVal}" oninput="triggerAutoSave()" class="dmg-input dmg-suptotal text-center"></td>
-                <td><input type="number" step="0.01" value="${supAfecVal}" oninput="triggerAutoSave()" class="dmg-input dmg-supafec text-center"></td>
-                <td><input type="text" value="${obsVal}" oninput="triggerAutoSave()" class="dmg-input dmg-obs"></td>
-                <td class="text-center"><button onclick="removeDamageRow(this)" class="text-red-500 hover:text-red-700 font-bold text-xs">X</button></td>
-            `;
-            tbody.appendChild(tr);
-            renumberDamageRows();
+            damageRowCount++; const tbody = document.getElementById('damageTableBody'); const tr = document.createElement('tr');
+            tr.innerHTML = `<td class="text-center text-gray-500 row-index">${damageRowCount}</td>
+                <td><input type="text" value="${rowData?.rubro||''}" oninput="triggerAutoSave()" class="dmg-input dmg-rubro"></td>
+                <td><input type="text" value="${rowData?.desc||''}" oninput="triggerAutoSave()" class="dmg-input dmg-desc"></td>
+                <td><input type="text" value="${rowData?.ubi||''}" oninput="triggerAutoSave()" class="dmg-input dmg-ubi"></td>
+                <td><select onchange="triggerAutoSave()" class="dmg-input dmg-um border-none text-center"><option value="m2" ${rowData?.um==='m2'?'selected':''}>m2</option><option value="ml" ${rowData?.um==='ml'?'selected':''}>ml</option><option value="m3" ${rowData?.um==='m3'?'selected':''}>m3</option><option value="und" ${rowData?.um==='und'?'selected':''}>und</option><option value="glb" ${rowData?.um==='glb'?'selected':''}>glb</option><option value="otro" ${rowData?.um==='otro'?'selected':''}>otro</option></select></td>
+                <td><input type="number" step="0.01" value="${rowData?.supTotal||''}" oninput="triggerAutoSave()" class="dmg-input dmg-suptotal text-center"></td>
+                <td><input type="number" step="0.01" value="${rowData?.supAfec||''}" oninput="triggerAutoSave()" class="dmg-input dmg-supafec text-center"></td>
+                <td><input type="text" value="${rowData?.obs||''}" oninput="triggerAutoSave()" class="dmg-input dmg-obs"></td>
+                <td class="text-center"><button onclick="removeDamageRow(this)" class="text-red-500 font-bold text-xs">X</button></td>`;
+            tbody.appendChild(tr); renumberDamageRows();
         };
 
-        window.removeDamageRow = (btn) => {
-            btn.parentElement.parentElement.remove();
-            renumberDamageRows();
-            triggerAutoSave();
-        };
+        window.removeDamageRow = (btn) => { btn.parentElement.parentElement.remove(); renumberDamageRows(); triggerAutoSave(); };
+        function renumberDamageRows() { const rows = document.querySelectorAll('#damageTableBody tr'); damageRowCount = rows.length; rows.forEach((row, idx) => { if(row.querySelector('.row-index')) row.querySelector('.row-index').innerText = idx + 1; }); }
 
-        function renumberDamageRows() {
-            const rows = document.querySelectorAll('#damageTableBody tr');
-            damageRowCount = rows.length;
-            rows.forEach((row, idx) => {
-                const idxCell = row.querySelector('.row-index');
-                if (idxCell) idxCell.innerText = idx + 1;
-            });
-        }
-
-        function getDamageDataForSave() {
-            const rows = document.querySelectorAll('#damageTableBody tr');
-            const data = [];
-            rows.forEach((row) => {
-                data.push({
-                    rubro: row.querySelector('.dmg-rubro').value,
-                    desc: row.querySelector('.dmg-desc').value,
-                    ubi: row.querySelector('.dmg-ubi').value,
-                    um: row.querySelector('.dmg-um').value,
-                    supTotal: row.querySelector('.dmg-suptotal').value,
-                    supAfec: row.querySelector('.dmg-supafec').value,
-                    obs: row.querySelector('.dmg-obs').value
-                });
-            });
-            return data;
-        }
-
-        function getDamageData() {
-            const rows = document.querySelectorAll('#damageTableBody tr');
-            const data = [];
-            rows.forEach((row, index) => {
-                const rubro = row.querySelector('.dmg-rubro').value.trim();
-                const desc = row.querySelector('.dmg-desc').value.trim();
-                const ubi = row.querySelector('.dmg-ubi').value.trim();
-                const supTotal = row.querySelector('.dmg-suptotal').value.trim();
-                const supAfec = row.querySelector('.dmg-supafec').value.trim();
-                const obs = row.querySelector('.dmg-obs').value.trim();
-                
-                if (rubro || desc || ubi || supTotal || supAfec || obs) {
-                    data.push([
-                        (index + 1).toString(),
-                        rubro,
-                        desc,
-                        ubi,
-                        row.querySelector('.dmg-um').value,
-                        supTotal,
-                        supAfec,
-                        obs
-                    ]);
-                }
-            });
-            return data;
-        }
-
-        // --- 5. EXPORTACIÓN PDF ---
-        window.exportToPDF = async (isAsegurado) => {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ format: 'a4' });
-            const pageWidth = doc.internal.pageSize.getWidth();
-            const pageHeight = doc.internal.pageSize.getHeight();
-            let yPos = 20;
-
-            const ownerName = document.getElementById('propNombre').value.trim().replace(/[^a-zA-Z0-9 ]/g, "") || "Sin_Nombre";
-            const outputFilename = isAsegurado ? `${ownerName}_Acta_Asegurado.pdf` : `${ownerName}_Reporte.pdf`;
-
-            const drawHeader = () => {
-                doc.setFillColor(0, 68, 129); // #004481
-                doc.rect(0, 0, pageWidth, 20, 'F');
-                doc.setTextColor(255, 255, 255);
-                doc.setFontSize(14);
-                doc.setFont("helvetica", "bold");
-                doc.text("ACTA DE INSPECCIÓN", 15, 13);
-                doc.setTextColor(0, 0, 0);
-            };
-
-            const drawFooter = (pageNum, totalPages) => {
-                doc.setDrawColor(200, 200, 200);
-                doc.setLineWidth(0.5);
-                doc.line(15, pageHeight - 15, pageWidth - 15, pageHeight - 15);
-                doc.setFontSize(8);
-                doc.setTextColor(100, 100, 100);
-                doc.setFont("helvetica", "normal");
-                doc.text("FRMEC | Reporte de Inspección", 15, pageHeight - 10);
-                doc.text(`Página ${pageNum} de ${totalPages}`, pageWidth - 35, pageHeight - 10);
-            };
-
-            drawHeader();
-            
-            doc.setFontSize(14);
-            doc.setFont("helvetica", "bold");
-            doc.setTextColor(0, 68, 129);
-            doc.text("FICHA DE DATOS DE INSPECCIÓN", 15, 30);
-            doc.setDrawColor(0, 113, 185);
-            doc.setLineWidth(0.8);
-            doc.line(15, 33, 110, 33);
-            
-            const formValues = [
-                ["Nombre y apellido del propietario:", document.getElementById('propNombre').value, "Nro. de DNI del propietario:", document.getElementById('propDNI').value],
-                ["Nombre y apellido del representante:", document.getElementById('repNombre').value, "Nro. de DNI del representante:", document.getElementById('repDNI').value],
-                ["Dirección:", document.getElementById('domicilio').value, "Distrito:", document.getElementById('distrito').value],
-                ["Nro. celular:", document.getElementById('celular').value, "Correo:", document.getElementById('correo').value],
-                ["Fecha de inspección:", document.getElementById('fechaInsp').value, "hora de inspección:", document.getElementById('horaInsp').value],
-                ["Inspector:", document.getElementById('inspectorNombre').value, "", ""]
-            ];
-
-            doc.autoTable({
-                startY: 38,
-                body: formValues,
-                theme: 'plain',
-                styles: { fontSize: 9, cellPadding: 4, textColor: [0, 0, 0], fillColor: [255, 255, 255] }, 
-                columnStyles: { 
-                    0: { fontStyle: 'bold', textColor: [0, 68, 129], cellWidth: 48 }, 
-                    1: { cellWidth: 42 },
-                    2: { fontStyle: 'bold', textColor: [0, 68, 129], cellWidth: 45 },
-                    3: { cellWidth: 45 } 
-                },
-                didDrawPage: function (data) { drawHeader(); },
-                willDrawCell: function(data) {
-                    doc.setDrawColor(226, 232, 240);
-                    doc.setLineWidth(0.2);
-                    doc.line(data.cell.x, data.cell.y + data.cell.height, data.cell.x + data.cell.width, data.cell.y + data.cell.height);
-                }
-            });
-
-            yPos = doc.lastAutoTable.finalY + 10;
-
-            // --- Textos Largos con justificado a la izquierda (left) y márgenes ---
-            const textSections = [
-                { title: "Descripción General del Siniestro", text: document.getElementById('descSiniestro').value },
-                { title: "Descripción del Inmueble", text: document.getElementById('descInmueble').value },
-                { title: "Descripción de Daños", text: document.getElementById('descDanos').value }
-            ];
-
-            textSections.forEach(sec => {
-                if (sec.text.trim() !== '') {
-                    doc.autoTable({
-                        startY: yPos,
-                        margin: { left: 15, right: 15, top: 25, bottom: 20 }, 
-                        head: [[sec.title]],
-                        body: [[sec.text]],
-                        theme: 'plain',
-                        headStyles: { fontStyle: 'bold', fontSize: 11, textColor: [0, 68, 129], cellPadding: {top: 5, bottom: 2} },
-                        bodyStyles: { fontSize: 9, textColor: [30, 41, 59], cellPadding: 2, fillColor: [255, 255, 255], halign: 'left' },
-                        didDrawPage: function (data) { drawHeader(); }
-                    });
-                    yPos = doc.lastAutoTable.finalY + 5;
-                }
-            });
-
-            // --- Nueva Tabla de Dimensiones (7 Columnas) ---
-            const dmgData = getDamageData();
-            if(dmgData.length > 0) {
-                yPos += 5;
-                doc.autoTable({
-                    startY: yPos,
-                    margin: { top: 30 },
-                    head: [["TABLA DE DIMENSIONES DE LOS DAÑOS"]],
-                    body: [],
-                    theme: 'plain',
-                    headStyles: { fontStyle: 'bold', fontSize: 11, textColor: [0, 68, 129] },
-                    didDrawPage: function (data) { drawHeader(); }
-                });
-                
-                doc.autoTable({
-                    startY: doc.lastAutoTable.finalY + 2,
-                    margin: { left: 10, right: 10, top: 30 },
-                    head: [["Nro.", "Rubro", "Descripción", "Ubicación (croquis)", "Und", "Sup. total", "Sup. afectada", "Observación"]],
-                    body: dmgData,
-                    theme: 'grid',
-                    headStyles: { fillColor: [0, 68, 129], textColor: 255, fontSize: 8, halign: 'center' },
-                    bodyStyles: { fontSize: 8, fillColor: [255, 255, 255], textColor: [30, 41, 59] },
-                    alternateRowStyles: { fillColor: [248, 250, 252] },
-                    columnStyles: {
-                        0: { cellWidth: 10, halign: 'center' },
-                        4: { cellWidth: 10, halign: 'center' },
-                        5: { cellWidth: 15, halign: 'center' },
-                        6: { cellWidth: 15, halign: 'center' }
-                    },
-                    didDrawPage: function (data) { drawHeader(); }
-                });
-                yPos = doc.lastAutoTable.finalY + 10;
-            }
-
-            // --- Disclaimers y Firmas ---
-            const disclaimer1 = "Le informamos que luego del presente levantamiento de información, se procederá con el análisis del siniestro por parte del Ajustador de Seguros seleccionado por usted, de conformidad a lo establecido en la Póliza de Seguros contratada y con la presentación de la documentación que sea requerida de acuerdo a la normativa de seguros vigente.\nEl asegurado no podrá hacer abandono parcial o total de los bienes afectados sin la autorización expresa de la Compañía de Seguros o del Ajustador de Seguros, debiendo darse el debido cuidado para evitar el agravamiento de los daños. Estos bienes podrán ser retirados previa comunicación de la Compañía de Seguros o de la empresa autorizada por esta.";
-            const disclaimer2 = "He leído y estoy de acuerdo con los aspectos importantes mencionados en el párrafo anterior.\nPor la presente, acepto el detalle de las partidas afectadas de Edificio o Contenido, registrados en la presente inspección y anexos, no teniendo ninguna objeción a la inspección realizada.\nAcepto que toda la documentación relacionada al proceso de ajuste y liquidación de la pérdida por el siniestro reportado sea a través del correo electrónico consignado en la presente acta de inspección, la cual suscribo en señal de conformidad.";
-
-            doc.autoTable({
-                startY: yPos,
-                margin: { left: 15, right: 15, top: 30 },
-                head: [["IMPORTANTE (LECTURA OBLIGATORIA)"]],
-                body: [[disclaimer1]],
-                theme: 'grid',
-                headStyles: { fillColor: [0, 113, 185], textColor: 255, fontStyle: 'bold', fontSize: 9 },
-                bodyStyles: { fillColor: [240, 248, 255], textColor: [0, 0, 0], fontSize: 8, halign: 'left', cellPadding: 3 },
-                didDrawPage: function (data) { drawHeader(); }
-            });
-            yPos = doc.lastAutoTable.finalY + 4;
-
-            doc.autoTable({
-                startY: yPos,
-                margin: { left: 15, right: 15, top: 30 },
-                head: [["DECLARACIÓN DEL ASEGURADO"]],
-                body: [[disclaimer2]],
-                theme: 'grid',
-                headStyles: { fillColor: [0, 113, 185], textColor: 255, fontStyle: 'bold', fontSize: 9 },
-                bodyStyles: { fillColor: [240, 248, 255], textColor: [0, 0, 0], fontSize: 8, halign: 'left', cellPadding: 3 },
-                didDrawPage: function (data) { drawHeader(); }
-            });
-            yPos = doc.lastAutoTable.finalY + 10;
-
-            if (yPos > pageHeight - 65) { doc.addPage(); yPos = 35; drawHeader(); }
-            
-            doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(0, 68, 129);
-            doc.text("Firma (Propietario / Representante):", 15, yPos);
-            doc.text("DNI:", 105, yPos);
-            
-            const firmaCanvas = document.getElementById('canvasFirma');
-            const dniCanvas = document.getElementById('canvasDNI');
-            
-            doc.setFillColor(255, 255, 255);
-            doc.setDrawColor(0, 68, 129);
-            doc.setLineWidth(0.3);
-            doc.rect(15, yPos + 5, 80, 40, 'DF'); 
-            doc.rect(105, yPos + 5, 80, 40, 'DF');
-            
-            doc.addImage(firmaCanvas.toDataURL('image/jpeg', 1.0), 'JPEG', 15, yPos + 5, 80, 40);
-            doc.addImage(dniCanvas.toDataURL('image/jpeg', 1.0), 'JPEG', 105, yPos + 5, 80, 40);
-
-            if (isAsegurado) {
-                const totalPages = doc.internal.getNumberOfPages();
-                for (let i = 1; i <= totalPages; i++) { doc.setPage(i); drawFooter(i, totalPages); }
-                showExportModal("pdf", doc.output('blob'), outputFilename);
-                return;
-            }
-
-            // Hojas de Croquis (Cálculo proporcional de imagen)
-            const croquisItems = document.querySelectorAll('.croquis-item');
-            croquisItems.forEach((item, idx) => {
-                const cCanvas = item.querySelector('canvas');
-                const inputVal = item.querySelector('.croquis-title').value || `Nivel ${idx + 1}`;
-                if (cCanvas) {
-                    doc.addPage();
-                    drawHeader();
-                    doc.setFontSize(12); doc.setFont("helvetica", "bold"); doc.setTextColor(0, 68, 129);
-                    doc.text(`HOJA DE CROQUIS: ${inputVal}`, 15, 28);
-                    doc.setDrawColor(0, 113, 185); doc.setLineWidth(0.5);
-                    doc.line(15, 30, 100, 30);
-                    
-                    const maxW = 180;
-                    const maxH = 240;
-                    const canvasRatio = cCanvas.width / cCanvas.height;
-                    
-                    let drawW = maxW;
-                    let drawH = maxW / canvasRatio;
-                    
-                    if (drawH > maxH) {
-                        drawH = maxH;
-                        drawW = maxH * canvasRatio;
-                    }
-                    
-                    const offsetX = 15 + (maxW - drawW) / 2;
-                    const offsetY = 35 + (maxH - drawH) / 2;
-
-                    doc.setFillColor(255, 255, 255);
-                    doc.setDrawColor(203, 213, 225);
-                    doc.setLineWidth(0.3);
-                    doc.rect(15, 35, 180, 240, 'DF'); 
-
-                    doc.addImage(cCanvas.toDataURL('image/jpeg', 1.0), 'JPEG', offsetX, offsetY, drawW, drawH);
-                }
-            });
-
-            // Registro Fotográfico
-            if (photosData.length > 0) {
-                doc.addPage();
-                drawHeader();
-                
-                doc.setFontSize(14); doc.setFont("helvetica", "bold"); doc.setTextColor(0, 68, 129);
-                doc.text("REGISTRO FOTOGRÁFICO", 15, 30);
-                doc.setDrawColor(0, 113, 185); doc.setLineWidth(0.8);
-                doc.line(15, 33, 110, 33);
-                
-                yPos = 40;
-                const colW = (pageWidth - 35) / 2;
-                const imgH = 55;
-                let cx = 15;
-                
-                for (let i = 0; i < photosData.length; i++) {
-                    const p = photosData[i];
-                    
-                    const img = new Image();
-                    img.src = p.image;
-                    const imgRatio = img.width / img.height;
-                    let drawW = imgH * imgRatio;
-                    
-                    if(drawW > colW - 4) { drawW = colW - 4; }
-
-                    if (yPos + imgH + 20 > pageHeight - 15) {
-                        doc.addPage(); 
-                        drawHeader(); 
-                        yPos = 35; 
-                        cx = 15;
-                    }
-                    
-                    const isRight = i % 2 !== 0;
-                    if (isRight) cx = 15 + colW + 5; else cx = 15;
-
-                    const offsetX = cx + (colW - drawW) / 2;
-                    doc.addImage(p.image, 'JPEG', offsetX, yPos, drawW, imgH); 
-                    
-                    doc.setFontSize(8); doc.setFont("helvetica", "normal"); doc.setTextColor(50, 50, 50);
-                    const splitDesc = doc.splitTextToSize(p.description || 'Sin descripción', colW);
-                    doc.text(splitDesc, cx, yPos + imgH + 5);
-
-                    if (isRight) yPos += imgH + 25;
-                }
-            }
-
-            const totalPages = doc.internal.getNumberOfPages();
-            for (let i = 1; i <= totalPages; i++) { doc.setPage(i); drawFooter(i, totalPages); }
-            showExportModal("pdf", doc.output('blob'), outputFilename);
-        };
-
-        // --- 6. EXPORTACIÓN ZIP ---
-        window.exportToZIP = async () => {
-            const croquisItems = document.querySelectorAll('.croquis-item');
-            if (photosData.length === 0 && croquisItems.length === 0) {
-                alert("No hay fotos ni croquis para exportar."); return;
-            }
-            const ownerName = document.getElementById('propNombre').value.trim().replace(/[^a-zA-Z0-9 ]/g, "") || "Sin_Nombre";
-            const zipFilename = `Fotos_${ownerName}.zip`;
-
-            const zip = new JSZip();
-            photosData.forEach((p, i) => {
-                const base64Data = p.image.replace(/^data:image\/(png|jpeg);base64,/, "");
-                zip.file(`Foto_${i+1}.jpg`, base64Data, {base64: true});
-            });
-            croquisItems.forEach((item, idx) => {
-                const cCanvas = item.querySelector('canvas');
-                if (cCanvas) {
-                    const base64Data = cCanvas.toDataURL('image/jpeg', 1.0).replace(/^data:image\/(png|jpeg);base64,/, "");
-                    zip.file(`Croquis_${idx+1}.jpg`, base64Data, {base64: true});
-                }
-            });
-            zip.generateAsync({type:"blob"}).then(function(content) {
-                showExportModal("zip", content, zipFilename);
-            });
-        };
-
-        // --- 7. MODAL UNIVERSAL DE EXPORTACIÓN ---
-        function showExportModal(type, blob, filename) {
-            pendingBlob = blob;
-            pendingFileName = filename;
-            pendingFileType = type;
-            
-            const title = document.getElementById('modalTitle');
-            if(type === 'pdf') title.innerText = "¡PDF Generado!";
-            else title.innerText = "¡ZIP Generado!";
-            
-            document.getElementById('universalExportModal').classList.remove('hidden');
-        }
-
-        window.closeModal = () => {
-            document.getElementById('universalExportModal').classList.add('hidden');
-            pendingBlob = null;
-        }
-
-        window.saveModalFile = () => {
-            if (pendingBlob) saveAs(pendingBlob, pendingFileName);
-            closeModal();
-        }
-
-        window.shareModalFile = async () => {
-            if (!pendingBlob) return;
-            
-            const fileOptions = { type: pendingFileType === 'pdf' ? "application/pdf" : "application/zip" };
-            const file = new File([pendingBlob], pendingFileName, fileOptions);
-            
-            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-                try {
-                    await navigator.share({
-                        files: [file],
-                        title: 'Archivo FRMEC',
-                        text: 'Adjunto el archivo generado desde la inspección.'
-                    });
-                    closeModal();
-                } catch (error) {
-                    console.log('Error o cancelación al compartir:', error);
-                }
-            } else {
-                alert("Tu dispositivo no soporta la función nativa de compartir archivos pesados. El archivo se descargará directamente en tu equipo para que lo envíes.");
-                saveModalFile();
-            }
-        }
-        
-        // --- 8. BASE DE DATOS LOCAL (IndexedDB), AUTOGUARDADO Y LISTA ---
-        let db;
-        let autoSaveTimer = null;
-        const request = indexedDB.open("FRMECDB_Multi", 3);
-        
-        request.onupgradeneeded = (e) => { 
-            db = e.target.result; 
-            if (!db.objectStoreNames.contains("reports")) {
-                db.createObjectStore("reports", { keyPath: "id" }); 
-            }
-        };
-        
-        request.onsuccess = (e) => { 
-            db = e.target.result; 
-            const lastSessionId = localStorage.getItem('frmec_active_report_id');
-            if (lastSessionId) {
-                loadSpecificReport(lastSessionId, true);
-            }
-        };
-
-        function collectReportObject() {
-            const propNombre = document.getElementById('propNombre').value || "Sin Nombre";
+        window.collectReportObject = () => {
             const croquisList = [];
             document.querySelectorAll('.croquis-item').forEach((item) => {
                 const cCanvas = item.querySelector('canvas');
-                const cTitle = item.querySelector('.croquis-title').value;
-                if (cCanvas) {
-                    croquisList.push({
-                        title: cTitle,
-                        dataUrl: cCanvas.toDataURL('image/jpeg', 0.9)
-                    });
-                }
+                if (cCanvas) croquisList.push({ title: item.querySelector('.croquis-title').value, dataUrl: cCanvas.toDataURL('image/jpeg', 0.9) });
             });
-
+            const damages = [];
+            document.querySelectorAll('#damageTableBody tr').forEach((row) => {
+                damages.push({ rubro: row.querySelector('.dmg-rubro').value, desc: row.querySelector('.dmg-desc').value, ubi: row.querySelector('.dmg-ubi').value, um: row.querySelector('.dmg-um').value, supTotal: row.querySelector('.dmg-suptotal').value, supAfec: row.querySelector('.dmg-supafec').value, obs: row.querySelector('.dmg-obs').value });
+            });
             return {
-                id: currentReportId,
-                timestamp: Date.now(),
-                title: propNombre,
-                date: new Date().toLocaleDateString(),
-                form: {
-                    propNombre: document.getElementById('propNombre').value,
-                    propDNI: document.getElementById('propDNI').value,
-                    repNombre: document.getElementById('repNombre').value,
-                    repDNI: document.getElementById('repDNI').value,
-                    domicilio: document.getElementById('domicilio').value,
-                    distrito: document.getElementById('distrito').value,
-                    celular: document.getElementById('celular').value,
-                    correo: document.getElementById('correo').value,
-                    fechaInsp: document.getElementById('fechaInsp').value,
-                    horaInsp: document.getElementById('horaInsp').value,
-                    inspectorNombre: document.getElementById('inspectorNombre').value,
-                    descSiniestro: document.getElementById('descSiniestro').value,
-                    descInmueble: document.getElementById('descInmueble').value,
-                    descDanos: document.getElementById('descDanos').value
-                },
-                damages: getDamageDataForSave(),
-                croquis: croquisList,
-                photos: photosData,
-                firma: document.getElementById('canvasFirma').toDataURL(),
-                dni: document.getElementById('canvasDNI').toDataURL()
-            };
-        }
-
-        function triggerAutoSave() {
-            if (!db) return;
-            clearTimeout(autoSaveTimer);
-            autoSaveTimer = setTimeout(() => {
-                const report = collectReportObject();
-                const tx = db.transaction("reports", "readwrite");
-                tx.objectStore("reports").put(report);
-                localStorage.setItem('frmec_active_report_id', currentReportId);
-            }, 600);
-        }
-
-        window.saveCurrentReport = () => {
-            if(!db) { alert("Base de datos no disponible."); return; }
-            const report = collectReportObject();
-            const tx = db.transaction("reports", "readwrite");
-            tx.objectStore("reports").put(report);
-            localStorage.setItem('frmec_active_report_id', currentReportId);
-            tx.oncomplete = () => alert("Reporte guardado exitosamente.");
-        };
-
-        window.showReportsList = () => {
-            if(!db) return;
-            const tx = db.transaction("reports", "readonly");
-            const req = tx.objectStore("reports").getAll();
-            req.onsuccess = () => {
-                const list = req.result.sort((a,b) => b.timestamp - a.timestamp);
-                const container = document.getElementById('reportsListContainer');
-                container.innerHTML = '';
-                if(list.length === 0) {
-                    container.innerHTML = '<p class="text-sm text-gray-500 text-center">No hay reportes guardados.</p>';
-                } else {
-                    list.forEach(r => {
-                        const div = document.createElement('div');
-                        div.className = "flex justify-between items-center bg-gray-50 p-3 rounded border border-gray-200";
-                        div.innerHTML = `
-                            <div>
-                                <p class="text-sm font-bold text-[#004481]">${r.title}</p>
-                                <p class="text-xs text-gray-500">${r.date}</p>
-                            </div>
-                            <button onclick="loadSpecificReport('${r.id}', false)" class="bg-[#0071b9] text-white text-xs px-3 py-1.5 rounded font-semibold shadow hover:bg-[#0055a5]">Cargar</button>
-                        `;
-                        container.appendChild(div);
-                    });
-                }
-                document.getElementById('reportsListModal').classList.remove('hidden');
+                id: currentReportId, timestamp: Date.now(), title: document.getElementById('propNombre').value || "Sin Nombre", date: new Date().toLocaleDateString(),
+                form: { propNombre: document.getElementById('propNombre').value, propDNI: document.getElementById('propDNI').value, repNombre: document.getElementById('repNombre').value, repDNI: document.getElementById('repDNI').value, domicilio: document.getElementById('domicilio').value, distrito: document.getElementById('distrito').value, celular: document.getElementById('celular').value, correo: document.getElementById('correo').value, fechaInsp: document.getElementById('fechaInsp').value, horaInsp: document.getElementById('horaInsp').value, inspectorNombre: document.getElementById('inspectorNombre').value, descSiniestro: document.getElementById('descSiniestro').value, descInmueble: document.getElementById('descInmueble').value, descDanos: document.getElementById('descDanos').value },
+                damages: damages, croquis: croquisList, photos: photosData, firma: document.getElementById('canvasFirma').toDataURL(), dni: document.getElementById('canvasDNI').toDataURL()
             };
         };
 
-        window.closeReportsListModal = () => {
-            document.getElementById('reportsListModal').classList.add('hidden');
+        window.saveToLocalDB = (report) => { if(localDB) { localDB.transaction("reports", "readwrite").objectStore("reports").put(report); localStorage.setItem('frmec_active_report_id', report.id); } };
+        function triggerAutoSave() { clearTimeout(autoSaveTimer); autoSaveTimer = setTimeout(() => { window.saveToLocalDB(window.collectReportObject()); }, 600); }
+
+        window.renderLoadedReport = (r) => {
+            currentReportId = r.id; localStorage.setItem('frmec_active_report_id', currentReportId);
+            if (r.form) Object.keys(r.form).forEach(k => { if(document.getElementById(k)) document.getElementById(k).value = r.form[k]; });
+            
+            document.getElementById('damageTableBody').innerHTML = ''; damageRowCount = 0;
+            if (r.damages && r.damages.length > 0) r.damages.forEach(rowData => addDamageRow(rowData)); else addDamageRow();
+
+            document.getElementById('croquisContainer').innerHTML = ''; croquisCount = 0;
+            if (r.croquis && r.croquis.length > 0) r.croquis.forEach(c => addCroquisSheet(c.title, c.dataUrl));
+
+            photosData = r.photos || []; renderPhotos();
+            
+            const drawImageToCanvas = (canvasId, src) => { if(src){ const c = document.getElementById(canvasId); const ctx = c.getContext('2d'); const img = new Image(); img.crossOrigin = "Anonymous"; img.onload = () => { ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, c.width, c.height); ctx.drawImage(img, 0, 0, c.width, c.height); }; img.src = src; } };
+            drawImageToCanvas('canvasFirma', r.firma); drawImageToCanvas('canvasDNI', r.dni);
         };
 
-        window.loadSpecificReport = (id, isSilentRestore = false) => {
-            if(!db) return;
-            const tx = db.transaction("reports", "readonly");
-            const req = tx.objectStore("reports").get(id);
-            req.onsuccess = () => {
-                if(req.result) {
-                    if(!isSilentRestore && !confirm("¿Cargar este reporte? Se reemplazará la vista actual.")) return;
-                    currentReportId = id;
-                    localStorage.setItem('frmec_active_report_id', currentReportId);
-                    const r = req.result;
-                    
-                    if (r.form) {
-                        Object.keys(r.form).forEach(k => {
-                            if(document.getElementById(k)) document.getElementById(k).value = r.form[k];
-                        });
-                    }
-                    
-                    const tbody = document.getElementById('damageTableBody');
-                    tbody.innerHTML = '';
-                    damageRowCount = 0;
-                    if (r.damages && Array.isArray(r.damages) && r.damages.length > 0) {
-                        r.damages.forEach(rowData => addDamageRow(rowData));
-                    } else {
-                        addDamageRow();
-                    }
+        function loadLocalReportOffline(id) { if(localDB) { const req = localDB.transaction("reports", "readonly").objectStore("reports").get(id); req.onsuccess = () => { if(req.result) window.renderLoadedReport(req.result); }; } }
+        window.closeReportsListModal = () => { document.getElementById('reportsListModal').classList.add('hidden'); };
+        window.createNewReport = () => { if(confirm("¿Empezar un nuevo reporte en blanco?")) { currentReportId = Date.now().toString(); document.querySelectorAll('input, textarea').forEach(el => el.value = ''); photosData = []; renderPhotos(); clearCanvas('canvasFirma'); clearCanvas('canvasDNI'); document.getElementById('croquisContainer').innerHTML = ''; croquisCount = 0; document.getElementById('damageTableBody').innerHTML = ''; addDamageRow(); triggerAutoSave(); } };
+        document.querySelectorAll('#inspectionForm input, textarea').forEach(el => el.addEventListener('input', triggerAutoSave));
+        setupCanvasDrawing('canvasFirma'); setupCanvasDrawing('canvasDNI'); addDamageRow();
 
-                    document.getElementById('croquisContainer').innerHTML = '';
-                    croquisCount = 0;
-                    if (r.croquis && Array.isArray(r.croquis) && r.croquis.length > 0) {
-                        r.croquis.forEach(c => addCroquisSheet(c.title, c.dataUrl));
-                    }
-
-                    photosData = r.photos || [];
-                    renderPhotos();
-                    
-                    if(r.firma) {
-                        const cF = document.getElementById('canvasFirma');
-                        const ctxF = cF.getContext('2d');
-                        const imgF = new Image(); 
-                        imgF.onload = () => {
-                            ctxF.fillStyle = '#ffffff';
-                            ctxF.fillRect(0, 0, cF.width, cF.height);
-                            ctxF.drawImage(imgF, 0, 0, cF.width, cF.height);
-                        }; 
-                        imgF.src = r.firma;
-                    }
-                    if(r.dni) {
-                        const cD = document.getElementById('canvasDNI');
-                        const ctxD = cD.getContext('2d');
-                        const imgD = new Image(); 
-                        imgD.onload = () => {
-                            ctxD.fillStyle = '#ffffff';
-                            ctxD.fillRect(0, 0, cD.width, cD.height);
-                            ctxD.drawImage(imgD, 0, 0, cD.width, cD.height);
-                        }; 
-                        imgD.src = r.dni;
-                    }
-                    closeReportsListModal();
-                }
-            };
+        // LOGICA DE EXPORTACIÓN PDF (Usado por el script módulo)
+        window.exportToPDF = async (isAsegurado) => {
+            const { jsPDF } = window.jspdf; const doc = new jsPDF({ format: 'a4' });
+            const pageWidth = doc.internal.pageSize.getWidth(), pageHeight = doc.internal.pageSize.getHeight();
+            const outputFilename = isAsegurado ? `${document.getElementById('propNombre').value}_Acta_Asegurado.pdf` : `${document.getElementById('propNombre').value}_Reporte.pdf`;
+            const drawHeader = () => { doc.setFillColor(0, 68, 129); doc.rect(0, 0, pageWidth, 20, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(14); doc.setFont("helvetica", "bold"); doc.text("ACTA DE INSPECCIÓN", 15, 13); doc.setTextColor(0, 0, 0); };
+            const drawFooter = (p, t) => { doc.setDrawColor(200, 200, 200); doc.setLineWidth(0.5); doc.line(15, pageHeight - 15, pageWidth - 15, pageHeight - 15); doc.setFontSize(8); doc.setTextColor(100, 100, 100); doc.setFont("helvetica", "normal"); doc.text("FRMEC | Reporte", 15, pageHeight - 10); doc.text(`Página ${p} de ${t}`, pageWidth - 35, pageHeight - 10); };
+            drawHeader(); doc.setFontSize(14); doc.setFont("helvetica", "bold"); doc.setTextColor(0, 68, 129); doc.text("FICHA DE DATOS DE INSPECCIÓN", 15, 30); doc.setDrawColor(0, 113, 185); doc.setLineWidth(0.8); doc.line(15, 33, 110, 33);
+            doc.autoTable({ startY: 38, body: [["Nombre propietario:", document.getElementById('propNombre').value, "DNI propietario:", document.getElementById('propDNI').value],["Nombre representante:", document.getElementById('repNombre').value, "DNI representante:", document.getElementById('repDNI').value],["Dirección:", document.getElementById('domicilio').value, "Distrito:", document.getElementById('distrito').value],["Celular:", document.getElementById('celular').value, "Correo:", document.getElementById('correo').value],["Fecha inspección:", document.getElementById('fechaInsp').value, "Hora inspección:", document.getElementById('horaInsp').value],["Inspector:", document.getElementById('inspectorNombre').value, "", ""]], theme: 'plain', styles: { fontSize: 9, cellPadding: 4, textColor: [0, 0, 0] }, columnStyles: { 0: { fontStyle: 'bold', textColor: [0, 68, 129] }, 2: { fontStyle: 'bold', textColor: [0, 68, 129] } }, didDrawPage: function () { drawHeader(); }, willDrawCell: function(data) { doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.2); doc.line(data.cell.x, data.cell.y + data.cell.height, data.cell.x + data.cell.width, data.cell.y + data.cell.height); } });
+            let yPos = doc.lastAutoTable.finalY + 10;
+            [{t: "Descripción General", d: 'descSiniestro'}, {t: "Descripción Inmueble", d: 'descInmueble'}, {t: "Descripción Daños", d: 'descDanos'}].forEach(sec => { if (document.getElementById(sec.d).value) { doc.autoTable({ startY: yPos, margin: { left: 15, right: 15, top: 25, bottom: 20 }, head: [[sec.t]], body: [[document.getElementById(sec.d).value]], theme: 'plain', headStyles: { fontStyle: 'bold', fontSize: 11, textColor: [0, 68, 129] }, bodyStyles: { fontSize: 9, textColor: [30, 41, 59], halign: 'left' }, didDrawPage: function () { drawHeader(); } }); yPos = doc.lastAutoTable.finalY + 5; } });
+            
+            const dmgData = []; document.querySelectorAll('#damageTableBody tr').forEach((row, i) => { const vals = Array.from(row.querySelectorAll('.dmg-input')).map(el => el.value); if(vals.some(v=>v)) dmgData.push([(i+1).toString(), ...vals]); });
+            if(dmgData.length > 0) { doc.autoTable({ startY: yPos, margin: { top: 30 }, head: [["TABLA DE DIMENSIONES"]], body: [], theme: 'plain', headStyles: { fontStyle: 'bold', fontSize: 11, textColor: [0, 68, 129] }, didDrawPage: function () { drawHeader(); } }); doc.autoTable({ startY: doc.lastAutoTable.finalY + 2, margin: { left: 10, right: 10, top: 30 }, head: [["Nro", "Rubro", "Desc", "Ubi", "Und", "Total", "Afectada", "Obs"]], body: dmgData, theme: 'grid', headStyles: { fillColor: [0, 68, 129], textColor: 255, fontSize: 8 }, bodyStyles: { fontSize: 8 }, didDrawPage: function () { drawHeader(); } }); yPos = doc.lastAutoTable.finalY + 10; }
+            if (yPos > pageHeight - 65) { doc.addPage(); yPos = 35; drawHeader(); }
+            doc.setFontSize(10); doc.setTextColor(0, 68, 129); doc.text("Firma (Propietario / Representante):", 15, yPos); doc.text("DNI:", 105, yPos);
+            doc.setFillColor(255, 255, 255); doc.setDrawColor(0, 68, 129); doc.setLineWidth(0.3); doc.rect(15, yPos + 5, 80, 40, 'DF'); doc.rect(105, yPos + 5, 80, 40, 'DF');
+            doc.addImage(document.getElementById('canvasFirma').toDataURL('image/jpeg', 1.0), 'JPEG', 15, yPos + 5, 80, 40); doc.addImage(document.getElementById('canvasDNI').toDataURL('image/jpeg', 1.0), 'JPEG', 105, yPos + 5, 80, 40);
+            if (isAsegurado) { for (let i = 1; i <= doc.internal.getNumberOfPages(); i++) { doc.setPage(i); drawFooter(i, doc.internal.getNumberOfPages()); } showExportModal("pdf", doc.output('blob'), outputFilename); return; }
+            document.querySelectorAll('.croquis-item').forEach((item, idx) => { const cCanvas = item.querySelector('canvas'); if (cCanvas) { doc.addPage(); drawHeader(); doc.setFontSize(12); doc.setTextColor(0, 68, 129); doc.text(`HOJA DE CROQUIS: ${item.querySelector('.croquis-title').value||('Nivel '+(idx+1))}`, 15, 28); doc.setDrawColor(0, 113, 185); doc.setLineWidth(0.5); doc.line(15, 30, 100, 30); const canvasRatio = cCanvas.width / cCanvas.height; let drawW = 180, drawH = 180 / canvasRatio; if (drawH > 240) { drawH = 240; drawW = 240 * canvasRatio; } doc.setFillColor(255, 255, 255); doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.3); doc.rect(15, 35, 180, 240, 'DF'); doc.addImage(cCanvas.toDataURL('image/jpeg', 1.0), 'JPEG', 15 + (180 - drawW) / 2, 35 + (240 - drawH) / 2, drawW, drawH); } });
+            if (photosData.length > 0) { doc.addPage(); drawHeader(); doc.setFontSize(14); doc.setTextColor(0, 68, 129); doc.text("REGISTRO FOTOGRÁFICO", 15, 30); doc.setDrawColor(0, 113, 185); doc.setLineWidth(0.8); doc.line(15, 33, 110, 33); yPos = 40; const colW = (pageWidth - 35) / 2; let cx = 15; for (let i = 0; i < photosData.length; i++) { const p = photosData[i]; const img = new Image(); img.src = p.image; let drawW = 55 * (img.width / img.height); if(drawW > colW - 4) drawW = colW - 4; if (yPos + 75 > pageHeight - 15) { doc.addPage(); drawHeader(); yPos = 35; cx = 15; } const isRight = i % 2 !== 0; if (isRight) cx = 15 + colW + 5; else cx = 15; doc.addImage(p.image, 'JPEG', cx + (colW - drawW) / 2, yPos, drawW, 55); doc.setFontSize(8); doc.setTextColor(50, 50, 50); doc.text(doc.splitTextToSize(p.description || 'Sin descripción', colW), cx, yPos + 60); if (isRight) yPos += 80; } }
+            for (let i = 1; i <= doc.internal.getNumberOfPages(); i++) { doc.setPage(i); drawFooter(i, doc.internal.getNumberOfPages()); } showExportModal("pdf", doc.output('blob'), outputFilename);
         };
 
-        window.createNewReport = () => {
-            if(confirm("¿Empezar un nuevo reporte en blanco? Se guardará el anterior en tu lista de Reportes.")) {
-                currentReportId = Date.now().toString();
-                localStorage.setItem('frmec_active_report_id', currentReportId);
-                document.querySelectorAll('input, textarea').forEach(el => el.value = '');
-                photosData = [];
-                renderPhotos();
-                clearCanvas('canvasFirma'); clearCanvas('canvasDNI');
-                document.getElementById('croquisContainer').innerHTML = '';
-                croquisCount = 0;
-                document.getElementById('damageTableBody').innerHTML = '';
-                damageRowCount = 0;
-                addDamageRow(); 
-            }
+        window.exportToZIP = async () => {
+            const croquisItems = document.querySelectorAll('.croquis-item'); if (photosData.length === 0 && croquisItems.length === 0) { alert("No hay fotos para exportar."); return; }
+            const zip = new JSZip(); photosData.forEach((p, i) => { zip.file(`Foto_${i+1}.jpg`, p.image.replace(/^data:image\/(png|jpeg);base64,/, ""), {base64: true}); });
+            croquisItems.forEach((item, idx) => { const cCanvas = item.querySelector('canvas'); if (cCanvas) zip.file(`Croquis_${idx+1}.jpg`, cCanvas.toDataURL('image/jpeg', 1.0).replace(/^data:image\/(png|jpeg);base64,/, ""), {base64: true}); });
+            zip.generateAsync({type:"blob"}).then(function(content) { showExportModal("zip", content, `Fotos_${document.getElementById('propNombre').value||"Siniestro"}.zip`); });
         };
 
-        document.querySelectorAll('#inspectionForm input, textarea').forEach(el => {
-            el.addEventListener('input', triggerAutoSave);
-        });
-
-        setupCanvasDrawing('canvasFirma');
-        setupCanvasDrawing('canvasDNI');
-        addDamageRow();
+        function showExportModal(type, blob, filename) { pendingBlob = blob; pendingFileName = filename; pendingFileType = type; document.getElementById('modalTitle').innerText = type === 'pdf' ? "¡PDF Generado!" : "¡ZIP Generado!"; document.getElementById('universalExportModal').classList.remove('hidden'); }
+        window.closeModal = () => { document.getElementById('universalExportModal').classList.add('hidden'); pendingBlob = null; }
+        window.saveModalFile = () => { if (pendingBlob) saveAs(pendingBlob, pendingFileName); closeModal(); }
+        window.shareModalFile = async () => { if (!pendingBlob) return; const file = new File([pendingBlob], pendingFileName, { type: pendingFileType === 'pdf' ? "application/pdf" : "application/zip" }); if (navigator.share && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file] }); closeModal(); } catch (e) { } } else { alert("Tu dispositivo no soporta compartir este archivo."); saveModalFile(); } }
     </script>
 </body>
 </html>
