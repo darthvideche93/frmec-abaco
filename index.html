@@ -326,7 +326,7 @@
     <!-- FIREBASE E INTEGRACIÓN BACKEND (MODULE) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, setDoc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, setDoc, getDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
         // CREDENCIALES FIREBASE
@@ -346,6 +346,7 @@
         // CONFIGURACIÓN DE ROLES (CORREOS ADMINISTRADORES)
         const ADMIN_EMAILS = ["hechegarayc@frmec.com", "gerencia@frmec.com"];
         let isCurrentUserAdmin = false;
+        window.loadedReportOriginalEmail = null; // Variable para recordar al inspector original al editar
 
         // CREDENCIALES CLOUDINARY
         const CLOUD_NAME = "ovmfxdmm";
@@ -361,7 +362,7 @@
                 isCurrentUserAdmin = ADMIN_EMAILS.includes(user.email.toLowerCase());
                 
                 if(isCurrentUserAdmin) {
-                    // MODO ADMINISTRADOR
+                    // MODO ADMINISTRADOR (Oculta botones de inspector)
                     document.getElementById('btnNewReport').classList.add('hidden');
                     document.getElementById('btnMyReports').classList.add('hidden');
                     document.getElementById('btnSaveReport').classList.add('hidden');
@@ -374,6 +375,7 @@
                     document.getElementById('btnNewReport').classList.remove('hidden');
                     document.getElementById('btnMyReports').classList.remove('hidden');
                     document.getElementById('btnSaveReport').classList.remove('hidden');
+                    document.getElementById('btnSaveReport').innerText = "Guardar";
                     document.getElementById('exportBar').classList.remove('hidden');
                 }
             } else {
@@ -427,7 +429,7 @@
             }
         }
 
-        // GUARDADO EN LA NUBE (Solo para Inspectores)
+        // GUARDADO EN LA NUBE (Inspectores y Administradores Editando)
         window.saveCurrentReportToCloud = async () => {
             if (!auth.currentUser) return;
             document.getElementById('loadingOverlay').classList.remove('hidden');
@@ -435,7 +437,10 @@
             
             try {
                 const report = window.collectReportObject();
-                report.inspectorEmail = auth.currentUser.email; // Vinculamos el reporte al inspector actual
+                
+                // Mantiene el correo del inspector original si el admin está editando, 
+                // sino, usa el correo del usuario logueado actualmente.
+                report.inspectorEmail = window.loadedReportOriginalEmail || auth.currentUser.email;
                 
                 report.firma = await uploadImageToCloudinary(report.firma);
                 report.dni = await uploadImageToCloudinary(report.dni);
@@ -457,6 +462,25 @@
             }
         };
 
+        // ELIMINAR REPORTE DE LA NUBE (Solo Administrador)
+        window.deleteCloudReport = async (id) => {
+            if(!isCurrentUserAdmin) return;
+            if(!confirm("⚠️ ¿Estás seguro de ELIMINAR este reporte? Esta acción es permanente y no se puede deshacer.")) return;
+            
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            document.getElementById('loadingText').innerText = "Eliminando reporte...";
+            
+            try {
+                await deleteDoc(doc(db, "reports", id));
+                alert("Reporte eliminado con éxito.");
+                window.loadAdminReports(); // Recarga la tabla automáticamente
+            } catch (error) {
+                alert("Error al eliminar el reporte: " + error.message);
+            } finally {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            }
+        };
+
         // LISTA DE REPORTES DEL INSPECTOR (Solo ve los suyos)
         window.showReportsList = async () => {
             if (!auth.currentUser) return;
@@ -464,7 +488,6 @@
             document.getElementById('loadingText').innerText = "Obteniendo tus reportes...";
             
             try {
-                // Consulta con filtro: Solo traer donde inspectorEmail == mi correo
                 const q = query(collection(db, "reports"), where("inspectorEmail", "==", auth.currentUser.email));
                 const querySnapshot = await getDocs(q);
                 const list = [];
@@ -525,8 +548,9 @@
                         <td class="p-3 font-semibold text-[#004481]">${r.title || 'Sin Nombre'}</td>
                         <td class="p-3">${r.form?.distrito || '-'}</td>
                         <td class="p-3 text-gray-500">${r.inspectorEmail || 'Desconocido'}</td>
-                        <td class="p-3 text-center">
-                            <button onclick="loadCloudReport('${r.id}', true)" class="bg-[#0071b9] text-white px-3 py-1.5 rounded text-xs font-bold shadow hover:bg-[#0055a5]">Ver / Exportar</button>
+                        <td class="p-3 text-center flex justify-center gap-2">
+                            <button onclick="loadCloudReport('${r.id}', true)" class="bg-[#0071b9] text-white px-3 py-1.5 rounded text-xs font-bold shadow hover:bg-[#0055a5]">Ver / Editar</button>
+                            <button onclick="deleteCloudReport('${r.id}')" class="bg-red-500 text-white px-3 py-1.5 rounded text-xs font-bold shadow hover:bg-red-600">Eliminar</button>
                         </td>
                     `;
                     tbody.appendChild(tr);
@@ -550,15 +574,24 @@
                 const docSnap = await getDoc(docRef);
                 
                 if (docSnap.exists()) {
-                    window.renderLoadedReport(docSnap.data());
+                    const reportData = docSnap.data();
+                    window.loadedReportOriginalEmail = reportData.inspectorEmail || null; // Guarda el inspector original
+                    
+                    window.renderLoadedReport(reportData);
                     window.closeReportsListModal();
                     
-                    // Si es admin, ocultamos el dashboard y mostramos el reporte con botón de retorno
                     if(fromAdmin) {
+                        // Modo Admin: Entrando al modo edición/exportación
                         document.getElementById('adminDashboard').classList.add('hidden');
                         document.getElementById('inspectorView').classList.remove('hidden');
                         document.getElementById('btnBackToAdmin').classList.remove('hidden');
                         document.getElementById('exportBar').classList.remove('hidden');
+                        
+                        // Habilitamos el botón Guardar para el administrador y cambiamos su nombre a "Guardar Cambios"
+                        const saveBtn = document.getElementById('btnSaveReport');
+                        saveBtn.classList.remove('hidden');
+                        saveBtn.innerHTML = "Guardar Cambios";
+                        
                         window.scrollTo(0,0);
                     }
                 } else {
@@ -607,6 +640,7 @@
             document.getElementById('inspectorView').classList.add('hidden');
             document.getElementById('btnBackToAdmin').classList.add('hidden');
             document.getElementById('exportBar').classList.add('hidden');
+            document.getElementById('btnSaveReport').classList.add('hidden'); // Oculta Guardar al volver
             window.loadAdminReports();
         };
 
@@ -849,6 +883,8 @@
 
         window.renderLoadedReport = (r) => {
             currentReportId = r.id; localStorage.setItem('frmec_active_report_id', currentReportId);
+            window.loadedReportOriginalEmail = r.inspectorEmail || null; // Sincroniza en carga offline también
+            
             if (r.form) Object.keys(r.form).forEach(k => { if(document.getElementById(k)) document.getElementById(k).value = r.form[k]; });
             
             document.getElementById('damageTableBody').innerHTML = ''; damageRowCount = 0;
@@ -865,7 +901,7 @@
 
         function loadLocalReportOffline(id) { if(localDB) { const req = localDB.transaction("reports", "readonly").objectStore("reports").get(id); req.onsuccess = () => { if(req.result) window.renderLoadedReport(req.result); }; } }
         window.closeReportsListModal = () => { document.getElementById('reportsListModal').classList.add('hidden'); };
-        window.createNewReport = () => { if(confirm("¿Empezar un nuevo reporte en blanco?")) { currentReportId = Date.now().toString(); document.querySelectorAll('#inspectorView input, #inspectorView textarea').forEach(el => el.value = ''); photosData = []; renderPhotos(); clearCanvas('canvasFirma'); clearCanvas('canvasDNI'); document.getElementById('croquisContainer').innerHTML = ''; croquisCount = 0; document.getElementById('damageTableBody').innerHTML = ''; addDamageRow(); triggerAutoSave(); } };
+        window.createNewReport = () => { if(confirm("¿Empezar un nuevo reporte en blanco?")) { currentReportId = Date.now().toString(); window.loadedReportOriginalEmail = null; document.querySelectorAll('#inspectorView input, #inspectorView textarea').forEach(el => el.value = ''); photosData = []; renderPhotos(); clearCanvas('canvasFirma'); clearCanvas('canvasDNI'); document.getElementById('croquisContainer').innerHTML = ''; croquisCount = 0; document.getElementById('damageTableBody').innerHTML = ''; addDamageRow(); triggerAutoSave(); } };
         document.querySelectorAll('#inspectionForm input, textarea').forEach(el => el.addEventListener('input', triggerAutoSave));
         setupCanvasDrawing('canvasFirma'); setupCanvasDrawing('canvasDNI'); addDamageRow();
 
