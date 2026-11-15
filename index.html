@@ -413,22 +413,6 @@
             return data.secure_url;
         }
 
-        async function getBase64FromUrl(url) {
-            if (!url || url.startsWith('data:')) return url;
-            try {
-                const res = await fetch(url);
-                const blob = await res.blob();
-                return new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => resolve(reader.result);
-                    reader.readAsDataURL(blob);
-                });
-            } catch (e) {
-                console.error("Error convirtiendo URL a Base64", e);
-                return null;
-            }
-        }
-
         // GUARDADO EN LA NUBE (Inspectores y Administradores Editando)
         window.saveCurrentReportToCloud = async () => {
             if (!auth.currentUser) return;
@@ -601,43 +585,6 @@
                 alert("Error al cargar el reporte: " + e.message);
             } finally {
                 document.getElementById('loadingOverlay').classList.add('hidden');
-            }
-        };
-
-        // EXPORTACIÓN WRAPPERS (Para procesar Base64)
-        const originalExportPDF = window.exportToPDF;
-        window.exportToPDFWrapper = async (isAsegurado) => {
-            document.getElementById('loadingOverlay').classList.remove('hidden');
-            document.getElementById('loadingText').innerText = "Procesando imágenes para el PDF...";
-            try {
-                await window.convertAllCloudImagesToBase64();
-                await originalExportPDF(isAsegurado);
-            } catch (e) {
-                console.error(e);
-            } finally {
-                document.getElementById('loadingOverlay').classList.add('hidden');
-            }
-        };
-        // Reemplazamos los botones del HTML para llamar a los wrappers desde ahora
-        document.querySelector("button[onclick=\"exportToPDF(true)\"]").setAttribute("onclick", "exportToPDFWrapper(true)");
-        document.querySelector("button[onclick=\"exportToPDF(false)\"]").setAttribute("onclick", "exportToPDFWrapper(false)");
-
-        const originalExportZIP = window.exportToZIP;
-        window.exportToZIPWrapper = async () => {
-            document.getElementById('loadingOverlay').classList.remove('hidden');
-            document.getElementById('loadingText').innerText = "Descargando fotos para el ZIP...";
-            try {
-                await window.convertAllCloudImagesToBase64();
-                await originalExportZIP();
-            } finally {
-                document.getElementById('loadingOverlay').classList.add('hidden');
-            }
-        };
-        document.querySelector("button[onclick=\"exportToZIP()\"]").setAttribute("onclick", "exportToZIPWrapper()");
-
-        window.convertAllCloudImagesToBase64 = async () => {
-            for(let i=0; i<photosData.length; i++) {
-                photosData[i].image = await getBase64FromUrl(photosData[i].image);
             }
         };
 
@@ -931,76 +878,147 @@
             });
         };
 
-        // LA FUNCIÓN PRINCIPAL DE EXPORTACIÓN (Implementación real, referenciada por los wrappers de arriba)
-        window.exportToPDF = async (isAsegurado) => {
-            const { jsPDF } = window.jspdf; const doc = new jsPDF({ format: 'a4' });
-            const pageWidth = doc.internal.pageSize.getWidth(), pageHeight = doc.internal.pageSize.getHeight();
-            const outputFilename = isAsegurado ? `${document.getElementById('propNombre').value}_Acta_Asegurado.pdf` : `${document.getElementById('propNombre').value}_Reporte.pdf`;
-            const drawHeader = () => { doc.setFillColor(0, 68, 129); doc.rect(0, 0, pageWidth, 20, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(14); doc.setFont("helvetica", "bold"); doc.text("ACTA DE INSPECCIÓN", 15, 13); doc.setTextColor(0, 0, 0); };
-            const drawFooter = (p, t) => { doc.setDrawColor(200, 200, 200); doc.setLineWidth(0.5); doc.line(15, pageHeight - 15, pageWidth - 15, pageHeight - 15); doc.setFontSize(8); doc.setTextColor(100, 100, 100); doc.setFont("helvetica", "normal"); doc.text("FRMEC | Reporte", 15, pageHeight - 10); doc.text(`Página ${p} de ${t}`, pageWidth - 35, pageHeight - 10); };
-            
-            drawHeader(); doc.setFontSize(14); doc.setFont("helvetica", "bold"); doc.setTextColor(0, 68, 129); doc.text("FICHA DE DATOS DE INSPECCIÓN", 15, 30); doc.setDrawColor(0, 113, 185); doc.setLineWidth(0.8); doc.line(15, 33, 110, 33);
-            doc.autoTable({ startY: 38, body: [["Nombre propietario:", document.getElementById('propNombre').value, "DNI propietario:", document.getElementById('propDNI').value],["Nombre representante:", document.getElementById('repNombre').value, "DNI representante:", document.getElementById('repDNI').value],["Dirección:", document.getElementById('domicilio').value, "Distrito:", document.getElementById('distrito').value],["Celular:", document.getElementById('celular').value, "Correo:", document.getElementById('correo').value],["Fecha inspección:", document.getElementById('fechaInsp').value, "Hora inspección:", document.getElementById('horaInsp').value],["Inspector:", document.getElementById('inspectorNombre').value, "", ""]], theme: 'plain', styles: { fontSize: 9, cellPadding: 4, textColor: [0, 0, 0] }, columnStyles: { 0: { fontStyle: 'bold', textColor: [0, 68, 129] }, 2: { fontStyle: 'bold', textColor: [0, 68, 129] } }, didDrawPage: function () { drawHeader(); }, willDrawCell: function(data) { doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.2); doc.line(data.cell.x, data.cell.y + data.cell.height, data.cell.x + data.cell.width, data.cell.y + data.cell.height); } });
-            
-            let yPos = doc.lastAutoTable.finalY + 10;
-            [{t: "Descripción General", d: 'descSiniestro'}, {t: "Descripción Inmueble", d: 'descInmueble'}, {t: "Descripción Daños", d: 'descDanos'}].forEach(sec => { if (document.getElementById(sec.d).value) { doc.autoTable({ startY: yPos, margin: { left: 15, right: 15, top: 25, bottom: 20 }, head: [[sec.t]], body: [[document.getElementById(sec.d).value]], theme: 'plain', headStyles: { fontStyle: 'bold', fontSize: 11, textColor: [0, 68, 129] }, bodyStyles: { fontSize: 9, textColor: [30, 41, 59], halign: 'left' }, didDrawPage: function () { drawHeader(); } }); yPos = doc.lastAutoTable.finalY + 5; } });
-            
-            const dmgData = []; document.querySelectorAll('#damageTableBody tr').forEach((row, i) => { const vals = Array.from(row.querySelectorAll('.dmg-input')).map(el => el.value); if(vals.some(v=>v)) dmgData.push([(i+1).toString(), ...vals]); });
-            if(dmgData.length > 0) { doc.autoTable({ startY: yPos, margin: { top: 30 }, head: [["TABLA DE DIMENSIONES"]], body: [], theme: 'plain', headStyles: { fontStyle: 'bold', fontSize: 11, textColor: [0, 68, 129] }, didDrawPage: function () { drawHeader(); } }); doc.autoTable({ startY: doc.lastAutoTable.finalY + 2, margin: { left: 10, right: 10, top: 30 }, head: [["Nro", "Rubro", "Desc", "Ubi", "Und", "Total", "Afectada", "Obs"]], body: dmgData, theme: 'grid', headStyles: { fillColor: [0, 68, 129], textColor: 255, fontSize: 8 }, bodyStyles: { fontSize: 8 }, didDrawPage: function () { drawHeader(); } }); yPos = doc.lastAutoTable.finalY + 10; }
-            
-            if (yPos > pageHeight - 65) { doc.addPage(); yPos = 35; drawHeader(); }
-            
-            doc.setFontSize(10); doc.setTextColor(0, 68, 129); doc.text("Firma (Propietario / Representante):", 15, yPos); doc.text("DNI:", 105, yPos);
-            doc.setFillColor(255, 255, 255); doc.setDrawColor(0, 68, 129); doc.setLineWidth(0.3); doc.rect(15, yPos + 5, 80, 40, 'DF'); doc.rect(105, yPos + 5, 80, 40, 'DF');
-            doc.addImage(document.getElementById('canvasFirma').toDataURL('image/jpeg', 1.0), 'JPEG', 15, yPos + 5, 80, 40); doc.addImage(document.getElementById('canvasDNI').toDataURL('image/jpeg', 1.0), 'JPEG', 105, yPos + 5, 80, 40);
-            
-            if (isAsegurado) { for (let i = 1; i <= doc.internal.getNumberOfPages(); i++) { doc.setPage(i); drawFooter(i, doc.internal.getNumberOfPages()); } showExportModal("pdf", doc.output('blob'), outputFilename); return; }
-            
-            document.querySelectorAll('.croquis-item').forEach((item, idx) => { const cCanvas = item.querySelector('canvas'); if (cCanvas) { doc.addPage(); drawHeader(); doc.setFontSize(12); doc.setTextColor(0, 68, 129); doc.text(`HOJA DE CROQUIS: ${item.querySelector('.croquis-title').value||('Nivel '+(idx+1))}`, 15, 28); doc.setDrawColor(0, 113, 185); doc.setLineWidth(0.5); doc.line(15, 30, 100, 30); const canvasRatio = cCanvas.width / cCanvas.height; let drawW = 180, drawH = 180 / canvasRatio; if (drawH > 240) { drawH = 240; drawW = 240 * canvasRatio; } doc.setFillColor(255, 255, 255); doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.3); doc.rect(15, 35, 180, 240, 'DF'); doc.addImage(cCanvas.toDataURL('image/jpeg', 1.0), 'JPEG', 15 + (180 - drawW) / 2, 35 + (240 - drawH) / 2, drawW, drawH); } });
-            
-            // CORRECCIÓN: Promesa para cargar cada imagen asincrónicamente y evitar cálculos vacíos
-            if (photosData.length > 0) { 
-                doc.addPage(); 
-                drawHeader(); 
-                doc.setFontSize(14); doc.setTextColor(0, 68, 129); doc.text("REGISTRO FOTOGRÁFICO", 15, 30); doc.setDrawColor(0, 113, 185); doc.setLineWidth(0.8); doc.line(15, 33, 110, 33); 
-                yPos = 40; const colW = (pageWidth - 35) / 2; let cx = 15; 
-                
-                for (let i = 0; i < photosData.length; i++) { 
-                    const p = photosData[i]; 
-                    const img = new Image(); 
-                    
-                    // Aseguramos que la imagen termine de cargar en memoria antes de leer su ancho
-                    await new Promise((resolve) => {
-                        img.onload = resolve;
-                        img.onerror = resolve; // Evita que el sistema se cuelgue si una foto falla
-                        img.src = p.image; 
-                        if(img.complete) resolve();
-                    });
-
-                    let drawW = 55 * (img.width / img.height); 
-                    if(drawW > colW - 4) drawW = colW - 4; 
-                    
-                    if (yPos + 75 > pageHeight - 15) { doc.addPage(); drawHeader(); yPos = 35; cx = 15; } 
-                    
-                    const isRight = i % 2 !== 0; if (isRight) cx = 15 + colW + 5; else cx = 15; 
-                    
-                    doc.addImage(p.image, 'JPEG', cx + (colW - drawW) / 2, yPos, drawW, 55); 
-                    doc.setFontSize(8); doc.setTextColor(50, 50, 50); 
-                    doc.text(doc.splitTextToSize(p.description || 'Sin descripción', colW), cx, yPos + 60); 
-                    
-                    if (isRight) yPos += 80; 
-                } 
-            }
-            
-            for (let i = 1; i <= doc.internal.getNumberOfPages(); i++) { doc.setPage(i); drawFooter(i, doc.internal.getNumberOfPages()); } 
-            showExportModal("pdf", doc.output('blob'), outputFilename);
+        // AYUDANTE DE EXTRACCIÓN SEGURA DE IMÁGENES DE CLOUDINARY (Lienzo Temporal Invisible)
+        window.processImageForExport = async (url) => {
+            if (!url) return null;
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.crossOrigin = "Anonymous"; // Permite lectura de nube externa
+                img.onload = () => {
+                    // Si ya es Base64, solo sacamos las medidas
+                    if(url.startsWith('data:')) {
+                        resolve({ dataUrl: url, width: img.width, height: img.height });
+                        return;
+                    }
+                    // Si es URL de Cloudinary, la dibujamos en un canvas temporal limpio para sacar un Base64 100% válido
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width; canvas.height = img.height;
+                    canvas.getContext('2d').drawImage(img, 0, 0);
+                    resolve({ dataUrl: canvas.toDataURL('image/jpeg', 0.9), width: img.width, height: img.height });
+                };
+                img.onerror = (e) => {
+                    console.error("No se pudo cargar la imagen para exportar: ", url);
+                    resolve(null); // Evita que se cuelgue, simplemente saltará la foto
+                };
+                img.src = url;
+            });
         };
 
+        // EXPORTACIÓN A PDF
+        window.exportToPDF = async (isAsegurado) => {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            document.getElementById('loadingText').innerText = isAsegurado ? "Generando PDF Asegurado..." : "Generando PDF Completo...";
+
+            try {
+                const { jsPDF } = window.jspdf; const doc = new jsPDF({ format: 'a4' });
+                const pageWidth = doc.internal.pageSize.getWidth(), pageHeight = doc.internal.pageSize.getHeight();
+                const outputFilename = isAsegurado ? `${document.getElementById('propNombre').value||'Acta'}_Asegurado.pdf` : `${document.getElementById('propNombre').value||'Acta'}_Reporte.pdf`;
+                
+                const drawHeader = () => { doc.setFillColor(0, 68, 129); doc.rect(0, 0, pageWidth, 20, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(14); doc.setFont("helvetica", "bold"); doc.text("ACTA DE INSPECCIÓN", 15, 13); doc.setTextColor(0, 0, 0); };
+                const drawFooter = (p, t) => { doc.setDrawColor(200, 200, 200); doc.setLineWidth(0.5); doc.line(15, pageHeight - 15, pageWidth - 15, pageHeight - 15); doc.setFontSize(8); doc.setTextColor(100, 100, 100); doc.setFont("helvetica", "normal"); doc.text("FRMEC | Reporte", 15, pageHeight - 10); doc.text(`Página ${p} de ${t}`, pageWidth - 35, pageHeight - 10); };
+                
+                drawHeader(); doc.setFontSize(14); doc.setFont("helvetica", "bold"); doc.setTextColor(0, 68, 129); doc.text("FICHA DE DATOS DE INSPECCIÓN", 15, 30); doc.setDrawColor(0, 113, 185); doc.setLineWidth(0.8); doc.line(15, 33, 110, 33);
+                doc.autoTable({ startY: 38, body: [["Nombre propietario:", document.getElementById('propNombre').value, "DNI propietario:", document.getElementById('propDNI').value],["Nombre representante:", document.getElementById('repNombre').value, "DNI representante:", document.getElementById('repDNI').value],["Dirección:", document.getElementById('domicilio').value, "Distrito:", document.getElementById('distrito').value],["Celular:", document.getElementById('celular').value, "Correo:", document.getElementById('correo').value],["Fecha inspección:", document.getElementById('fechaInsp').value, "Hora inspección:", document.getElementById('horaInsp').value],["Inspector:", document.getElementById('inspectorNombre').value, "", ""]], theme: 'plain', styles: { fontSize: 9, cellPadding: 4, textColor: [0, 0, 0] }, columnStyles: { 0: { fontStyle: 'bold', textColor: [0, 68, 129], cellWidth: 45 }, 1: { cellWidth: 45 }, 2: { fontStyle: 'bold', textColor: [0, 68, 129], cellWidth: 45 }, 3: { cellWidth: 45 } }, didDrawPage: function () { drawHeader(); }, willDrawCell: function(data) { doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.2); doc.line(data.cell.x, data.cell.y + data.cell.height, data.cell.x + data.cell.width, data.cell.y + data.cell.height); } });
+                
+                let yPos = doc.lastAutoTable.finalY + 10;
+                [{t: "Descripción General", d: 'descSiniestro'}, {t: "Descripción Inmueble", d: 'descInmueble'}, {t: "Descripción Daños", d: 'descDanos'}].forEach(sec => { if (document.getElementById(sec.d).value) { doc.autoTable({ startY: yPos, margin: { left: 15, right: 15, top: 25, bottom: 20 }, head: [[sec.t]], body: [[document.getElementById(sec.d).value]], theme: 'plain', headStyles: { fontStyle: 'bold', fontSize: 11, textColor: [0, 68, 129] }, bodyStyles: { fontSize: 9, textColor: [30, 41, 59], halign: 'left' }, didDrawPage: function () { drawHeader(); } }); yPos = doc.lastAutoTable.finalY + 5; } });
+                
+                const dmgData = []; document.querySelectorAll('#damageTableBody tr').forEach((row, i) => { const vals = Array.from(row.querySelectorAll('.dmg-input')).map(el => el.value); if(vals.some(v=>v)) dmgData.push([(i+1).toString(), ...vals]); });
+                if(dmgData.length > 0) { doc.autoTable({ startY: yPos, margin: { top: 30 }, head: [["TABLA DE DIMENSIONES"]], body: [], theme: 'plain', headStyles: { fontStyle: 'bold', fontSize: 11, textColor: [0, 68, 129] }, didDrawPage: function () { drawHeader(); } }); doc.autoTable({ startY: doc.lastAutoTable.finalY + 2, margin: { left: 10, right: 10, top: 30 }, head: [["Nro", "Rubro", "Desc", "Ubi", "Und", "Total", "Afectada", "Obs"]], body: dmgData, theme: 'grid', headStyles: { fillColor: [0, 68, 129], textColor: 255, fontSize: 8 }, bodyStyles: { fontSize: 8 }, didDrawPage: function () { drawHeader(); } }); yPos = doc.lastAutoTable.finalY + 10; }
+                
+                if (yPos > pageHeight - 65) { doc.addPage(); yPos = 35; drawHeader(); }
+                
+                // Textos Legales (Solo en el PDF, como recuadros ordenados)
+                doc.autoTable({ startY: yPos, margin: { left: 15, right: 15, top: 25 }, head: [["IMPORTANTE (LECTURA OBLIGATORIA)"]], body: [["Le informamos que luego del presente levantamiento de información, se procederá con el análisis del siniestro por parte del Ajustador de Seguros seleccionado por usted, de conformidad a lo establecido en la Póliza de Seguros contratada y con la presentación de la documentación que sea requerida de acuerdo a la normativa de seguros vigente.\n\nEl asegurado no podrá hacer abandono parcial o total de los bienes afectados sin la autorización expresa de la Compañía de Seguros o del Ajustador de Seguros, debiendo darse el debido cuidado para evitar el agravamiento de los daños. Estos bienes podrán ser retirados previa comunicación de la Compañía de Seguros o de la empresa autorizada por esta."]], theme: 'grid', headStyles: { fillColor: [0, 113, 185], textColor: 255, fontSize: 9 }, bodyStyles: { fontSize: 8, textColor: [50, 50, 50], fillColor: [240, 248, 255] }, didDrawPage: function () { drawHeader(); } });
+                doc.autoTable({ startY: doc.lastAutoTable.finalY + 4, margin: { left: 15, right: 15, top: 25 }, head: [["DECLARACIÓN DEL ASEGURADO"]], body: [["He leído y estoy de acuerdo con los aspectos importantes mencionados en el párrafo anterior.\nPor la presente, acepto el detalle de las partidas afectadas de Edificio o Contenido, registrados en la presente inspección y anexos, no teniendo ninguna objeción a la inspección realizada.\nAcepto que toda la documentación relacionada al proceso de ajuste y liquidación de la pérdida por el siniestro reportado sea a través del correo electrónico consignado en la presente acta de inspección, la cual suscribo en señal de conformidad."]], theme: 'grid', headStyles: { fillColor: [0, 113, 185], textColor: 255, fontSize: 9 }, bodyStyles: { fontSize: 8, textColor: [50, 50, 50], fillColor: [240, 248, 255] }, didDrawPage: function () { drawHeader(); } });
+                
+                yPos = doc.lastAutoTable.finalY + 10;
+                if (yPos > pageHeight - 50) { doc.addPage(); yPos = 35; drawHeader(); }
+                
+                doc.setFontSize(10); doc.setTextColor(0, 68, 129); doc.text("Firma (Propietario / Representante):", 15, yPos); doc.text("DNI:", 105, yPos);
+                doc.setFillColor(255, 255, 255); doc.setDrawColor(0, 68, 129); doc.setLineWidth(0.3); doc.rect(15, yPos + 5, 80, 40, 'DF'); doc.rect(105, yPos + 5, 80, 40, 'DF');
+                doc.addImage(document.getElementById('canvasFirma').toDataURL('image/jpeg', 1.0), 'JPEG', 15, yPos + 5, 80, 40); doc.addImage(document.getElementById('canvasDNI').toDataURL('image/jpeg', 1.0), 'JPEG', 105, yPos + 5, 80, 40);
+                
+                if (isAsegurado) { for (let i = 1; i <= doc.internal.getNumberOfPages(); i++) { doc.setPage(i); drawFooter(i, doc.internal.getNumberOfPages()); } showExportModal("pdf", doc.output('blob'), outputFilename); return; }
+                
+                document.querySelectorAll('.croquis-item').forEach((item, idx) => { const cCanvas = item.querySelector('canvas'); if (cCanvas) { doc.addPage(); drawHeader(); doc.setFontSize(12); doc.setTextColor(0, 68, 129); doc.text(`HOJA DE CROQUIS: ${item.querySelector('.croquis-title').value||('Nivel '+(idx+1))}`, 15, 28); doc.setDrawColor(0, 113, 185); doc.setLineWidth(0.5); doc.line(15, 30, 100, 30); const canvasRatio = cCanvas.width / cCanvas.height; let drawW = 180, drawH = 180 / canvasRatio; if (drawH > 240) { drawH = 240; drawW = 240 * canvasRatio; } doc.setFillColor(255, 255, 255); doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.3); doc.rect(15, 35, 180, 240, 'DF'); doc.addImage(cCanvas.toDataURL('image/jpeg', 1.0), 'JPEG', 15 + (180 - drawW) / 2, 35 + (240 - drawH) / 2, drawW, drawH); } });
+                
+                // FOTOS EXPORTADAS CON LIENZO SEGURO
+                if (photosData.length > 0) { 
+                    doc.addPage(); 
+                    drawHeader(); 
+                    doc.setFontSize(14); doc.setTextColor(0, 68, 129); doc.text("REGISTRO FOTOGRÁFICO", 15, 30); doc.setDrawColor(0, 113, 185); doc.setLineWidth(0.8); doc.line(15, 33, 110, 33); 
+                    yPos = 40; const colW = (pageWidth - 35) / 2; let cx = 15; 
+                    
+                    for (let i = 0; i < photosData.length; i++) { 
+                        const p = photosData[i]; 
+                        
+                        // Extraemos la foto de forma segura (sin sobreescribir la BD)
+                        const imgData = await window.processImageForExport(p.image);
+                        if (!imgData) continue; // Si una falla (sin red), la salta sin romper el reporte
+    
+                        let drawW = 55 * (imgData.width / imgData.height); 
+                        if(drawW > colW - 4) drawW = colW - 4; 
+                        
+                        if (yPos + 75 > pageHeight - 15) { doc.addPage(); drawHeader(); yPos = 35; cx = 15; } 
+                        
+                        const isRight = i % 2 !== 0; if (isRight) cx = 15 + colW + 5; else cx = 15; 
+                        
+                        doc.addImage(imgData.dataUrl, 'JPEG', cx + (colW - drawW) / 2, yPos, drawW, 55); 
+                        doc.setFontSize(8); doc.setTextColor(50, 50, 50); 
+                        doc.text(doc.splitTextToSize(p.description || 'Sin descripción', colW), cx, yPos + 60); 
+                        
+                        if (isRight) yPos += 80; 
+                    } 
+                }
+                
+                for (let i = 1; i <= doc.internal.getNumberOfPages(); i++) { doc.setPage(i); drawFooter(i, doc.internal.getNumberOfPages()); } 
+                showExportModal("pdf", doc.output('blob'), outputFilename);
+
+            } catch (error) {
+                console.error("Error crítico en PDF:", error);
+                alert("Ocurrió un error al generar el PDF. Revisa tu conexión si estás cargando de la nube.\nError técnico: " + error.message);
+            } finally {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            }
+        };
+
+        // EXPORTACIÓN A ZIP CON EXTRACCIÓN SEGURA
         window.exportToZIP = async () => {
-            const croquisItems = document.querySelectorAll('.croquis-item'); if (photosData.length === 0 && croquisItems.length === 0) { alert("No hay fotos para exportar."); return; }
-            const zip = new JSZip(); photosData.forEach((p, i) => { zip.file(`Foto_${i+1}.jpg`, p.image.replace(/^data:image\/(png|jpeg);base64,/, ""), {base64: true}); });
-            croquisItems.forEach((item, idx) => { const cCanvas = item.querySelector('canvas'); if (cCanvas) zip.file(`Croquis_${idx+1}.jpg`, cCanvas.toDataURL('image/jpeg', 1.0).replace(/^data:image\/(png|jpeg);base64,/, ""), {base64: true}); });
-            zip.generateAsync({type:"blob"}).then(function(content) { showExportModal("zip", content, `Fotos_${document.getElementById('propNombre').value||"Siniestro"}.zip`); });
+            const croquisItems = document.querySelectorAll('.croquis-item'); 
+            if (photosData.length === 0 && croquisItems.length === 0) { alert("No hay fotos para exportar."); return; }
+            
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            document.getElementById('loadingText').innerText = "Empaquetando fotos en ZIP...";
+            
+            try {
+                const zip = new JSZip(); 
+                
+                // Procesar cada foto de manera segura usando el canvas temporal
+                for (let i = 0; i < photosData.length; i++) {
+                    const imgData = await window.processImageForExport(photosData[i].image);
+                    if (imgData) {
+                        zip.file(`Foto_${i+1}.jpg`, imgData.dataUrl.replace(/^data:image\/(png|jpeg);base64,/, ""), {base64: true}); 
+                    }
+                }
+
+                // Agregar los croquis
+                croquisItems.forEach((item, idx) => { 
+                    const cCanvas = item.querySelector('canvas'); 
+                    if (cCanvas) {
+                        zip.file(`Croquis_${idx+1}.jpg`, cCanvas.toDataURL('image/jpeg', 1.0).replace(/^data:image\/(png|jpeg);base64,/, ""), {base64: true}); 
+                    }
+                });
+
+                const content = await zip.generateAsync({type:"blob"});
+                showExportModal("zip", content, `Fotos_${document.getElementById('propNombre').value||"Siniestro"}.zip`);
+                
+            } catch (error) {
+                console.error("Error al crear el ZIP:", error);
+                alert("Ocurrió un error al crear el archivo ZIP: " + error.message);
+            } finally {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            }
         };
 
         function showExportModal(type, blob, filename) { pendingBlob = blob; pendingFileName = filename; pendingFileType = type; document.getElementById('modalTitle').innerText = type === 'pdf' ? "¡PDF Generado!" : "¡ZIP Generado!"; document.getElementById('universalExportModal').classList.remove('hidden'); }
