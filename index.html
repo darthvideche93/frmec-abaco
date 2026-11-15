@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FRMEC - Inspecciones</title>
+    <title>FRMEC - Inspecciones (Nube)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -62,10 +62,10 @@
         </div>
     </div>
 
-    <!-- OVERLAY DE CARGA (Para procesos en la nube) -->
+    <!-- OVERLAY DE CARGA -->
     <div id="loadingOverlay" class="hidden fixed inset-0 bg-slate-900/80 z-[200] flex flex-col items-center justify-center p-4 backdrop-blur-sm">
         <svg class="animate-spin h-12 w-12 text-[#0071b9] mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-        <p id="loadingText" class="text-white font-bold text-lg">Sincronizando con la nube...</p>
+        <p id="loadingText" class="text-white font-bold text-lg">Procesando...</p>
     </div>
 
     <!-- Encabezado Corporativo -->
@@ -87,13 +87,17 @@
                 <div id="gpsIndicatorContainer" class="bg-[#003366] text-blue-200 text-xs py-1.5 px-3 rounded flex items-center">
                     <span id="gpsIndicator" class="w-2 h-2 rounded-full bg-yellow-500 mr-2"></span> GPS Buscando...
                 </div>
-                <button onclick="createNewReport()" class="bg-transparent hover:bg-white/10 text-white text-xs py-1.5 px-3 rounded border border-white/30 transition-colors flex items-center gap-1">
+                <!-- Botones Dinámicos según Rol -->
+                <button id="btnBackToAdmin" onclick="showAdminDashboard()" class="hidden bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold text-xs py-1.5 px-3 rounded shadow transition-colors flex items-center gap-1">
+                    « Volver al Panel
+                </button>
+                <button id="btnNewReport" onclick="createNewReport()" class="bg-transparent hover:bg-white/10 text-white text-xs py-1.5 px-3 rounded border border-white/30 transition-colors flex items-center gap-1">
                     Nuevo
                 </button>
-                <button onclick="showReportsList()" class="bg-transparent hover:bg-white/10 text-white text-xs py-1.5 px-3 rounded border border-white/30 transition-colors flex items-center gap-1" title="Nube">
-                    Reportes
+                <button id="btnMyReports" onclick="showReportsList()" class="bg-transparent hover:bg-white/10 text-white text-xs py-1.5 px-3 rounded border border-white/30 transition-colors flex items-center gap-1">
+                    Mis Reportes
                 </button>
-                <button onclick="saveCurrentReportToCloud()" class="bg-[#0071b9] hover:bg-[#0055a5] text-white text-xs py-1.5 px-4 rounded transition-colors font-semibold shadow flex items-center gap-1">
+                <button id="btnSaveReport" onclick="saveCurrentReportToCloud()" class="bg-[#0071b9] hover:bg-[#0055a5] text-white text-xs py-1.5 px-4 rounded transition-colors font-semibold shadow flex items-center gap-1">
                     Guardar
                 </button>
                 <button onclick="logoutUser()" class="bg-red-500 hover:bg-red-600 text-white text-xs py-1.5 px-3 rounded font-bold shadow transition-colors ml-2">
@@ -103,7 +107,7 @@
         </div>
         
         <!-- Barra de Exportación -->
-        <div class="max-w-5xl mx-auto mt-4 pt-3 border-t border-[#0055a5] flex flex-wrap justify-between items-center gap-3">
+        <div id="exportBar" class="max-w-5xl mx-auto mt-4 pt-3 border-t border-[#0055a5] flex flex-wrap justify-between items-center gap-3">
             <span class="text-sm font-semibold text-blue-50">Exportar Reporte:</span>
             <div class="flex flex-wrap gap-2">
                 <button onclick="exportToPDF(true)" class="bg-white text-[#004481] hover:bg-gray-100 text-xs py-1.5 px-4 rounded shadow font-semibold flex items-center gap-1 transition-colors">PDF Asegurado</button>
@@ -113,7 +117,38 @@
         </div>
     </header>
 
-    <main class="max-w-5xl mx-auto p-4 space-y-6 mt-4">
+    <!-- DASHBOARD ADMINISTRADOR (Oculto por defecto) -->
+    <div id="adminDashboard" class="hidden max-w-5xl mx-auto p-4 space-y-6 mt-4">
+        <div class="bg-white shadow-sm border border-slate-200 p-6 rounded-lg">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 border-b border-[#0071b9] pb-4">
+                <h2 class="text-2xl font-bold text-[#004481]">Panel de Control General</h2>
+                <div class="flex gap-2 w-full md:w-auto">
+                    <input type="text" id="adminSearchInput" onkeyup="filterAdminTable()" placeholder="Buscar inspector o asegurado..." class="input-clean bg-slate-50 px-3 py-2 rounded border-none w-full md:w-64">
+                    <button onclick="loadAdminReports()" class="bg-[#0071b9] text-white px-4 py-2 rounded text-sm font-bold shadow hover:bg-[#0055a5] flex-shrink-0">Actualizar</button>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse" id="adminTable">
+                    <thead>
+                        <tr class="bg-[#004481] text-white text-xs uppercase tracking-wider">
+                            <th class="p-3 rounded-tl">Fecha / Hora</th>
+                            <th class="p-3">Asegurado</th>
+                            <th class="p-3">Distrito</th>
+                            <th class="p-3">Inspector (Correo)</th>
+                            <th class="p-3 text-center rounded-tr">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminTableBody" class="text-sm text-slate-700">
+                        <!-- Las filas se llenan con JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- VISTA DEL INSPECTOR (Formulario Completo) -->
+    <main id="inspectorView" class="max-w-5xl mx-auto p-4 space-y-6 mt-4">
         <!-- SECCIÓN 1: DATOS DE INSPECCIÓN -->
         <div class="bg-white shadow-sm border border-slate-200 p-6 rounded-lg">
             <h2 class="text-lg font-bold text-[#004481] border-b pb-2 mb-5 border-[#0071b9]">FICHA DE DATOS DE INSPECCIÓN</h2>
@@ -253,11 +288,11 @@
         </div>
     </main>
 
-    <!-- MODAL DE LISTA DE REPORTES (AHORA DESDE FIREBASE) -->
+    <!-- MODAL DE LISTA DE REPORTES (INSPECTORES) -->
     <div id="reportsListModal" class="hidden fixed inset-0 bg-slate-900/60 z-[120] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white p-6 rounded-xl shadow-2xl max-w-md w-full border-t-4 border-[#0071b9]">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold text-[#004481]">Reportes en la Nube</h3>
+                <h3 class="text-lg font-bold text-[#004481]">Mis Reportes (Nube)</h3>
                 <button onclick="closeReportsListModal()" class="text-slate-400 hover:text-slate-700 font-bold">X</button>
             </div>
             <div id="reportsListContainer" class="max-h-64 overflow-y-auto space-y-2 mb-4"></div>
@@ -291,7 +326,7 @@
     <!-- FIREBASE E INTEGRACIÓN BACKEND (MODULE) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, setDoc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
         // CREDENCIALES FIREBASE
@@ -308,16 +343,39 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
+        // CONFIGURACIÓN DE ROLES (CORREOS ADMINISTRADORES)
+        const ADMIN_EMAILS = ["hechegarayc@frmec.com", "gerencia@frmec.com"];
+        let isCurrentUserAdmin = false;
+
         // CREDENCIALES CLOUDINARY
         const CLOUD_NAME = "ovmfxdmm";
         const UPLOAD_PRESET = "frmec_fotos";
         const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
 
-        // MANEJO DE SESIÓN (LOGIN)
+        // MANEJO DE SESIÓN Y ROLES
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('loginModal').classList.add('hidden');
                 document.getElementById('currentUserDisplay').innerText = `Usuario: ${user.email}`;
+                
+                isCurrentUserAdmin = ADMIN_EMAILS.includes(user.email.toLowerCase());
+                
+                if(isCurrentUserAdmin) {
+                    // MODO ADMINISTRADOR
+                    document.getElementById('btnNewReport').classList.add('hidden');
+                    document.getElementById('btnMyReports').classList.add('hidden');
+                    document.getElementById('btnSaveReport').classList.add('hidden');
+                    window.showAdminDashboard();
+                } else {
+                    // MODO INSPECTOR
+                    document.getElementById('adminDashboard').classList.add('hidden');
+                    document.getElementById('inspectorView').classList.remove('hidden');
+                    document.getElementById('btnBackToAdmin').classList.add('hidden');
+                    document.getElementById('btnNewReport').classList.remove('hidden');
+                    document.getElementById('btnMyReports').classList.remove('hidden');
+                    document.getElementById('btnSaveReport').classList.remove('hidden');
+                    document.getElementById('exportBar').classList.remove('hidden');
+                }
             } else {
                 document.getElementById('loginModal').classList.remove('hidden');
             }
@@ -353,7 +411,6 @@
             return data.secure_url;
         }
 
-        // HELPER PARA DESCARGAR URL A BASE64 (Necesario para jsPDF y ZIP)
         async function getBase64FromUrl(url) {
             if (!url || url.startsWith('data:')) return url;
             try {
@@ -370,51 +427,46 @@
             }
         }
 
-        // EXPOSICIÓN A WINDOW PARA MANTENER LA APP FUNCIONANDO
+        // GUARDADO EN LA NUBE (Solo para Inspectores)
         window.saveCurrentReportToCloud = async () => {
-            if (!auth.currentUser) { alert("Debes iniciar sesión"); return; }
+            if (!auth.currentUser) return;
             document.getElementById('loadingOverlay').classList.remove('hidden');
             document.getElementById('loadingText').innerText = "Subiendo imágenes y guardando en la Nube...";
             
             try {
                 const report = window.collectReportObject();
+                report.inspectorEmail = auth.currentUser.email; // Vinculamos el reporte al inspector actual
                 
-                // 1. Subir Firmas
                 report.firma = await uploadImageToCloudinary(report.firma);
                 report.dni = await uploadImageToCloudinary(report.dni);
                 
-                // 2. Subir Fotos
                 for (let i = 0; i < report.photos.length; i++) {
                     report.photos[i].image = await uploadImageToCloudinary(report.photos[i].image);
                 }
-                
-                // 3. Subir Croquis
                 for (let i = 0; i < report.croquis.length; i++) {
                     report.croquis[i].dataUrl = await uploadImageToCloudinary(report.croquis[i].dataUrl);
                 }
                 
-                // 4. Guardar documento JSON en Firestore (Firebase)
                 await setDoc(doc(db, "reports", report.id), report);
-                
-                // Mantener el backup local por si acaso
-                window.saveToLocalDB(report);
-                
+                window.saveToLocalDB(report); // Backup local
                 alert("¡Reporte guardado exitosamente en la Nube!");
             } catch (error) {
-                console.error(error);
                 alert("Error al guardar en la nube: " + error.message);
             } finally {
                 document.getElementById('loadingOverlay').classList.add('hidden');
             }
         };
 
+        // LISTA DE REPORTES DEL INSPECTOR (Solo ve los suyos)
         window.showReportsList = async () => {
             if (!auth.currentUser) return;
             document.getElementById('loadingOverlay').classList.remove('hidden');
-            document.getElementById('loadingText').innerText = "Obteniendo reportes...";
+            document.getElementById('loadingText').innerText = "Obteniendo tus reportes...";
             
             try {
-                const querySnapshot = await getDocs(collection(db, "reports"));
+                // Consulta con filtro: Solo traer donde inspectorEmail == mi correo
+                const q = query(collection(db, "reports"), where("inspectorEmail", "==", auth.currentUser.email));
+                const querySnapshot = await getDocs(q);
                 const list = [];
                 querySnapshot.forEach((docSnap) => { list.push(docSnap.data()); });
                 list.sort((a,b) => b.timestamp - a.timestamp);
@@ -422,7 +474,7 @@
                 const container = document.getElementById('reportsListContainer');
                 container.innerHTML = '';
                 if(list.length === 0) {
-                    container.innerHTML = '<p class="text-sm text-gray-500 text-center">No hay reportes en la nube.</p>';
+                    container.innerHTML = '<p class="text-sm text-gray-500 text-center">No tienes reportes guardados en la nube.</p>';
                 } else {
                     list.forEach(r => {
                         const div = document.createElement('div');
@@ -445,11 +497,53 @@
             }
         };
 
-        window.loadCloudReport = async (id) => {
-            if(!confirm("¿Cargar este reporte de la nube? Se reemplazará la vista actual.")) return;
+        // DASHBOARD DE ADMINISTRADOR (Ve todos los reportes)
+        window.loadAdminReports = async () => {
+            if (!isCurrentUserAdmin) return;
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            document.getElementById('loadingText').innerText = "Cargando Panel de Control...";
+            
+            try {
+                const querySnapshot = await getDocs(collection(db, "reports"));
+                const list = [];
+                querySnapshot.forEach((docSnap) => { list.push(docSnap.data()); });
+                list.sort((a,b) => b.timestamp - a.timestamp); // Más recientes primero
+                
+                const tbody = document.getElementById('adminTableBody');
+                tbody.innerHTML = '';
+                
+                list.forEach(r => {
+                    const tr = document.createElement('tr');
+                    tr.className = "border-b border-gray-200 hover:bg-slate-50 transition-colors admin-row";
+                    const aseguradoLower = (r.title || "").toLowerCase();
+                    const inspectorLower = (r.inspectorEmail || "").toLowerCase();
+                    const dateStr = new Date(r.timestamp).toLocaleString('es-PE');
+                    
+                    tr.setAttribute('data-search', `${aseguradoLower} ${inspectorLower}`);
+                    tr.innerHTML = `
+                        <td class="p-3 whitespace-nowrap">${dateStr}</td>
+                        <td class="p-3 font-semibold text-[#004481]">${r.title || 'Sin Nombre'}</td>
+                        <td class="p-3">${r.form?.distrito || '-'}</td>
+                        <td class="p-3 text-gray-500">${r.inspectorEmail || 'Desconocido'}</td>
+                        <td class="p-3 text-center">
+                            <button onclick="loadCloudReport('${r.id}', true)" class="bg-[#0071b9] text-white px-3 py-1.5 rounded text-xs font-bold shadow hover:bg-[#0055a5]">Ver / Exportar</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                alert("Error al cargar reportes generales: " + e.message);
+            } finally {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            }
+        };
+
+        // CARGAR REPORTE (Usado por inspector o admin)
+        window.loadCloudReport = async (id, fromAdmin = false) => {
+            if(!fromAdmin && !confirm("¿Cargar este reporte de la nube? Se reemplazará tu progreso actual.")) return;
             
             document.getElementById('loadingOverlay').classList.remove('hidden');
-            document.getElementById('loadingText').innerText = "Descargando datos...";
+            document.getElementById('loadingText').innerText = "Descargando datos del acta...";
             
             try {
                 const docRef = doc(db, "reports", id);
@@ -458,6 +552,15 @@
                 if (docSnap.exists()) {
                     window.renderLoadedReport(docSnap.data());
                     window.closeReportsListModal();
+                    
+                    // Si es admin, ocultamos el dashboard y mostramos el reporte con botón de retorno
+                    if(fromAdmin) {
+                        document.getElementById('adminDashboard').classList.add('hidden');
+                        document.getElementById('inspectorView').classList.remove('hidden');
+                        document.getElementById('btnBackToAdmin').classList.remove('hidden');
+                        document.getElementById('exportBar').classList.remove('hidden');
+                        window.scrollTo(0,0);
+                    }
                 } else {
                     alert("El reporte no existe en la nube.");
                 }
@@ -468,7 +571,7 @@
             }
         };
 
-        // Envolver exportToPDF y exportToZIP para asegurar conversión de URL a Base64
+        // EXPORTACIÓN WRAPPERS (Para procesar Base64)
         const originalExportPDF = window.exportToPDF;
         window.exportToPDF = async (isAsegurado) => {
             document.getElementById('loadingOverlay').classList.remove('hidden');
@@ -497,12 +600,19 @@
             for(let i=0; i<photosData.length; i++) {
                 photosData[i].image = await getBase64FromUrl(photosData[i].image);
             }
-            // Los canvas se extraen usando .toDataURL() que ya es base64, 
-            // siempre que se hayan pintado con crossOrigin="Anonymous"
         };
+
+        window.showAdminDashboard = () => {
+            document.getElementById('adminDashboard').classList.remove('hidden');
+            document.getElementById('inspectorView').classList.add('hidden');
+            document.getElementById('btnBackToAdmin').classList.add('hidden');
+            document.getElementById('exportBar').classList.add('hidden');
+            window.loadAdminReports();
+        };
+
     </script>
 
-    <!-- LOGICA FRONTEND RESTANTE (Mantenida fuera del module para acceso fácil) -->
+    <!-- LOGICA FRONTEND RESTANTE -->
     <script>
         let currentLat = null, currentLon = null, currentAcc = null;
         let photosData = [];
@@ -515,7 +625,6 @@
         let localDB;
         let autoSaveTimer = null;
 
-        // INICIALIZACIÓN BASE DATOS LOCAL (Solo para backup offline automático)
         const request = indexedDB.open("FRMECDB_Multi", 3);
         request.onupgradeneeded = (e) => { 
             localDB = e.target.result; 
@@ -756,11 +865,21 @@
 
         function loadLocalReportOffline(id) { if(localDB) { const req = localDB.transaction("reports", "readonly").objectStore("reports").get(id); req.onsuccess = () => { if(req.result) window.renderLoadedReport(req.result); }; } }
         window.closeReportsListModal = () => { document.getElementById('reportsListModal').classList.add('hidden'); };
-        window.createNewReport = () => { if(confirm("¿Empezar un nuevo reporte en blanco?")) { currentReportId = Date.now().toString(); document.querySelectorAll('input, textarea').forEach(el => el.value = ''); photosData = []; renderPhotos(); clearCanvas('canvasFirma'); clearCanvas('canvasDNI'); document.getElementById('croquisContainer').innerHTML = ''; croquisCount = 0; document.getElementById('damageTableBody').innerHTML = ''; addDamageRow(); triggerAutoSave(); } };
+        window.createNewReport = () => { if(confirm("¿Empezar un nuevo reporte en blanco?")) { currentReportId = Date.now().toString(); document.querySelectorAll('#inspectorView input, #inspectorView textarea').forEach(el => el.value = ''); photosData = []; renderPhotos(); clearCanvas('canvasFirma'); clearCanvas('canvasDNI'); document.getElementById('croquisContainer').innerHTML = ''; croquisCount = 0; document.getElementById('damageTableBody').innerHTML = ''; addDamageRow(); triggerAutoSave(); } };
         document.querySelectorAll('#inspectionForm input, textarea').forEach(el => el.addEventListener('input', triggerAutoSave));
         setupCanvasDrawing('canvasFirma'); setupCanvasDrawing('canvasDNI'); addDamageRow();
 
-        // LOGICA DE EXPORTACIÓN PDF (Usado por el script módulo)
+        // FILTRO PARA TABLA DE ADMIN
+        window.filterAdminTable = () => {
+            const query = document.getElementById('adminSearchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('.admin-row');
+            rows.forEach(row => {
+                const text = row.getAttribute('data-search');
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
+        };
+
+        // LOGICA DE EXPORTACIÓN PDF
         window.exportToPDF = async (isAsegurado) => {
             const { jsPDF } = window.jspdf; const doc = new jsPDF({ format: 'a4' });
             const pageWidth = doc.internal.pageSize.getWidth(), pageHeight = doc.internal.pageSize.getHeight();
