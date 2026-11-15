@@ -502,6 +502,11 @@
                 const rect = canvas.parentElement.getBoundingClientRect();
                 if (rect.width === 0 || rect.height === 0) return;
 
+                const newWidth = rect.width * HD_SCALE;
+                const newHeight = rect.height * HD_SCALE;
+
+                if (canvas.width === newWidth && canvas.height === newHeight) return;
+
                 let hasContent = false;
                 const tempCanvas = document.createElement('canvas');
                 
@@ -511,11 +516,6 @@
                     tempCanvas.getContext('2d').drawImage(canvas, 0, 0);
                     hasContent = true;
                 }
-                
-                const newWidth = rect.width * HD_SCALE;
-                const newHeight = rect.height * HD_SCALE;
-
-                if (canvas.width === newWidth && canvas.height === newHeight) return;
 
                 canvas.width = newWidth;
                 canvas.height = newHeight;
@@ -641,6 +641,7 @@
             inputEl.value = '';
         };
 
+        // ACTUALIZADO: Adapta el canvas a la proporción original de la imagen
         window.setCanvasBackground = (id, inputEl) => {
             if(inputEl.files && inputEl.files[0]) {
                 const reader = new FileReader();
@@ -648,20 +649,21 @@
                     const img = new Image();
                     img.onload = function() {
                         const canvas = document.getElementById(id);
+                        const wrapper = canvas.parentElement;
                         const ctx = canvas.getContext('2d');
-                        saveCanvasState(id);
                         
-                        ctx.fillStyle = '#ffffff'; 
-                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        // Modificar el aspecto del contenedor para igualar a la imagen
+                        wrapper.style.aspectRatio = `${img.width} / ${img.height}`;
+                        wrapper.style.minHeight = 'auto'; // Limpiar la altura predeterminada
                         
-                        let scale = Math.min(canvas.width / img.width, canvas.height / img.height);
-                        let drawW = img.width * scale;
-                        let drawH = img.height * scale;
-                        let x = (canvas.width - drawW) / 2;
-                        let y = (canvas.height - drawH) / 2;
-                        
-                        ctx.drawImage(img, x, y, drawW, drawH);
-                        triggerAutoSave();
+                        // Dar tiempo al DOM para ajustar el tamaño antes de dibujar
+                        setTimeout(() => {
+                            ctx.fillStyle = '#ffffff'; 
+                            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                            saveCanvasState(id);
+                            triggerAutoSave();
+                        }, 100);
                     };
                     img.src = e.target.result;
                 };
@@ -689,11 +691,11 @@
                         <button onclick="undoCanvas('${id}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded text-xs border border-gray-200 font-semibold flex items-center gap-1">
                             ↩ Deshacer
                         </button>
-                        <button onclick="clearCanvas('${id}')" class="bg-gray-100 hover:bg-red-50 text-red-500 px-2 py-1 rounded text-xs border border-gray-200 font-semibold">
+                        <button onclick="clearCanvas('${id}')" class="bg-gray-100 hover:bg-red-50 text-red-50 px-2 py-1 rounded text-xs border border-gray-200 font-semibold text-red-500">
                             Borrar
                         </button>
                         <label class="bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 px-2 py-1 rounded text-xs cursor-pointer flex items-center gap-1 font-semibold">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
                             Cámara
                             <input type="file" accept="image/*" capture="environment" class="hidden" onchange="setCanvasBackground('${id}', this)">
                         </label>
@@ -704,7 +706,8 @@
                         </label>
                     </div>
                 </div>
-                <div class="border border-gray-300 bg-white relative w-full" style="aspect-ratio: 3 / 4;">
+                <!-- Proporción por defecto (4:3) que se adapta si se sube una imagen -->
+                <div class="border border-gray-300 bg-white relative w-full croquis-wrapper" style="aspect-ratio: 3 / 4;">
                     <canvas id="${id}" class="absolute inset-0 w-full h-full canvas-container"></canvas>
                 </div>
             `;
@@ -716,9 +719,13 @@
                     const ctx = canvas.getContext('2d');
                     const img = new Image();
                     img.onload = () => {
-                        ctx.fillStyle = '#ffffff';
-                        ctx.fillRect(0, 0, canvas.width, canvas.height);
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        const wrapper = canvas.parentElement;
+                        wrapper.style.aspectRatio = `${img.width} / ${img.height}`;
+                        setTimeout(() => {
+                            ctx.fillStyle = '#ffffff';
+                            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        }, 50);
                     };
                     img.src = savedDataUrl;
                 }
@@ -911,7 +918,6 @@
                         body: [[sec.text]],
                         theme: 'plain',
                         headStyles: { fontStyle: 'bold', fontSize: 11, textColor: [0, 68, 129], cellPadding: {top: 5, bottom: 2} },
-                        // HALIGN LEFT es el estándar para evitar vacios extraños entre palabras
                         bodyStyles: { fontSize: 9, textColor: [30, 41, 59], cellPadding: 2, fillColor: [255, 255, 255], halign: 'left' },
                         didDrawPage: function (data) { drawHeader(); }
                     });
@@ -954,14 +960,9 @@
             }
 
             // --- Disclaimers y Firmas ---
-            
-            // Texto Importante
             const disclaimer1 = "Le informamos que luego del presente levantamiento de información, se procederá con el análisis del siniestro por parte del Ajustador de Seguros seleccionado por usted, de conformidad a lo establecido en la Póliza de Seguros contratada y con la presentación de la documentación que sea requerida de acuerdo a la normativa de seguros vigente.\nEl asegurado no podrá hacer abandono parcial o total de los bienes afectados sin la autorización expresa de la Compañía de Seguros o del Ajustador de Seguros, debiendo darse el debido cuidado para evitar el agravamiento de los daños. Estos bienes podrán ser retirados previa comunicación de la Compañía de Seguros o de la empresa autorizada por esta.";
-            
-            // Texto Declaracion
             const disclaimer2 = "He leído y estoy de acuerdo con los aspectos importantes mencionados en el párrafo anterior.\nPor la presente, acepto el detalle de las partidas afectadas de Edificio o Contenido, registrados en la presente inspección y anexos, no teniendo ninguna objeción a la inspección realizada.\nAcepto que toda la documentación relacionada al proceso de ajuste y liquidación de la pérdida por el siniestro reportado sea a través del correo electrónico consignado en la presente acta de inspección, la cual suscribo en señal de conformidad.";
 
-            // Renderizar Disclaimers con AutoTable para auto-salto de página
             doc.autoTable({
                 startY: yPos,
                 margin: { left: 15, right: 15, top: 30 },
@@ -986,7 +987,6 @@
             });
             yPos = doc.lastAutoTable.finalY + 10;
 
-            // Renderizar Firma y DNI
             if (yPos > pageHeight - 65) { doc.addPage(); yPos = 35; drawHeader(); }
             
             doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(0, 68, 129);
@@ -1012,7 +1012,7 @@
                 return;
             }
 
-            // Hojas de Croquis (Proporción 3:4 exacta de 180mm x 240mm ocupando toda la hoja)
+            // Hojas de Croquis (Cálculo proporcional de imagen)
             const croquisItems = document.querySelectorAll('.croquis-item');
             croquisItems.forEach((item, idx) => {
                 const cCanvas = item.querySelector('canvas');
@@ -1025,11 +1025,27 @@
                     doc.setDrawColor(0, 113, 185); doc.setLineWidth(0.5);
                     doc.line(15, 30, 100, 30);
                     
+                    const maxW = 180;
+                    const maxH = 240;
+                    const canvasRatio = cCanvas.width / cCanvas.height;
+                    
+                    let drawW = maxW;
+                    let drawH = maxW / canvasRatio;
+                    
+                    if (drawH > maxH) {
+                        drawH = maxH;
+                        drawW = maxH * canvasRatio;
+                    }
+                    
+                    const offsetX = 15 + (maxW - drawW) / 2;
+                    const offsetY = 35 + (maxH - drawH) / 2;
+
                     doc.setFillColor(255, 255, 255);
                     doc.setDrawColor(203, 213, 225);
                     doc.setLineWidth(0.3);
-                    doc.rect(15, 35, 180, 240, 'DF');
-                    doc.addImage(cCanvas.toDataURL('image/jpeg', 1.0), 'JPEG', 15, 35, 180, 240);
+                    doc.rect(15, 35, 180, 240, 'DF'); 
+
+                    doc.addImage(cCanvas.toDataURL('image/jpeg', 1.0), 'JPEG', offsetX, offsetY, drawW, drawH);
                 }
             });
 
