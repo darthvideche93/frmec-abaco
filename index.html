@@ -34,16 +34,18 @@
         }
 
         .damage-table-container { border-radius: 6px; overflow: hidden; border: 1px solid #e2e8f0; }
-        .damage-table th { background-color: #004481; color: white; padding: 10px; font-size: 12px; font-weight: 600; }
+        .damage-table th { background-color: #004481; color: white; padding: 10px; font-size: 11px; font-weight: 600; text-align: center; }
         .damage-table td { padding: 8px; border-bottom: 1px solid #e2e8f0; font-size: 12px; background-color: white; }
         .damage-table tr:nth-child(even) td { background-color: #f8fafc; }
+        .dmg-input { width: 100%; background: transparent; outline: none; border-bottom: 1px dashed #cbd5e1; font-size: 12px; }
+        .dmg-input:focus { border-bottom-color: #0071b9; }
     </style>
 </head>
 <body class="pb-20">
 
     <!-- Encabezado Corporativo -->
     <header class="bg-[#004481] text-white p-4 shadow-md sticky top-0 z-50">
-        <div class="max-w-4xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3 w-full md:w-auto justify-center md:justify-start">
                 <div class="bg-white/10 p-2 rounded">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -63,7 +65,7 @@
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     Nuevo
                 </button>
-                <!-- Botón Reportes (Abre Modal de Lista) -->
+                <!-- Botón Reportes -->
                 <button onclick="showReportsList()" class="bg-transparent hover:bg-white/10 text-white text-xs py-1.5 px-3 rounded border border-white/30 transition-colors flex items-center gap-1" title="Ver reportes guardados">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
                     Reportes
@@ -77,7 +79,7 @@
         </div>
         
         <!-- Barra de Exportación -->
-        <div class="max-w-4xl mx-auto mt-4 pt-3 border-t border-[#0055a5] flex flex-wrap justify-between items-center gap-3">
+        <div class="max-w-5xl mx-auto mt-4 pt-3 border-t border-[#0055a5] flex flex-wrap justify-between items-center gap-3">
             <span class="text-sm font-semibold text-blue-50">Exportar Reporte:</span>
             <div class="flex flex-wrap gap-2">
                 <button onclick="exportToPDF(true)" class="bg-white text-[#004481] hover:bg-gray-100 text-xs py-1.5 px-4 rounded shadow font-semibold flex items-center gap-1 transition-colors">
@@ -96,7 +98,7 @@
         </div>
     </header>
 
-    <main class="max-w-4xl mx-auto p-4 space-y-6 mt-4">
+    <main class="max-w-5xl mx-auto p-4 space-y-6 mt-4">
         
         <!-- SECCIÓN 1: DATOS DE INSPECCIÓN -->
         <div class="bg-white shadow-sm border border-slate-200 p-6 rounded-lg">
@@ -113,19 +115,19 @@
                 <div><label class="label-clean">Correo</label><input type="email" id="correo" class="input-clean"></div>
                 <div><label class="label-clean">Fecha de inspección</label><input type="date" id="fechaInsp" class="input-clean"></div>
                 <div><label class="label-clean">hora de inspección</label><input type="time" id="horaInsp" class="input-clean"></div>
-                <div><label class="label-clean">Inspector</label><input type="text" id="inspectorNombre" class="input-clean"></div>
+                <div class="md:col-span-2"><label class="label-clean">Inspector</label><input type="text" id="inspectorNombre" class="input-clean w-1/2"></div>
             </div>
         </div>
 
         <!-- SECCIÓN 2: DESCRIPCIONES -->
         <div class="bg-white shadow-sm border border-slate-200 p-6 rounded-lg space-y-5">
             <h2 class="text-lg font-bold text-[#004481] border-b border-[#0071b9] pb-2">DETALLES DEL SINIESTRO</h2>
-            <div><label class="label-clean">Descripción General del Siniestro</label><textarea id="descSiniestro" rows="2" class="input-clean"></textarea></div>
-            <div><label class="label-clean">Descripción del Inmueble</label><textarea id="descInmueble" rows="2" class="input-clean"></textarea></div>
-            <div><label class="label-clean">Descripción de Daños</label><textarea id="descDanos" rows="3" class="input-clean"></textarea></div>
+            <div><label class="label-clean">Descripción General del Siniestro</label><textarea id="descSiniestro" rows="3" class="input-clean"></textarea></div>
+            <div><label class="label-clean">Descripción del Inmueble</label><textarea id="descInmueble" rows="3" class="input-clean"></textarea></div>
+            <div><label class="label-clean">Descripción de Daños</label><textarea id="descDanos" rows="4" class="input-clean"></textarea></div>
         </div>
 
-        <!-- SECCIÓN 3: TABLA DE DIMENSIONES -->
+        <!-- SECCIÓN 3: TABLA DE DIMENSIONES (ACTUALIZADA) -->
         <div class="bg-white shadow-sm border border-slate-200 p-6 rounded-lg">
             <div class="flex justify-between items-center mb-4 border-b border-[#0071b9] pb-2">
                 <h2 class="text-lg font-bold text-[#004481]">DIMENSIONES DE LOS DAÑOS</h2>
@@ -137,13 +139,15 @@
                 <table class="w-full text-left border-collapse damage-table" id="damageTable">
                     <thead>
                         <tr>
-                            <th class="w-10 text-center">Nro.</th>
-                            <th class="w-1/5">Ambiente / Partida</th>
-                            <th class="w-1/3">Detalle del bien afectado</th>
-                            <th class="w-20 text-center">U.M.</th>
-                            <th class="w-24 text-center">Sup. Afectada</th>
-                            <th>Observaciones</th>
-                            <th class="w-10"></th>
+                            <th class="w-8">Nro.</th>
+                            <th class="w-1/6">Rubro</th>
+                            <th class="w-1/5">Descripción</th>
+                            <th class="w-1/6">Ubicación(croquis)</th>
+                            <th class="w-12">Und</th>
+                            <th class="w-20">Superficie<br>total</th>
+                            <th class="w-20">Superficie<br>afectada</th>
+                            <th class="w-1/5">Observación</th>
+                            <th class="w-8"></th>
                         </tr>
                     </thead>
                     <tbody id="damageTableBody">
@@ -153,54 +157,83 @@
             </div>
         </div>
 
-        <!-- SECCIÓN 4: FIRMAS Y DNI (CON OPCIÓN DE FOTO / GALERÍA) -->
-        <div class="bg-white shadow-sm border border-slate-200 p-6 rounded-lg grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-                <div class="flex flex-wrap justify-between items-center mb-2 gap-2">
-                    <label class="block text-sm font-bold text-[#004481]">Firma (Propietario / Rep.):</label>
-                    <div class="flex gap-1">
-                        <label class="bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 px-2 py-1 rounded text-xs cursor-pointer flex items-center gap-1 font-semibold shadow-sm" title="Tomar foto a firma">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
-                            Foto
-                            <input type="file" accept="image/*" capture="environment" class="hidden" onchange="setSignatureOrDNIPhoto('canvasFirma', this)">
-                        </label>
-                        <label class="bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 px-2 py-1 rounded text-xs cursor-pointer flex items-center gap-1 font-semibold shadow-sm" title="Subir imagen de firma">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            Subir
-                            <input type="file" accept="image/*" class="hidden" onchange="setSignatureOrDNIPhoto('canvasFirma', this)">
-                        </label>
-                    </div>
+        <!-- SECCIÓN 4: DISCLAIMERS LEGALES Y FIRMAS -->
+        <div class="bg-white shadow-sm border border-slate-200 p-6 rounded-lg space-y-6">
+            
+            <!-- Disclaimer 1 -->
+            <div class="border border-blue-200 rounded-lg overflow-hidden">
+                <div class="bg-[#0071b9] text-white font-bold py-2 px-3 flex items-center gap-2 text-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    IMPORTANTE (LECTURA OBLIGATORIA)
                 </div>
-                <div class="border border-slate-300 rounded bg-white relative h-40">
-                    <canvas id="canvasFirma" class="absolute inset-0 w-full h-full canvas-container"></canvas>
-                    <div class="absolute top-2 right-2 flex gap-1 z-10">
-                        <button onclick="undoCanvas('canvasFirma')" class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs hover:bg-gray-200 shadow-sm border border-gray-200 font-bold" title="Deshacer trazo">↩</button>
-                        <button onclick="clearCanvas('canvasFirma')" class="bg-gray-100 text-red-500 font-semibold px-2 py-1 rounded text-xs hover:bg-gray-200 shadow-sm border border-gray-200">Borrar</button>
-                    </div>
+                <div class="p-3 text-xs text-justify text-slate-700 bg-blue-50/50 leading-relaxed">
+                    Le informamos que luego del presente levantamiento de información, se procederá con el análisis del siniestro por parte del Ajustador de Seguros seleccionado por usted, de conformidad a lo establecido en la Póliza de Seguros contratada y con la presentación de la documentación que sea requerida de acuerdo a la normativa de seguros vigente.<br><br>
+                    El asegurado no podrá hacer abandono parcial o total de los bienes afectados sin la autorización expresa de la Compañía de Seguros o del Ajustador de Seguros, debiendo darse el debido cuidado para evitar el agravamiento de los daños. Estos bienes podrán ser retirados previa comunicación de la Compañía de Seguros o de la empresa autorizada por esta.
                 </div>
             </div>
 
-            <div>
-                <div class="flex flex-wrap justify-between items-center mb-2 gap-2">
-                    <label class="block text-sm font-bold text-[#004481]">DNI:</label>
-                    <div class="flex gap-1">
-                        <label class="bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 px-2 py-1 rounded text-xs cursor-pointer flex items-center gap-1 font-semibold shadow-sm" title="Tomar foto al DNI">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
-                            Foto
-                            <input type="file" accept="image/*" capture="environment" class="hidden" onchange="setSignatureOrDNIPhoto('canvasDNI', this)">
-                        </label>
-                        <label class="bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 px-2 py-1 rounded text-xs cursor-pointer flex items-center gap-1 font-semibold shadow-sm" title="Subir imagen de DNI">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            Subir
-                            <input type="file" accept="image/*" class="hidden" onchange="setSignatureOrDNIPhoto('canvasDNI', this)">
-                        </label>
+            <!-- Disclaimer 2 -->
+            <div class="border border-blue-200 rounded-lg overflow-hidden">
+                <div class="bg-[#0071b9] text-white font-bold py-2 px-3 flex items-center gap-2 text-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    DECLARACIÓN DEL ASEGURADO
+                </div>
+                <div class="p-3 text-xs text-justify text-slate-700 bg-blue-50/50 leading-relaxed">
+                    He leído y estoy de acuerdo con los aspectos importantes mencionados en el párrafo anterior.<br>
+                    Por la presente, acepto el detalle de las partidas afectadas de Edificio o Contenido, registrados en la presente inspección y anexos, no teniendo ninguna objeción a la inspección realizada.<br>
+                    Acepto que toda la documentación relacionada al proceso de ajuste y liquidación de la pérdida por el siniestro reportado sea a través del correo electrónico consignado en la presente acta de inspección, la cual suscribo en señal de conformidad.
+                </div>
+            </div>
+
+            <!-- Recuadros de Firma -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-2">
+                <div>
+                    <div class="flex flex-wrap justify-between items-center mb-2 gap-2">
+                        <label class="block text-sm font-bold text-[#004481]">Firma (Propietario / Rep.):</label>
+                        <div class="flex gap-1">
+                            <label class="bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 px-2 py-1 rounded text-xs cursor-pointer flex items-center gap-1 font-semibold shadow-sm">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+                                Foto
+                                <input type="file" accept="image/*" capture="environment" class="hidden" onchange="setSignatureOrDNIPhoto('canvasFirma', this)">
+                            </label>
+                            <label class="bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 px-2 py-1 rounded text-xs cursor-pointer flex items-center gap-1 font-semibold shadow-sm">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                Subir
+                                <input type="file" accept="image/*" class="hidden" onchange="setSignatureOrDNIPhoto('canvasFirma', this)">
+                            </label>
+                        </div>
+                    </div>
+                    <div class="border border-slate-300 rounded bg-white relative h-40">
+                        <canvas id="canvasFirma" class="absolute inset-0 w-full h-full canvas-container"></canvas>
+                        <div class="absolute top-2 right-2 flex gap-1 z-10">
+                            <button onclick="undoCanvas('canvasFirma')" class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs hover:bg-gray-200 shadow-sm border border-gray-200 font-bold" title="Deshacer trazo">↩</button>
+                            <button onclick="clearCanvas('canvasFirma')" class="bg-gray-100 text-red-500 font-semibold px-2 py-1 rounded text-xs hover:bg-gray-200 shadow-sm border border-gray-200">Borrar</button>
+                        </div>
                     </div>
                 </div>
-                <div class="border border-slate-300 rounded bg-white relative h-40">
-                    <canvas id="canvasDNI" class="absolute inset-0 w-full h-full canvas-container"></canvas>
-                    <div class="absolute top-2 right-2 flex gap-1 z-10">
-                        <button onclick="undoCanvas('canvasDNI')" class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs hover:bg-gray-200 shadow-sm border border-gray-200 font-bold" title="Deshacer trazo">↩</button>
-                        <button onclick="clearCanvas('canvasDNI')" class="bg-gray-100 text-red-500 font-semibold px-2 py-1 rounded text-xs hover:bg-gray-200 shadow-sm border border-gray-200">Borrar</button>
+
+                <div>
+                    <div class="flex flex-wrap justify-between items-center mb-2 gap-2">
+                        <label class="block text-sm font-bold text-[#004481]">DNI:</label>
+                        <div class="flex gap-1">
+                            <label class="bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 px-2 py-1 rounded text-xs cursor-pointer flex items-center gap-1 font-semibold shadow-sm">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+                                Foto
+                                <input type="file" accept="image/*" capture="environment" class="hidden" onchange="setSignatureOrDNIPhoto('canvasDNI', this)">
+                            </label>
+                            <label class="bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 px-2 py-1 rounded text-xs cursor-pointer flex items-center gap-1 font-semibold shadow-sm">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                Subir
+                                <input type="file" accept="image/*" class="hidden" onchange="setSignatureOrDNIPhoto('canvasDNI', this)">
+                            </label>
+                        </div>
+                    </div>
+                    <div class="border border-slate-300 rounded bg-white relative h-40">
+                        <canvas id="canvasDNI" class="absolute inset-0 w-full h-full canvas-container"></canvas>
+                        <div class="absolute top-2 right-2 flex gap-1 z-10">
+                            <button onclick="undoCanvas('canvasDNI')" class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs hover:bg-gray-200 shadow-sm border border-gray-200 font-bold" title="Deshacer trazo">↩</button>
+                            <button onclick="clearCanvas('canvasDNI')" class="bg-gray-100 text-red-500 font-semibold px-2 py-1 rounded text-xs hover:bg-gray-200 shadow-sm border border-gray-200">Borrar</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -327,7 +360,7 @@
             let degrees = Math.floor(d);
             let minutes = Math.floor((d - degrees) * 60);
             let seconds = ((d - degrees - minutes/60) * 3600).toFixed(0);
-            let dir = isLat ? (deg >= 0 ? "S" : "N") : (deg >= 0 ? "O" : "E"); // Perú
+            let dir = isLat ? (deg >= 0 ? "S" : "N") : (deg >= 0 ? "O" : "E"); 
             return `${degrees}°${minutes}'${seconds}" ${dir}`;
         }
 
@@ -353,7 +386,6 @@
                         const dateStr = date.toLocaleDateString('es-PE', {day:'2-digit', month:'2-digit', year:'numeric'}).replace(/\//g, ':');
                         const timeStr = date.toLocaleTimeString('es-PE', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
                         
-                        // Caja superior derecha "GEOPHOTO VERIFIED"
                         const topBoxW = canvas.width * 0.35;
                         const topBoxH = canvas.height * 0.05;
                         ctx.fillStyle = 'black';
@@ -366,7 +398,6 @@
                         ctx.textBaseline = 'middle';
                         ctx.fillText('GEOPHOTO VERIFIED', canvas.width - (topBoxW/2), topBoxH/2);
 
-                        // Banda inferior translúcida con pequeño margen para que no se corte
                         const marginBottom = canvas.height * 0.005;
                         const bandHeight = canvas.height * 0.15;
                         const startY = canvas.height - bandHeight - marginBottom;
@@ -374,7 +405,6 @@
                         ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
                         ctx.fillRect(0, startY, canvas.width, bandHeight);
                         
-                        // Línea verde superior de la banda
                         ctx.fillStyle = '#4ade80';
                         ctx.fillRect(0, startY, canvas.width, canvas.height * 0.005);
 
@@ -455,13 +485,11 @@
             document.getElementById('previewModalImage').src = "";
         };
 
-        // --- 3. DIBUJO EN CANVAS (Pointer Events + ALTA RESOLUCIÓN) ---
+        // --- 3. DIBUJO EN CANVAS ---
         function setupCanvasDrawing(canvasId) {
             const canvas = document.getElementById(canvasId);
             if(!canvas) return;
             const ctx = canvas.getContext('2d');
-            
-            // Factor de alta resolución para que el croquis no pierda calidad en el PDF (Retina HD)
             const HD_SCALE = 3;
 
             let isDrawing = false;
@@ -487,7 +515,6 @@
                 const newWidth = rect.width * HD_SCALE;
                 const newHeight = rect.height * HD_SCALE;
 
-                // Evitar resets innecesarios si la pantalla no cambió de tamaño
                 if (canvas.width === newWidth && canvas.height === newHeight) return;
 
                 canvas.width = newWidth;
@@ -496,11 +523,9 @@
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
-                if (hasContent) {
-                    ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
-                }
+                if (hasContent) { ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height); }
                 ctx.strokeStyle = color; 
-                ctx.lineWidth = 2 * HD_SCALE; // Escalar el grosor de línea para alta resolución
+                ctx.lineWidth = 2 * HD_SCALE; 
                 ctx.lineCap = 'round'; 
                 ctx.lineJoin = 'round';
             }
@@ -517,7 +542,6 @@
 
             function getPos(e) {
                 const rect = canvas.getBoundingClientRect();
-                // Ajustar las coordenadas físicas del mouse/dedo a la alta resolución interna del canvas
                 const scaleX = canvas.width / rect.width;
                 const scaleY = canvas.height / rect.height;
                 return { 
@@ -540,10 +564,7 @@
                 e.preventDefault();
             }
             function stopDraw(e) { 
-                if(isDrawing) {
-                    isDrawing = false; 
-                    triggerAutoSave();
-                }
+                if(isDrawing) { isDrawing = false; triggerAutoSave(); }
             }
 
             canvas.addEventListener('pointerdown', startDraw);
@@ -591,7 +612,6 @@
             canvases[id].ctx.strokeStyle = color;
         };
 
-        // Función para cargar foto en Firma o DNI manteniendo la proporción sin distorsión
         window.setSignatureOrDNIPhoto = (canvasId, inputEl) => {
             if(inputEl.files && inputEl.files[0]) {
                 const reader = new FileReader();
@@ -605,7 +625,6 @@
                         ctx.fillStyle = '#ffffff'; 
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                         
-                        // Escalar imagen para que encaje perfectamente (contain) sin deformarse
                         let scale = Math.min(canvas.width / img.width, canvas.height / img.height);
                         let drawW = img.width * scale;
                         let drawH = img.height * scale;
@@ -622,7 +641,6 @@
             inputEl.value = '';
         };
 
-        // Función para cargar fondo en Croquis forzando recorte o encaje 3:4 (4:3 vertical) sin distorsión
         window.setCanvasBackground = (id, inputEl) => {
             if(inputEl.files && inputEl.files[0]) {
                 const reader = new FileReader();
@@ -636,7 +654,6 @@
                         ctx.fillStyle = '#ffffff'; 
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                         
-                        // Usar Math.min para asegurar que fotos 16:9 u otras entren completas y centradas sin estirarse ni deformarse
                         let scale = Math.min(canvas.width / img.width, canvas.height / img.height);
                         let drawW = img.width * scale;
                         let drawH = img.height * scale;
@@ -675,7 +692,6 @@
                         <button onclick="clearCanvas('${id}')" class="bg-gray-100 hover:bg-red-50 text-red-500 px-2 py-1 rounded text-xs border border-gray-200 font-semibold">
                             Borrar
                         </button>
-                        
                         <label class="bg-white border border-[#0071b9] text-[#0071b9] hover:bg-blue-50 px-2 py-1 rounded text-xs cursor-pointer flex items-center gap-1 font-semibold">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
                             Cámara
@@ -688,7 +704,6 @@
                         </label>
                     </div>
                 </div>
-                <!-- Proporción 3:4 exacta (4:3 vertical) -->
                 <div class="border border-gray-300 bg-white relative w-full" style="aspect-ratio: 3 / 4;">
                     <canvas id="${id}" class="absolute inset-0 w-full h-full canvas-container"></canvas>
                 </div>
@@ -710,25 +725,28 @@
             }, 60);
         };
 
-        // --- 4. TABLA DE DIMENSIONES ---
+        // --- 4. NUEVA TABLA DE DIMENSIONES (7 COLUMNAS) ---
         let damageRowCount = 0;
         window.addDamageRow = (rowData = null) => {
             damageRowCount++;
             const tbody = document.getElementById('damageTableBody');
             const tr = document.createElement('tr');
             
-            const partidaVal = rowData ? (rowData.partida || '') : '';
-            const detalleVal = rowData ? (rowData.detalle || '') : '';
+            const rubroVal = rowData ? (rowData.rubro || '') : '';
+            const descVal = rowData ? (rowData.desc || '') : '';
+            const ubiVal = rowData ? (rowData.ubi || '') : '';
             const umVal = rowData ? (rowData.um || 'm2') : 'm2';
-            const supVal = rowData ? (rowData.sup || '') : '';
+            const supTotalVal = rowData ? (rowData.supTotal || '') : '';
+            const supAfecVal = rowData ? (rowData.supAfec || '') : '';
             const obsVal = rowData ? (rowData.obs || '') : '';
 
             tr.innerHTML = `
                 <td class="text-center text-gray-500 row-index">${damageRowCount}</td>
-                <td><input type="text" value="${partidaVal}" oninput="triggerAutoSave()" class="w-full bg-transparent outline-none border-b border-dashed border-gray-300 focus:border-[#0071b9] dmg-partida"></td>
-                <td><input type="text" value="${detalleVal}" oninput="triggerAutoSave()" class="w-full bg-transparent outline-none border-b border-dashed border-gray-300 focus:border-[#0071b9] dmg-detalle"></td>
+                <td><input type="text" value="${rubroVal}" oninput="triggerAutoSave()" class="dmg-input dmg-rubro"></td>
+                <td><input type="text" value="${descVal}" oninput="triggerAutoSave()" class="dmg-input dmg-desc"></td>
+                <td><input type="text" value="${ubiVal}" oninput="triggerAutoSave()" class="dmg-input dmg-ubi"></td>
                 <td>
-                    <select onchange="triggerAutoSave()" class="w-full bg-transparent outline-none border-b border-dashed border-gray-300 dmg-um">
+                    <select onchange="triggerAutoSave()" class="dmg-input dmg-um border-none text-center">
                         <option value="m2" ${umVal === 'm2' ? 'selected' : ''}>m2</option>
                         <option value="ml" ${umVal === 'ml' ? 'selected' : ''}>ml</option>
                         <option value="m3" ${umVal === 'm3' ? 'selected' : ''}>m3</option>
@@ -737,8 +755,9 @@
                         <option value="otro" ${umVal === 'otro' ? 'selected' : ''}>otro</option>
                     </select>
                 </td>
-                <td><input type="number" step="0.01" value="${supVal}" oninput="triggerAutoSave()" class="w-full bg-transparent outline-none border-b border-dashed border-gray-300 text-center dmg-sup"></td>
-                <td><input type="text" value="${obsVal}" oninput="triggerAutoSave()" class="w-full bg-transparent outline-none border-b border-dashed border-gray-300 dmg-obs"></td>
+                <td><input type="number" step="0.01" value="${supTotalVal}" oninput="triggerAutoSave()" class="dmg-input dmg-suptotal text-center"></td>
+                <td><input type="number" step="0.01" value="${supAfecVal}" oninput="triggerAutoSave()" class="dmg-input dmg-supafec text-center"></td>
+                <td><input type="text" value="${obsVal}" oninput="triggerAutoSave()" class="dmg-input dmg-obs"></td>
                 <td class="text-center"><button onclick="removeDamageRow(this)" class="text-red-500 hover:text-red-700 font-bold text-xs">X</button></td>
             `;
             tbody.appendChild(tr);
@@ -765,10 +784,12 @@
             const data = [];
             rows.forEach((row) => {
                 data.push({
-                    partida: row.querySelector('.dmg-partida').value,
-                    detalle: row.querySelector('.dmg-detalle').value,
+                    rubro: row.querySelector('.dmg-rubro').value,
+                    desc: row.querySelector('.dmg-desc').value,
+                    ubi: row.querySelector('.dmg-ubi').value,
                     um: row.querySelector('.dmg-um').value,
-                    sup: row.querySelector('.dmg-sup').value,
+                    supTotal: row.querySelector('.dmg-suptotal').value,
+                    supAfec: row.querySelector('.dmg-supafec').value,
                     obs: row.querySelector('.dmg-obs').value
                 });
             });
@@ -779,17 +800,22 @@
             const rows = document.querySelectorAll('#damageTableBody tr');
             const data = [];
             rows.forEach((row, index) => {
-                const partida = row.querySelector('.dmg-partida').value.trim();
-                const detalle = row.querySelector('.dmg-detalle').value.trim();
-                const sup = row.querySelector('.dmg-sup').value.trim();
+                const rubro = row.querySelector('.dmg-rubro').value.trim();
+                const desc = row.querySelector('.dmg-desc').value.trim();
+                const ubi = row.querySelector('.dmg-ubi').value.trim();
+                const supTotal = row.querySelector('.dmg-suptotal').value.trim();
+                const supAfec = row.querySelector('.dmg-supafec').value.trim();
                 const obs = row.querySelector('.dmg-obs').value.trim();
-                if (partida || detalle || sup || obs) {
+                
+                if (rubro || desc || ubi || supTotal || supAfec || obs) {
                     data.push([
                         (index + 1).toString(),
-                        partida,
-                        detalle,
+                        rubro,
+                        desc,
+                        ubi,
                         row.querySelector('.dmg-um').value,
-                        sup,
+                        supTotal,
+                        supAfec,
                         obs
                     ]);
                 }
@@ -831,7 +857,6 @@
 
             drawHeader();
             
-            // Título de Sección "FICHA DE DATOS" solo en la primera página
             doc.setFontSize(14);
             doc.setFont("helvetica", "bold");
             doc.setTextColor(0, 68, 129);
@@ -854,7 +879,6 @@
                 body: formValues,
                 theme: 'plain',
                 styles: { fontSize: 9, cellPadding: 4, textColor: [0, 0, 0], fillColor: [255, 255, 255] }, 
-                // Asignación estricta de anchos de columna (45mm cada una para mantener el cuadre perfecto)
                 columnStyles: { 
                     0: { fontStyle: 'bold', textColor: [0, 68, 129], cellWidth: 48 }, 
                     1: { cellWidth: 42 },
@@ -871,7 +895,7 @@
 
             yPos = doc.lastAutoTable.finalY + 10;
 
-            // Textos Largos con paginación y justificado
+            // --- Textos Largos con justificado a la izquierda (left) y márgenes ---
             const textSections = [
                 { title: "Descripción General del Siniestro", text: document.getElementById('descSiniestro').value },
                 { title: "Descripción del Inmueble", text: document.getElementById('descInmueble').value },
@@ -882,20 +906,20 @@
                 if (sec.text.trim() !== '') {
                     doc.autoTable({
                         startY: yPos,
-                        margin: { top: 30 }, 
+                        margin: { left: 15, right: 15, top: 25, bottom: 20 }, 
                         head: [[sec.title]],
                         body: [[sec.text]],
                         theme: 'plain',
                         headStyles: { fontStyle: 'bold', fontSize: 11, textColor: [0, 68, 129], cellPadding: {top: 5, bottom: 2} },
-                        // Alineación 'justify' para que el texto ocupe de extremo a extremo
-                        bodyStyles: { fontSize: 9, textColor: [30, 41, 59], cellPadding: 2, fillColor: [255, 255, 255], halign: 'justify' },
+                        // HALIGN LEFT es el estándar para evitar vacios extraños entre palabras
+                        bodyStyles: { fontSize: 9, textColor: [30, 41, 59], cellPadding: 2, fillColor: [255, 255, 255], halign: 'left' },
                         didDrawPage: function (data) { drawHeader(); }
                     });
                     yPos = doc.lastAutoTable.finalY + 5;
                 }
             });
 
-            // Tabla de Dimensiones
+            // --- Nueva Tabla de Dimensiones (7 Columnas) ---
             const dmgData = getDamageData();
             if(dmgData.length > 0) {
                 yPos += 5;
@@ -911,19 +935,58 @@
                 
                 doc.autoTable({
                     startY: doc.lastAutoTable.finalY + 2,
-                    margin: { top: 30 },
-                    head: [["Nro.", "Partida", "Detalle", "U.M.", "Sup.", "Obs."]],
+                    margin: { left: 10, right: 10, top: 30 },
+                    head: [["Nro.", "Rubro", "Descripción", "Ubicación (croquis)", "Und", "Sup. total", "Sup. afectada", "Observación"]],
                     body: dmgData,
                     theme: 'grid',
-                    headStyles: { fillColor: [0, 68, 129], textColor: 255, fontSize: 8 },
+                    headStyles: { fillColor: [0, 68, 129], textColor: 255, fontSize: 8, halign: 'center' },
                     bodyStyles: { fontSize: 8, fillColor: [255, 255, 255], textColor: [30, 41, 59] },
                     alternateRowStyles: { fillColor: [248, 250, 252] },
+                    columnStyles: {
+                        0: { cellWidth: 10, halign: 'center' },
+                        4: { cellWidth: 10, halign: 'center' },
+                        5: { cellWidth: 15, halign: 'center' },
+                        6: { cellWidth: 15, halign: 'center' }
+                    },
                     didDrawPage: function (data) { drawHeader(); }
                 });
                 yPos = doc.lastAutoTable.finalY + 10;
             }
 
-            // Firmas con cuadro delimitador
+            // --- Disclaimers y Firmas ---
+            
+            // Texto Importante
+            const disclaimer1 = "Le informamos que luego del presente levantamiento de información, se procederá con el análisis del siniestro por parte del Ajustador de Seguros seleccionado por usted, de conformidad a lo establecido en la Póliza de Seguros contratada y con la presentación de la documentación que sea requerida de acuerdo a la normativa de seguros vigente.\nEl asegurado no podrá hacer abandono parcial o total de los bienes afectados sin la autorización expresa de la Compañía de Seguros o del Ajustador de Seguros, debiendo darse el debido cuidado para evitar el agravamiento de los daños. Estos bienes podrán ser retirados previa comunicación de la Compañía de Seguros o de la empresa autorizada por esta.";
+            
+            // Texto Declaracion
+            const disclaimer2 = "He leído y estoy de acuerdo con los aspectos importantes mencionados en el párrafo anterior.\nPor la presente, acepto el detalle de las partidas afectadas de Edificio o Contenido, registrados en la presente inspección y anexos, no teniendo ninguna objeción a la inspección realizada.\nAcepto que toda la documentación relacionada al proceso de ajuste y liquidación de la pérdida por el siniestro reportado sea a través del correo electrónico consignado en la presente acta de inspección, la cual suscribo en señal de conformidad.";
+
+            // Renderizar Disclaimers con AutoTable para auto-salto de página
+            doc.autoTable({
+                startY: yPos,
+                margin: { left: 15, right: 15, top: 30 },
+                head: [["IMPORTANTE (LECTURA OBLIGATORIA)"]],
+                body: [[disclaimer1]],
+                theme: 'grid',
+                headStyles: { fillColor: [0, 113, 185], textColor: 255, fontStyle: 'bold', fontSize: 9 },
+                bodyStyles: { fillColor: [240, 248, 255], textColor: [0, 0, 0], fontSize: 8, halign: 'left', cellPadding: 3 },
+                didDrawPage: function (data) { drawHeader(); }
+            });
+            yPos = doc.lastAutoTable.finalY + 4;
+
+            doc.autoTable({
+                startY: yPos,
+                margin: { left: 15, right: 15, top: 30 },
+                head: [["DECLARACIÓN DEL ASEGURADO"]],
+                body: [[disclaimer2]],
+                theme: 'grid',
+                headStyles: { fillColor: [0, 113, 185], textColor: 255, fontStyle: 'bold', fontSize: 9 },
+                bodyStyles: { fillColor: [240, 248, 255], textColor: [0, 0, 0], fontSize: 8, halign: 'left', cellPadding: 3 },
+                didDrawPage: function (data) { drawHeader(); }
+            });
+            yPos = doc.lastAutoTable.finalY + 10;
+
+            // Renderizar Firma y DNI
             if (yPos > pageHeight - 65) { doc.addPage(); yPos = 35; drawHeader(); }
             
             doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(0, 68, 129);
@@ -965,13 +1028,12 @@
                     doc.setFillColor(255, 255, 255);
                     doc.setDrawColor(203, 213, 225);
                     doc.setLineWidth(0.3);
-                    // 180mm ancho x 240mm alto = proporción exacta 3:4 (4:3 vertical)
                     doc.rect(15, 35, 180, 240, 'DF');
                     doc.addImage(cCanvas.toDataURL('image/jpeg', 1.0), 'JPEG', 15, 35, 180, 240);
                 }
             });
 
-            // Registro Fotográfico (6 fotos por hoja)
+            // Registro Fotográfico
             if (photosData.length > 0) {
                 doc.addPage();
                 drawHeader();
@@ -1097,7 +1159,7 @@
         // --- 8. BASE DE DATOS LOCAL (IndexedDB), AUTOGUARDADO Y LISTA ---
         let db;
         let autoSaveTimer = null;
-        const request = indexedDB.open("FRMECDB_Multi", 2);
+        const request = indexedDB.open("FRMECDB_Multi", 3);
         
         request.onupgradeneeded = (e) => { 
             db = e.target.result; 
@@ -1108,7 +1170,6 @@
         
         request.onsuccess = (e) => { 
             db = e.target.result; 
-            // Restaurar sesión activa automáticamente al refrescar la página
             const lastSessionId = localStorage.getItem('frmec_active_report_id');
             if (lastSessionId) {
                 loadSpecificReport(lastSessionId, true);
@@ -1175,7 +1236,7 @@
             const tx = db.transaction("reports", "readwrite");
             tx.objectStore("reports").put(report);
             localStorage.setItem('frmec_active_report_id', currentReportId);
-            tx.oncomplete = () => alert("Reporte guardado exitosamente (incluyendo tabla de daños y croquis).");
+            tx.oncomplete = () => alert("Reporte guardado exitosamente.");
         };
 
         window.showReportsList = () => {
@@ -1221,14 +1282,12 @@
                     localStorage.setItem('frmec_active_report_id', currentReportId);
                     const r = req.result;
                     
-                    // 1. Restaurar campos de formulario
                     if (r.form) {
                         Object.keys(r.form).forEach(k => {
                             if(document.getElementById(k)) document.getElementById(k).value = r.form[k];
                         });
                     }
                     
-                    // 2. Restaurar Tabla de Dimensiones de Daños
                     const tbody = document.getElementById('damageTableBody');
                     tbody.innerHTML = '';
                     damageRowCount = 0;
@@ -1238,18 +1297,15 @@
                         addDamageRow();
                     }
 
-                    // 3. Restaurar Hojas de Croquis
                     document.getElementById('croquisContainer').innerHTML = '';
                     croquisCount = 0;
                     if (r.croquis && Array.isArray(r.croquis) && r.croquis.length > 0) {
                         r.croquis.forEach(c => addCroquisSheet(c.title, c.dataUrl));
                     }
 
-                    // 4. Restaurar Fotos
                     photosData = r.photos || [];
                     renderPhotos();
                     
-                    // 5. Restaurar Firma y DNI
                     if(r.firma) {
                         const cF = document.getElementById('canvasFirma');
                         const ctxF = cF.getContext('2d');
@@ -1293,12 +1349,10 @@
             }
         };
 
-        // Escuchar cambios en todos los inputs principales para autoguardar
         document.querySelectorAll('#inspectionForm input, textarea').forEach(el => {
             el.addEventListener('input', triggerAutoSave);
         });
 
-        // --- Inicialización ---
         setupCanvasDrawing('canvasFirma');
         setupCanvasDrawing('canvasDNI');
         addDamageRow();
