@@ -9,6 +9,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <!-- Lector EXIF para extraer metadatos originales de las fotos -->
+    <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; color: #334155; }
         .canvas-container { touch-action: none; } 
@@ -346,7 +348,7 @@
         // CONFIGURACIÓN DE ROLES (CORREOS ADMINISTRADORES)
         const ADMIN_EMAILS = ["hechegarayc@frmec.com", "gerencia@frmec.com"];
         let isCurrentUserAdmin = false;
-        window.loadedReportOriginalEmail = null; // Variable para recordar al inspector original al editar
+        window.loadedReportOriginalEmail = null;
 
         // CREDENCIALES CLOUDINARY
         const CLOUD_NAME = "ovmfxdmm";
@@ -362,13 +364,11 @@
                 isCurrentUserAdmin = ADMIN_EMAILS.includes(user.email.toLowerCase());
                 
                 if(isCurrentUserAdmin) {
-                    // MODO ADMINISTRADOR (Oculta botones de inspector)
                     document.getElementById('btnNewReport').classList.add('hidden');
                     document.getElementById('btnMyReports').classList.add('hidden');
                     document.getElementById('btnSaveReport').classList.add('hidden');
                     window.showAdminDashboard();
                 } else {
-                    // MODO INSPECTOR
                     document.getElementById('adminDashboard').classList.add('hidden');
                     document.getElementById('inspectorView').classList.remove('hidden');
                     document.getElementById('btnBackToAdmin').classList.add('hidden');
@@ -402,9 +402,8 @@
 
         window.logoutUser = () => { signOut(auth); };
 
-        // HELPER PARA SUBIR A CLOUDINARY
         async function uploadImageToCloudinary(base64Data) {
-            if (!base64Data || !base64Data.startsWith('data:image')) return base64Data; // Ya es URL o está vacío
+            if (!base64Data || !base64Data.startsWith('data:image')) return base64Data; 
             const formData = new FormData();
             formData.append('file', base64Data);
             formData.append('upload_preset', UPLOAD_PRESET);
@@ -413,7 +412,6 @@
             return data.secure_url;
         }
 
-        // GUARDADO EN LA NUBE (Inspectores y Administradores Editando)
         window.saveCurrentReportToCloud = async () => {
             if (!auth.currentUser) return;
             document.getElementById('loadingOverlay').classList.remove('hidden');
@@ -421,9 +419,6 @@
             
             try {
                 const report = window.collectReportObject();
-                
-                // Mantiene el correo del inspector original si el admin está editando, 
-                // sino, usa el correo del usuario logueado actualmente.
                 report.inspectorEmail = window.loadedReportOriginalEmail || auth.currentUser.email;
                 
                 report.firma = await uploadImageToCloudinary(report.firma);
@@ -437,7 +432,7 @@
                 }
                 
                 await setDoc(doc(db, "reports", report.id), report);
-                window.saveToLocalDB(report); // Backup local
+                window.saveToLocalDB(report); 
                 alert("¡Reporte guardado exitosamente en la Nube!");
             } catch (error) {
                 alert("Error al guardar en la nube: " + error.message);
@@ -446,7 +441,6 @@
             }
         };
 
-        // ELIMINAR REPORTE DE LA NUBE (Solo Administrador)
         window.deleteCloudReport = async (id) => {
             if(!isCurrentUserAdmin) return;
             if(!confirm("⚠️ ¿Estás seguro de ELIMINAR este reporte? Esta acción es permanente y no se puede deshacer.")) return;
@@ -457,7 +451,7 @@
             try {
                 await deleteDoc(doc(db, "reports", id));
                 alert("Reporte eliminado con éxito.");
-                window.loadAdminReports(); // Recarga la tabla automáticamente
+                window.loadAdminReports();
             } catch (error) {
                 alert("Error al eliminar el reporte: " + error.message);
             } finally {
@@ -465,7 +459,6 @@
             }
         };
 
-        // LISTA DE REPORTES DEL INSPECTOR (Solo ve los suyos)
         window.showReportsList = async () => {
             if (!auth.currentUser) return;
             document.getElementById('loadingOverlay').classList.remove('hidden');
@@ -504,7 +497,6 @@
             }
         };
 
-        // DASHBOARD DE ADMINISTRADOR (Ve todos los reportes)
         window.loadAdminReports = async () => {
             if (!isCurrentUserAdmin) return;
             document.getElementById('loadingOverlay').classList.remove('hidden');
@@ -514,7 +506,7 @@
                 const querySnapshot = await getDocs(collection(db, "reports"));
                 const list = [];
                 querySnapshot.forEach((docSnap) => { list.push(docSnap.data()); });
-                list.sort((a,b) => b.timestamp - a.timestamp); // Más recientes primero
+                list.sort((a,b) => b.timestamp - a.timestamp);
                 
                 const tbody = document.getElementById('adminTableBody');
                 tbody.innerHTML = '';
@@ -546,7 +538,6 @@
             }
         };
 
-        // CARGAR REPORTE (Usado por inspector o admin)
         window.loadCloudReport = async (id, fromAdmin = false) => {
             if(!fromAdmin && !confirm("¿Cargar este reporte de la nube? Se reemplazará tu progreso actual.")) return;
             
@@ -559,19 +550,17 @@
                 
                 if (docSnap.exists()) {
                     const reportData = docSnap.data();
-                    window.loadedReportOriginalEmail = reportData.inspectorEmail || null; // Guarda el inspector original
+                    window.loadedReportOriginalEmail = reportData.inspectorEmail || null; 
                     
                     window.renderLoadedReport(reportData);
                     window.closeReportsListModal();
                     
                     if(fromAdmin) {
-                        // Modo Admin: Entrando al modo edición/exportación
                         document.getElementById('adminDashboard').classList.add('hidden');
                         document.getElementById('inspectorView').classList.remove('hidden');
                         document.getElementById('btnBackToAdmin').classList.remove('hidden');
                         document.getElementById('exportBar').classList.remove('hidden');
                         
-                        // Habilitamos el botón Guardar para el administrador y cambiamos su nombre a "Guardar Cambios"
                         const saveBtn = document.getElementById('btnSaveReport');
                         saveBtn.classList.remove('hidden');
                         saveBtn.innerHTML = "Guardar Cambios";
@@ -593,10 +582,9 @@
             document.getElementById('inspectorView').classList.add('hidden');
             document.getElementById('btnBackToAdmin').classList.add('hidden');
             document.getElementById('exportBar').classList.add('hidden');
-            document.getElementById('btnSaveReport').classList.add('hidden'); // Oculta Guardar al volver
+            document.getElementById('btnSaveReport').classList.add('hidden');
             window.loadAdminReports();
         };
-
     </script>
 
     <!-- LOGICA FRONTEND RESTANTE -->
@@ -645,8 +633,39 @@
         }
 
         async function processImageFile(file) {
-            if (!currentLat) { alert("Esperando señal GPS."); return; }
-            return new Promise((resolve) => {
+            return new Promise(async (resolve) => {
+                
+                // Extraer metadatos EXIF
+                let lat = currentLat;
+                let lon = currentLon;
+                let acc = currentAcc || 0;
+                let photoDate = new Date();
+                let isExifGPS = false;
+
+                try {
+                    const exifData = await exifr.parse(file);
+                    if (exifData) {
+                        if (exifData.latitude && exifData.longitude) {
+                            lat = exifData.latitude;
+                            lon = exifData.longitude;
+                            isExifGPS = true;
+                        }
+                        if (exifData.DateTimeOriginal) {
+                            photoDate = new Date(exifData.DateTimeOriginal);
+                        } else if (exifData.CreateDate) {
+                            photoDate = new Date(exifData.CreateDate);
+                        }
+                    }
+                } catch (err) {
+                    console.warn("No EXIF data found or error parsing", err);
+                }
+
+                if (lat === null) {
+                    alert("Esperando señal GPS para fotos sin EXIF."); 
+                    resolve();
+                    return; 
+                }
+
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const img = new Image();
@@ -656,9 +675,8 @@
                         canvas.width = img.width * scale; canvas.height = img.height * scale;
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                         
-                        const date = new Date();
-                        const dateStr = date.toLocaleDateString('es-PE', {day:'2-digit', month:'2-digit', year:'numeric'}).replace(/\//g, ':');
-                        const timeStr = date.toLocaleTimeString('es-PE');
+                        const dateStr = photoDate.toLocaleDateString('es-PE', {day:'2-digit', month:'2-digit', year:'numeric'}).replace(/\//g, ':');
+                        const timeStr = photoDate.toLocaleTimeString('es-PE');
                         
                         const topBoxW = canvas.width * 0.35, topBoxH = canvas.height * 0.05;
                         ctx.fillStyle = 'black'; ctx.fillRect(canvas.width - topBoxW, 0, topBoxW, topBoxH);
@@ -671,9 +689,12 @@
 
                         ctx.textAlign = 'left'; ctx.font = `bold ${Math.floor(canvas.height * 0.035)}px Arial`;
                         const padX = canvas.width * 0.02;
+                        
+                        const accString = isExifGPS ? "(Metadatos Originales)" : `(±${Math.round(acc)}m)`;
+
                         ctx.fillStyle = '#fbbf24'; ctx.fillText(`FECHA / HORA: ${dateStr} ${timeStr}`, padX, startY + (bandHeight * 0.35));
-                        ctx.fillStyle = 'white'; ctx.fillText(`COORD: ${currentLat.toFixed(6)}°, ${currentLon.toFixed(6)}° (±${Math.round(currentAcc)}m)`, padX, startY + (bandHeight * 0.65));
-                        ctx.fillText(`DMS: ${formatDMS(currentLat, true)} | ${formatDMS(currentLon, false)}`, padX, startY + (bandHeight * 0.95));
+                        ctx.fillStyle = 'white'; ctx.fillText(`COORD: ${lat.toFixed(6)}°, ${lon.toFixed(6)}° ${accString}`, padX, startY + (bandHeight * 0.65));
+                        ctx.fillText(`DMS: ${formatDMS(lat, true)} | ${formatDMS(lon, false)}`, padX, startY + (bandHeight * 0.95));
 
                         photosData.push({ id: 'photo_' + Date.now(), image: canvas.toDataURL('image/jpeg', 0.85), description: '' });
                         renderPhotos(); triggerAutoSave(); resolve();
@@ -733,7 +754,6 @@
             canvas.addEventListener('pointerdown', (e) => { isDrawing = true; const pos = getPos(e); lastX = pos.x; lastY = pos.y; if(canvases[canvasId]) saveCanvasState(canvasId); e.preventDefault(); });
             canvas.addEventListener('pointermove', (e) => { 
                 if(!isDrawing) return; 
-                // Mejora para trazos de S-Pen / Lápices de alta frecuencia
                 const events = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
                 for(let ev of events) {
                     const pos = getPos(ev); 
@@ -846,7 +866,7 @@
 
         window.renderLoadedReport = (r) => {
             currentReportId = r.id; localStorage.setItem('frmec_active_report_id', currentReportId);
-            window.loadedReportOriginalEmail = r.inspectorEmail || null; // Sincroniza en carga offline también
+            window.loadedReportOriginalEmail = r.inspectorEmail || null; 
             
             if (r.form) Object.keys(r.form).forEach(k => { if(document.getElementById(k)) document.getElementById(k).value = r.form[k]; });
             
@@ -868,7 +888,6 @@
         document.querySelectorAll('#inspectionForm input, textarea').forEach(el => el.addEventListener('input', triggerAutoSave));
         setupCanvasDrawing('canvasFirma'); setupCanvasDrawing('canvasDNI'); addDamageRow();
 
-        // FILTRO PARA TABLA DE ADMIN
         window.filterAdminTable = () => {
             const query = document.getElementById('adminSearchInput').value.toLowerCase();
             const rows = document.querySelectorAll('.admin-row');
@@ -878,19 +897,16 @@
             });
         };
 
-        // AYUDANTE DE EXTRACCIÓN SEGURA DE IMÁGENES DE CLOUDINARY (Lienzo Temporal Invisible)
         window.processImageForExport = async (url) => {
             if (!url) return null;
             return new Promise((resolve) => {
                 const img = new Image();
-                img.crossOrigin = "Anonymous"; // Permite lectura de nube externa
+                img.crossOrigin = "Anonymous"; 
                 img.onload = () => {
-                    // Si ya es Base64, solo sacamos las medidas
                     if(url.startsWith('data:')) {
                         resolve({ dataUrl: url, width: img.width, height: img.height });
                         return;
                     }
-                    // Si es URL de Cloudinary, la dibujamos en un canvas temporal limpio para sacar un Base64 100% válido
                     const canvas = document.createElement('canvas');
                     canvas.width = img.width; canvas.height = img.height;
                     canvas.getContext('2d').drawImage(img, 0, 0);
@@ -898,13 +914,12 @@
                 };
                 img.onerror = (e) => {
                     console.error("No se pudo cargar la imagen para exportar: ", url);
-                    resolve(null); // Evita que se cuelgue, simplemente saltará la foto
+                    resolve(null); 
                 };
                 img.src = url;
             });
         };
 
-        // EXPORTACIÓN A PDF
         window.exportToPDF = async (isAsegurado) => {
             document.getElementById('loadingOverlay').classList.remove('hidden');
             document.getElementById('loadingText').innerText = isAsegurado ? "Generando PDF Asegurado..." : "Generando PDF Completo...";
@@ -928,7 +943,6 @@
                 
                 if (yPos > pageHeight - 65) { doc.addPage(); yPos = 35; drawHeader(); }
                 
-                // Textos Legales (Solo en el PDF, como recuadros ordenados)
                 doc.autoTable({ startY: yPos, margin: { left: 15, right: 15, top: 25 }, head: [["IMPORTANTE (LECTURA OBLIGATORIA)"]], body: [["Le informamos que luego del presente levantamiento de información, se procederá con el análisis del siniestro por parte del Ajustador de Seguros seleccionado por usted, de conformidad a lo establecido en la Póliza de Seguros contratada y con la presentación de la documentación que sea requerida de acuerdo a la normativa de seguros vigente.\n\nEl asegurado no podrá hacer abandono parcial o total de los bienes afectados sin la autorización expresa de la Compañía de Seguros o del Ajustador de Seguros, debiendo darse el debido cuidado para evitar el agravamiento de los daños. Estos bienes podrán ser retirados previa comunicación de la Compañía de Seguros o de la empresa autorizada por esta."]], theme: 'grid', headStyles: { fillColor: [0, 113, 185], textColor: 255, fontSize: 9 }, bodyStyles: { fontSize: 8, textColor: [50, 50, 50], fillColor: [240, 248, 255] }, didDrawPage: function () { drawHeader(); } });
                 doc.autoTable({ startY: doc.lastAutoTable.finalY + 4, margin: { left: 15, right: 15, top: 25 }, head: [["DECLARACIÓN DEL ASEGURADO"]], body: [["He leído y estoy de acuerdo con los aspectos importantes mencionados en el párrafo anterior.\nPor la presente, acepto el detalle de las partidas afectadas de Edificio o Contenido, registrados en la presente inspección y anexos, no teniendo ninguna objeción a la inspección realizada.\nAcepto que toda la documentación relacionada al proceso de ajuste y liquidación de la pérdida por el siniestro reportado sea a través del correo electrónico consignado en la presente acta de inspección, la cual suscribo en señal de conformidad."]], theme: 'grid', headStyles: { fillColor: [0, 113, 185], textColor: 255, fontSize: 9 }, bodyStyles: { fontSize: 8, textColor: [50, 50, 50], fillColor: [240, 248, 255] }, didDrawPage: function () { drawHeader(); } });
                 
@@ -943,7 +957,6 @@
                 
                 document.querySelectorAll('.croquis-item').forEach((item, idx) => { const cCanvas = item.querySelector('canvas'); if (cCanvas) { doc.addPage(); drawHeader(); doc.setFontSize(12); doc.setTextColor(0, 68, 129); doc.text(`HOJA DE CROQUIS: ${item.querySelector('.croquis-title').value||('Nivel '+(idx+1))}`, 15, 28); doc.setDrawColor(0, 113, 185); doc.setLineWidth(0.5); doc.line(15, 30, 100, 30); const canvasRatio = cCanvas.width / cCanvas.height; let drawW = 180, drawH = 180 / canvasRatio; if (drawH > 240) { drawH = 240; drawW = 240 * canvasRatio; } doc.setFillColor(255, 255, 255); doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.3); doc.rect(15, 35, 180, 240, 'DF'); doc.addImage(cCanvas.toDataURL('image/jpeg', 1.0), 'JPEG', 15 + (180 - drawW) / 2, 35 + (240 - drawH) / 2, drawW, drawH); } });
                 
-                // FOTOS EXPORTADAS CON LIENZO SEGURO
                 if (photosData.length > 0) { 
                     doc.addPage(); 
                     drawHeader(); 
@@ -952,10 +965,8 @@
                     
                     for (let i = 0; i < photosData.length; i++) { 
                         const p = photosData[i]; 
-                        
-                        // Extraemos la foto de forma segura (sin sobreescribir la BD)
                         const imgData = await window.processImageForExport(p.image);
-                        if (!imgData) continue; // Si una falla (sin red), la salta sin romper el reporte
+                        if (!imgData) continue; 
     
                         let drawW = 55 * (imgData.width / imgData.height); 
                         if(drawW > colW - 4) drawW = colW - 4; 
@@ -983,7 +994,6 @@
             }
         };
 
-        // EXPORTACIÓN A ZIP CON EXTRACCIÓN SEGURA
         window.exportToZIP = async () => {
             const croquisItems = document.querySelectorAll('.croquis-item'); 
             if (photosData.length === 0 && croquisItems.length === 0) { alert("No hay fotos para exportar."); return; }
@@ -993,16 +1003,12 @@
             
             try {
                 const zip = new JSZip(); 
-                
-                // Procesar cada foto de manera segura usando el canvas temporal
                 for (let i = 0; i < photosData.length; i++) {
                     const imgData = await window.processImageForExport(photosData[i].image);
                     if (imgData) {
                         zip.file(`Foto_${i+1}.jpg`, imgData.dataUrl.replace(/^data:image\/(png|jpeg);base64,/, ""), {base64: true}); 
                     }
                 }
-
-                // Agregar los croquis
                 croquisItems.forEach((item, idx) => { 
                     const cCanvas = item.querySelector('canvas'); 
                     if (cCanvas) {
