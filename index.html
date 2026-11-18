@@ -745,10 +745,11 @@
                 canvas.width = newW; canvas.height = newH;
                 ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
                 if (hasContent) ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
-                ctx.strokeStyle = color; ctx.lineWidth = 2 * HD_SCALE; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+                // GROSOR DE PINCEL AJUSTADO (MÁS FINO)
+                ctx.strokeStyle = color; ctx.lineWidth = 1 * HD_SCALE; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
             }
             if(!canvases[canvasId]) { window.addEventListener('resize', resizeCanvas); setTimeout(resizeCanvas, 100); } 
-            else { ctx.strokeStyle = color; ctx.lineWidth = 2 * HD_SCALE; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; }
+            else { ctx.strokeStyle = color; ctx.lineWidth = 1 * HD_SCALE; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; }
 
             function getPos(e) { const rect = canvas.getBoundingClientRect(); return { x: (e.clientX - rect.left) * (canvas.width / rect.width), y: (e.clientY - rect.top) * (canvas.height / rect.height) }; }
             canvas.addEventListener('pointerdown', (e) => { isDrawing = true; const pos = getPos(e); lastX = pos.x; lastY = pos.y; if(canvases[canvasId]) saveCanvasState(canvasId); e.preventDefault(); });
@@ -789,19 +790,52 @@
             } inputEl.value = '';
         };
 
+        // MOTOR CORREGIDO PARA CROQUIS SIN DISTORSIÓN
         window.setCanvasBackground = (id, inputEl) => {
             if(inputEl.files[0]) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const img = new Image(); img.crossOrigin = "Anonymous";
                     img.onload = () => {
-                        const canvas = document.getElementById(id); canvas.parentElement.style.aspectRatio = `${img.width} / ${img.height}`; canvas.parentElement.style.minHeight = 'auto';
-                        setTimeout(() => { canvas.getContext('2d').fillRect(0, 0, canvas.width, canvas.height); canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height); saveCanvasState(id); triggerAutoSave(); }, 100);
-                    }; img.src = e.target.result;
-                }; reader.readAsDataURL(inputEl.files[0]);
-            } inputEl.value = '';
+                        const canvas = document.getElementById(id); 
+                        const wrapper = canvas.parentElement;
+                        
+                        // Adaptar contenedor 100% a la proporción de la foto sin estirar
+                        wrapper.style.aspectRatio = `${img.width} / ${img.height}`;
+                        wrapper.style.minHeight = 'auto';
+                        void wrapper.offsetHeight; // Forzar actualización visual del navegador
+                        
+                        const rect = wrapper.getBoundingClientRect();
+                        const HD_SCALE = 3;
+                        canvas.width = rect.width * HD_SCALE;
+                        canvas.height = rect.height * HD_SCALE;
+                        
+                        const ctx = canvas.getContext('2d');
+                        ctx.fillStyle = '#ffffff'; 
+                        ctx.fillRect(0, 0, canvas.width, canvas.height); 
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        
+                        // Evitar que el deshacer vuelva a estirar el lienzo viejo
+                        if(canvases[id]) canvases[id].history = []; 
+                        saveCanvasState(id); 
+                        triggerAutoSave();
+                        
+                        // Restaurar configuraciones de trazo fino
+                        if(canvases[id]) {
+                            ctx.strokeStyle = canvases[id].color; 
+                            ctx.lineWidth = 1 * HD_SCALE;
+                            ctx.lineCap = 'round'; 
+                            ctx.lineJoin = 'round';
+                        }
+                    }; 
+                    img.src = e.target.result;
+                }; 
+                reader.readAsDataURL(inputEl.files[0]);
+            } 
+            inputEl.value = '';
         };
 
+        // CREACIÓN DE CROQUIS CORREGIDA PARA PREVENIR ESTIRAMIENTO AL CARGAR
         window.addCroquisSheet = (savedTitle = '', savedDataUrl = null) => {
             croquisCount++; const id = 'croquis_' + croquisCount; const div = document.createElement('div'); div.className = "border border-gray-200 rounded p-3 bg-white croquis-item";
             div.innerHTML = `
@@ -815,13 +849,35 @@
                 </div>
                 <div class="border border-gray-300 bg-white relative w-full croquis-wrapper" style="aspect-ratio: 3 / 4;"><canvas id="${id}" class="absolute inset-0 w-full h-full canvas-container"></canvas></div>`;
             document.getElementById('croquisContainer').appendChild(div);
+            
             setTimeout(() => {
                 setupCanvasDrawing(id);
                 if (savedDataUrl) {
-                    const img = new Image(); img.crossOrigin = "Anonymous"; img.onload = () => {
-                        const canvas = document.getElementById(id); canvas.parentElement.style.aspectRatio = `${img.width} / ${img.height}`;
-                        setTimeout(() => { canvas.getContext('2d').fillRect(0, 0, canvas.width, canvas.height); canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height); }, 50);
-                    }; img.src = savedDataUrl;
+                    const img = new Image(); img.crossOrigin = "Anonymous"; 
+                    img.onload = () => {
+                        const canvas = document.getElementById(id); 
+                        const wrapper = canvas.parentElement;
+                        wrapper.style.aspectRatio = `${img.width} / ${img.height}`;
+                        void wrapper.offsetHeight; 
+                        
+                        const rect = wrapper.getBoundingClientRect();
+                        const HD_SCALE = 3;
+                        canvas.width = rect.width * HD_SCALE;
+                        canvas.height = rect.height * HD_SCALE;
+                        
+                        const ctx = canvas.getContext('2d');
+                        ctx.fillStyle = '#ffffff'; 
+                        ctx.fillRect(0, 0, canvas.width, canvas.height); 
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        
+                        if(canvases[id]) {
+                            ctx.strokeStyle = canvases[id].color; 
+                            ctx.lineWidth = 1 * HD_SCALE;
+                            ctx.lineCap = 'round'; 
+                            ctx.lineJoin = 'round';
+                        }
+                    }; 
+                    img.src = savedDataUrl;
                 }
             }, 60);
         };
